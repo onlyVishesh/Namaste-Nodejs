@@ -39,6 +39,47 @@ app.get("/userProfile/:userId/:collageId", (req, res) => {
   res.send(`showing the profile of ${JSON.stringify(req.params)}`);
 });
 
+// API patterns - Route patterns for flexible matching
+
+// Optional letters using "?"
+app.get("/ab?c", (req, res) => {
+  // /abc and /ac both give same response (b is optional)
+  res.send({
+    uid: 101,
+    fname: "Vishesh",
+    lname: "",
+  });
+});
+
+// Grouping letters using "()"
+app.get("/a(bc)?d", (req, res) => {
+  res.send({
+    // Handles both /abcd and /ad (bc is optional)
+    uid: 101,
+    fname: "Vishesh",
+    lname: "",
+  });
+});
+
+// Repeating the same letter or pattern using "+" 
+app.get("/pq+r", (req, res) => {
+  // Handles /pqr, /pqqr, /pqqqr, etc. (one or more q's)
+  res.send({
+    uid: 102,
+    fname: "Tommy",
+    lname: "Bansal",
+  });
+});
+
+// Matching any characters using "*"
+app.get("/xy*z", (req, res) => {
+  // Handles /xyz, /xy123z, /xyabcxyz, etc. (any characters between x and z)
+  res.send({
+    uid: 103,
+    fname: "Austin",
+    lname: "trump",
+  });
+});
 
 
 // Start the server and listen on port 3000
