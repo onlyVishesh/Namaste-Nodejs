@@ -1,0 +1,32 @@
+{
+  "name": "devroot",
+  "version": "1.0.0",
+  "description": "DevRoot is a professional networking and collaboration platform designed specifically for developers, engineers, and tech enthusiasts. It serves as the foundation for innovation, connection, and growth in the developer community—your go-to hub for building meaningful connections and tackling exciting projects.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Developer",
+    "Network",
+    "Code",
+    "Collaboration",
+    "Skill",
+    "Matchmaking",
+    "Debugging",
+    "Support",
+    "Open-Source",
+    "Projects",
+    "Agile",
+    "Teams",
+    "DevOps",
+    "Integration"
+  ],
+  "author": "onlyVishesh",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
