@@ -117,6 +117,21 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+
+userSchema.methods.getJWT = function () {
+  // create a jwt
+  const token = jwt.sign({ _id: this._id }, process.env.secretJWT, {
+    expiresIn: "3d",
+  });
+
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (password) {
+    const isPasswordValid = await bcrypt.compare(password, this.password);
+  return isPasswordValid
+};
+
 // Export the model
 const User = mongoose.model("User", userSchema);
 

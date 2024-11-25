@@ -47,14 +47,12 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(400).json({ error: "Invalid Credential" });
     }
-    const isPasswordValid = await bcrypt.compare(password, this.password);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (isPasswordValid) {
       
       // JWT token created at user model
-      const token = jwt.sign({ _id: this._id }, process.env.secretJWT, {
-        expiresIn: "3d",
-      });
+      const token = user.getJWT()
 
       // add the token to cookie and send back to user
       res.cookie("token", token);
