@@ -214,4 +214,58 @@ requestRouter.delete(
   }
 );
 
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status, requestId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+
+      const allowedStatus = ["accepted", "rejected"];
+
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ error: `invalid status type ${status}` });
+      }
+
+      //! checking if there is connectionRequest with status interested
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: user._id,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ error: "Connection request does not exist" });
+      }
+
+      connectionRequest.status = status;
+
+      await connectionRequest.save();
+
+      if (status === "accepted") {
+        res.status(200).json({ message: "Connection request accepted" });
+      } else if (status === "rejected") {
+        res.status(200).json({ message: "Connection request rejected" });
+      } else {
+        res.status(400).json({ error: "Invalid request type" });
+      }
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = requestRouter;
