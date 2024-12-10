@@ -268,4 +268,54 @@ requestRouter.post(
   }
 );
 
+requestRouter.delete(
+  "/request/review/retrieved/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { requestId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res.status(400).json({ error: "Invalid request ID" });
+      }
+
+      //! checking if there is connectionRequest with status interested
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        fromUserId: user._id,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ error: "Connection request does not exist" });
+      }
+
+      const { deletedCount } = await connectionRequest.deleteOne({
+        _id: requestId,
+      });
+
+      if (deletedCount >= 1) {
+        res
+          .status(200)
+          .json({ message: "Connection request has been retrieved" });
+      } else {
+        res
+          .status(400)
+          .json({ error: "Connection request could not retrieved" });
+      }
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = requestRouter;
