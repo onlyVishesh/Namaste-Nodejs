@@ -60,6 +60,16 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       hideUserProfile.add(request.toUserId.toString());
     });
 
+    //! finding limited the user profile that are not in hideUserProfile
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
+
     const userProfiles = await User.find({
       _id: { $nin: Array.from(hideUserProfile) },
       status: "active",
@@ -74,12 +84,13 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         "gender",
         "status",
       ])
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json({ message: userProfiles });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = userRouter;
