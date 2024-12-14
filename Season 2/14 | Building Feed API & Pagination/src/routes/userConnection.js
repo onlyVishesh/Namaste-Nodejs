@@ -93,4 +93,37 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
   }
 });
 
+userRouter.delete(
+  "/user/connection/:connectionId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+      const { connectionId } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(connectionId)) {
+        return res.status(400).json({ error: "Invalid connection ID" });
+      }
+
+      const connectionExist = await ConnectionRequest.findOneAndDelete({
+        _id: connectionId,
+        status: "accepted",
+        $or: [{ fromUserId: user._id }, { toUserId: user._id }],
+      });
+
+      if (connectionExist) {
+        res.status(200).json({ message: "connection deleted" });
+      } else {
+        throw new Error("connection does not exist");
+      }
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = userRouter;
