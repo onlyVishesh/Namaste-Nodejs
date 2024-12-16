@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const validateSignUpData = (res) => {
+  //* taking user input
   const { username, firstName, email, password } = res.body;
 
   if (!username) {

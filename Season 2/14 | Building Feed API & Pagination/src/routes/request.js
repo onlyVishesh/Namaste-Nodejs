@@ -5,6 +5,7 @@ const { default: mongoose } = require("mongoose");
 const User = require("../models/user");
 const requestRouter = express.Router();
 
+//* To send interested or ignored request to user profile
 requestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,
@@ -20,8 +21,7 @@ requestRouter.post(
       const fromUserId = user._id;
       const { status, toUserId } = req.params;
 
-      //! Checking if toUserId exist in user database
-
+      //* Checking if toUserId exist in user database
       if (mongoose.Types.ObjectId.isValid(toUserId)) {
         const isToUserExist = await User.findById(toUserId);
         if (!isToUserExist) {
@@ -31,7 +31,7 @@ requestRouter.post(
         return res.status(400).json({ error: "Invalid user ID" });
       }
 
-      //! check if toUserId === fromUserId
+      //* checking if toUserId === fromUserId
       if (fromUserId.equals(toUserId)) {
         return res
           .status(400)
@@ -44,8 +44,7 @@ requestRouter.post(
         return res.status(400).json({ error: `invalid status type ${status}` });
       }
 
-      //! checking if there is existing connectionRequest
-
+      //* checking if there is existing connectionRequest
       const existingConnectionRequest = await ConnectionRequest.findOne({
         $or: [
           { fromUserId, toUserId },
@@ -53,21 +52,21 @@ requestRouter.post(
         ],
       });
 
-      
-
       if (existingConnectionRequest) {
         return res
           .status(400)
           .json({ error: "Connection request already exist" });
       }
 
+      //* if user connection does not exist create a new connection
       const connectionRequest = new ConnectionRequest({
         fromUserId,
         toUserId,
         status,
       });
 
-      const data = await connectionRequest.save();
+      await connectionRequest.save();
+
       if (status === "interested") {
         res.status(200).json({ message: "Connection request Send" });
       } else if (status === "ignored") {
@@ -81,6 +80,7 @@ requestRouter.post(
   }
 );
 
+//* To view all the request send
 requestRouter.get("/request/send", userAuth, async (req, res) => {
   try {
     const user = req.user;
@@ -90,6 +90,7 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         .json({ error: "Unauthorized. Please login again." });
     }
 
+    //* finding all the connection with interested status send form logged in user
     const requestSent = await ConnectionRequest.find({
       fromUserId: user._id,
       status: "interested",
@@ -110,15 +111,17 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
   }
 });
 
+//* To view all the request received
 requestRouter.get("/request/received", userAuth, async (req, res) => {
   try {
     const user = req.user;
     if (!user) {
       return res
-        .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+      .status(401)
+      .json({ error: "Unauthorized. Please login again." });
     }
-
+    
+    //* finding all the connection with interested status send to logged in user
     const requestSent = await ConnectionRequest.find({
       toUserId: user._id,
       status: "interested",
@@ -132,22 +135,23 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
       "gender",
       "status",
     ]);
-
+    
     res.status(200).json({ message: requestSent });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 });
 
+//* To view all the ignored profiles
 requestRouter.get("/request/ignored", userAuth, async (req, res) => {
   try {
     const user = req.user;
     if (!user) {
       return res
-        .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+      .status(401)
+      .json({ error: "Unauthorized. Please login again." });
     }
-
+    //* finding all the connection with ignored status send form logged in user
     const requestSent = await ConnectionRequest.find({
       fromUserId: user._id,
       status: "ignored",
@@ -168,6 +172,7 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
   }
 });
 
+//* To delete a ignored profiles
 requestRouter.delete(
   "/request/review/ignored/:requestId",
   userAuth,
@@ -186,7 +191,7 @@ requestRouter.delete(
         return res.status(400).json({ error: "Invalid request ID" });
       }
 
-      //! checking if there is connectionRequest with status interested
+      //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
         fromUserId: user._id,
@@ -199,6 +204,7 @@ requestRouter.delete(
           .json({ error: "Connection request does not exist" });
       }
 
+      //* deleting ignored connection
       const { deletedCount } = await connectionRequest.deleteOne({
         _id: requestId,
       });
@@ -216,6 +222,7 @@ requestRouter.delete(
   }
 );
 
+//* To accepted or rejected request send to logged in user
 requestRouter.post(
   "/request/review/:status/:requestId",
   userAuth,
@@ -230,6 +237,7 @@ requestRouter.post(
 
       const { status, requestId } = req.params;
 
+      //* checking if requestId is valid
       if (!mongoose.Types.ObjectId.isValid(requestId)) {
         return res.status(400).json({ error: "Invalid request ID" });
       }
@@ -240,7 +248,7 @@ requestRouter.post(
         return res.status(400).json({ error: `invalid status type ${status}` });
       }
 
-      //! checking if there is connectionRequest with status interested
+      //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
         toUserId: user._id,
@@ -253,6 +261,7 @@ requestRouter.post(
           .json({ error: "Connection request does not exist" });
       }
 
+      //* updating new status
       connectionRequest.status = status;
 
       await connectionRequest.save();
@@ -270,6 +279,7 @@ requestRouter.post(
   }
 );
 
+//* To delete interested request
 requestRouter.delete(
   "/request/review/retrieved/:requestId",
   userAuth,
@@ -284,11 +294,12 @@ requestRouter.delete(
 
       const { requestId } = req.params;
 
+      //* checking if requestId is valid
       if (!mongoose.Types.ObjectId.isValid(requestId)) {
         return res.status(400).json({ error: "Invalid request ID" });
       }
 
-      //! checking if there is connectionRequest with status interested
+      //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
         fromUserId: user._id,
@@ -301,6 +312,7 @@ requestRouter.delete(
           .json({ error: "Connection request does not exist" });
       }
 
+      //* deleting interested request
       const { deletedCount } = await connectionRequest.deleteOne({
         _id: requestId,
       });

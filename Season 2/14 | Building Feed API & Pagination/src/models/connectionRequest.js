@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const User = require("./user");
 const { Schema } = mongoose;
 
 const connectionRequestSchema = new Schema(
@@ -26,10 +25,10 @@ const connectionRequestSchema = new Schema(
   { timestamps: true }
 );
 
-// Creating index
+//* Creating composite index
 connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
 
-// pre save
+//* creating pre save function to check if form and to user is same during saving
 connectionRequestSchema.pre("save", function (next) {
   // checking if fromUserId is same as toUserId
 

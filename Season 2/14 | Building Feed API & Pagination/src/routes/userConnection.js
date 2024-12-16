@@ -5,6 +5,7 @@ const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
 const userRouter = express.Router();
 
+//* To view all the connections
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const user = req.user;
@@ -14,6 +15,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         .json({ error: "Unauthorized. Please login again." });
     }
 
+    //* finding all the connections
     const connections = await ConnectionRequest.find({
       $or: [
         { fromUserId: user._id, status: "accepted" },
@@ -35,6 +37,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+//* To create user feed
 userRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
     const user = req.user;
@@ -48,19 +52,19 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       $or: [{ fromUserId: user._id }, { toUserId: user._id }],
     }).select("fromUserId toUserId");
 
-    //! to get a set of all the user whom user have send/received request including himself
-    const hideUserProfile = new Set();
+    //* to get a set of all the user whom user have send/received request including himself
+    const hiddenUserProfiles = new Set();
 
-    //! Hiding logged user
-    hideUserProfile.add(user._id.toString());
+    //* Hiding logged user
+    hiddenUserProfiles.add(user._id.toString());
 
-    //! Hiding user requests
+    //* Hiding user requests
     connectionRequests.forEach((request) => {
-      hideUserProfile.add(request.fromUserId.toString());
-      hideUserProfile.add(request.toUserId.toString());
+      hiddenUserProfiles.add(request.fromUserId.toString());
+      hiddenUserProfiles.add(request.toUserId.toString());
     });
 
-    //! finding limited the user profile that are not in hideUserProfile
+    //* finding limited the user profile that are not in hideUserProfile
     const page =
       parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
     let limit =
@@ -70,8 +74,9 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         ? 1
         : parseInt(req.query.limit) || 10;
 
+    //* finding profile that are not in hiddenUserProfiles and are active
     const userProfiles = await User.find({
-      _id: { $nin: Array.from(hideUserProfile) },
+      _id: { $nin: Array.from(hiddenUserProfiles) },
       status: "active",
     })
       .select([
@@ -84,6 +89,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
         "gender",
         "status",
       ])
+      //* adding paging
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -93,6 +99,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
   }
 });
 
+//* To delete a connection
 userRouter.delete(
   "/user/connection/:connectionId",
   userAuth,

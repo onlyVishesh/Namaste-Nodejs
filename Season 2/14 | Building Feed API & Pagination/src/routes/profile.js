@@ -1,11 +1,11 @@
 const express = require("express");
 const profileRouter = express.Router();
-
 const { userAuth } = require("../middlewares/auth");
 const User = require("../models/user");
 const { validateProfileData } = require("../utils/validation");
 const ConnectionRequest = require("../models/connectionRequest");
 
+//* To view all the users (admin)
 profileRouter.get("/feed", async (req, res) => {
   try {
     const users = await User.find();
@@ -20,22 +20,27 @@ profileRouter.get("/feed", async (req, res) => {
   }
 });
 
+//* To view ourself profile
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    res.status(200).json({ message: user });
+    const loggedInUser = req.user;
+    res.status(200).json({ message: loggedInUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+//* To edit fields in profile
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
+    //* checking if fields are updatable
     if (!validateProfileData(req)) {
       throw new Error("Update not allow");
     }
 
     const loggedInUser = req.user;
+
+    //* updating values of field given in request
     Object.keys(req.body).forEach(
       (field) => (loggedInUser[field] = req.body[field])
     );
@@ -51,6 +56,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   }
 });
 
+//* To delete profile/account
 profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
   try {
     const user = req.user;
@@ -85,11 +91,13 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
   }
 });
 
+//* To change status active/deactivated
 profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
   try {
-    const user = req.user;
+    //* storing logged user data
+    const loggedInUser = req.user;
 
-    if (!user) {
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
@@ -97,35 +105,35 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
 
     const { status, password } = req.body;
 
-    // Validate password
-    const isPasswordValid = await user.validatePassword(password);
+    //* Validating password
+    const isPasswordValid = await loggedInUser.validatePassword(password);
     if (!isPasswordValid) {
       return res
         .status(401)
         .json({ error: "Invalid password. Please try again." });
     }
 
-    // Handle banned status
-    if (user.status === "banned") {
+    //* Handle if `status` is banned
+    if (loggedInUser.status === "banned") {
       return res.status(403).json({
-        message: `${user.firstName}, your account has been banned. Contact admin for more details.`,
+        message: `${loggedInUser.firstName}, your account has been banned. Contact admin for more details.`,
       });
     }
     if (status === "banned") {
       return res.status(403).json({
-        message: `${user.firstName}, you need to be an admin or moderator to ban a user.`,
+        message: `${loggedInUser.firstName}, you need to be an admin or moderator to ban a loggedInUser.`,
       });
     }
 
-    // Ensure `status` is valid
+    //* Ensure `status` is valid
     if (!["active", "deactivated"].includes(status)) {
       return res
         .status(400)
         .json({ error: "Invalid status. Use 'active' or 'deactivated'." });
     }
 
-    // Handle status change logic
-    if (user.status === status) {
+    //* Handle status change logic
+    if (loggedInUser.status === status) {
       const message =
         status === "active"
           ? "Your account is already active."
@@ -133,9 +141,9 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
       return res.status(200).json({ message });
     }
 
-    // Update the user's status
-    user.status = status;
-    await user.save();
+    //* Update the loggedInUser's status
+    loggedInUser.status = status;
+    await loggedInUser.save();
     const message =
       status === "active"
         ? "Your account has been reactivated."
@@ -146,14 +154,17 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
   }
 });
 
+//* To view Someone profile
 profileRouter.get("/profile/:userId", async (req, res) => {
   try {
+    //* storing userId from params
     const { userId } = req.params;
 
     if (!userId) {
       return res.status(400).json({ error: "Username must be provided" });
     }
 
+    //* finding if user present in collection
     const user = await User.findOne({ username: userId });
 
     if (!user) {
