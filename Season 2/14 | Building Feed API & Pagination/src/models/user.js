@@ -128,12 +128,17 @@ userSchema.index({ skills: 1 });
 //* creating custom method to create JWT Token
 userSchema.methods.getJWT = function () {
   // create a jwt
-  const token = jwt.sign({ _id: this._id }, process.env.secretJWT, {
-    expiresIn: "3d",
-  });
+  const token = jwt.sign(
+    { _id: this._id, role: this.role },
+    process.env.secretJWT,
+    {
+      expiresIn: "3d",
+    }
+  );
 
   return token;
 };
+
 //* creating custom method to validate password
 userSchema.methods.validatePassword = async function (password) {
   const isPasswordValid = await bcrypt.compare(password, this.password);

@@ -1,4 +1,6 @@
+require("dotenv").config;
 const express = require("express");
+const authRouter = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const {
@@ -8,7 +10,6 @@ const {
 const validator = require("validator");
 const { userAuth } = require("../middlewares/auth");
 
-const authRouter = express.Router();
 
 //* To create account
 authRouter.post("/signup", async (req, res) => {
@@ -19,13 +20,28 @@ authRouter.post("/signup", async (req, res) => {
 
     //* Creating password hash and saving it to data base
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = new User({
-      username,
-      firstName,
-      lastName,
-      email,
-      password: passwordHash,
-    });
+    const adminEmails = process.env.adminEmails
+      ? process.env.adminEmails.split(",")
+      : [];
+    let user;
+    if (adminEmails.includes(email)) {
+      user = new User({
+        username,
+        firstName,
+        lastName,
+        email,
+        password: passwordHash,
+        role: "admin",
+      });
+    } else {
+      user = new User({
+        username,
+        firstName,
+        lastName,
+        email,
+        password: passwordHash,
+      });
+    }
 
     //? Need to add email otp verification
 
