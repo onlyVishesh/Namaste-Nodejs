@@ -22,11 +22,11 @@ app.use("/", userRouter);
 
 
 //* Connect to the database and start the server once connected
+const PORT = process.env.PORT || 3001
 connectDB()
   .then(() => {
-    console.log("database connection establish");
-    app.listen(process.env.PORT, () => {
-      console.log(`Server is listening on port ${process.env.PORT}...`);
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}...`);
     });
   })
   .catch((err) => console.error(err));

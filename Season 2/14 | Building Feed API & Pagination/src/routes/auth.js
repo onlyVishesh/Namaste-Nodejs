@@ -30,7 +30,7 @@ authRouter.post("/signup", async (req, res) => {
     //? Need to add email otp verification
 
     await user.save();
-    res.status(200).json({ message: "Account Created successfully" });
+    res.status(201).json({ message: "Account Created successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
