@@ -1,9 +1,11 @@
 const express = require("express");
 const profileRouter = express.Router();
+const { mongoose } = require("mongoose");
 const { userAuth } = require("../middlewares/auth");
 const User = require("../models/user");
 const { validateProfileData } = require("../utils/validation");
 const ConnectionRequest = require("../models/connectionRequest");
+const { userRole } = require("../middlewares/role");
 
 //* To view all the users (admin)
 profileRouter.get("/feed", async (req, res) => {
@@ -177,5 +179,162 @@ profileRouter.get("/profile/:userId", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+//* Admin routes
+
+//* To change the role of user to admin, moderator or user
+profileRouter.patch(
+  "/admin/changeRole/:role/:userId",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { role, userId } = req.params;
+
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      //* array of roles allowed to update
+      const allowedRole = ["admin", "moderator", "user"];
+
+      if (!allowedRole.includes(role)) {
+        return res.status(400).json({ error: `invalid Role ${role}` });
+      }
+
+      //* finding user
+      const user = await User.findById(userId);
+
+      //* checking if user is admin
+      const adminEmails = process.env.adminEmails
+        ? process.env.adminEmails.split(",")
+        : [];
+      if (adminEmails.includes(user.email)) {
+        return res.status(400).json({
+          error: `Role of ${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } could not be update.`,
+        });
+      }
+
+      //* if role is same as previous role
+      if (user.role === role) {
+        return res.status(400).json({
+          error: `${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } already have ${role} role`,
+        });
+      }
+
+      //* updating role
+      user.role = role;
+      await user.save();
+
+      res.status(200).json({
+        message: `Role of ${
+          user.firstName[0].toUpperCase() + user.firstName.slice(1)
+        } is updated to ${role}`,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* Moderator routes
+profileRouter.patch(
+  "/moderator/changeRole/:role/:userId",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { role, userId } = req.params;
+
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      //* checking if loggedInUser === userId
+      if (loggedInUser._id.equals(userId)) {
+        return res.status(400).json({ error: "You could not change your oun" });
+      }
+
+      //* array of roles allowed to update
+      const allowedRole = ["moderator", "user"];
+
+      if (!allowedRole.includes(role)) {
+        return res.status(400).json({ error: `invalid Role ${role}` });
+      }
+
+      //* finding user
+      const user = await User.findById(userId);
+
+      //* checking if user is admin
+      const adminEmails = process.env.adminEmails
+        ? process.env.adminEmails.split(",")
+        : [];
+      if (adminEmails.includes(user.email)) {
+        return res.status(400).json({
+          error: `Role of ${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } could not be update.`,
+        });
+      }
+
+      if (user.role === "admin") {
+        return res.status(400).json({
+          message: `Admin role could not be changed. If you are admin try admin api.`,
+        });
+      }
+
+      //* checking if new role is same as previous
+      if (user.role === role) {
+        return res.status(400).json({
+          message: `${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } already have ${role} role`,
+        });
+      }
+
+      //* updating role
+      user.role = role;
+      await user.save();
+
+      res.status(200).json({
+        message: `Role of ${
+          user.firstName[0].toUpperCase() + user.firstName.slice(1)
+        } is updated to ${role}`,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
 
 module.exports = profileRouter;
