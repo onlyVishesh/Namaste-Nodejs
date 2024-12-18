@@ -1,6 +1,6 @@
 const express = require("express");
 const profileRouter = express.Router();
-const { mongoose } = require("mongoose");
+const { mongoose, get } = require("mongoose");
 const { userAuth } = require("../middlewares/auth");
 const User = require("../models/user");
 const { validateProfileData } = require("../utils/validation");
@@ -182,7 +182,7 @@ profileRouter.get("/profile/:userId", async (req, res) => {
 
 //* Admin routes
 
-//* To change the role of user to admin, moderator or user
+//* To change the role to admin, moderator or user
 profileRouter.patch(
   "/admin/changeRole/:role/:userId",
   userAuth,
@@ -254,7 +254,63 @@ profileRouter.patch(
   }
 );
 
+//* to view all admin, moderators and user
+profileRouter.get(
+  "/admin/viewRole/:role",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { role } = req.params;
+
+      const allowedRole = ["admin", "moderator", "user"];
+
+      if (!allowedRole.includes(role)) {
+        return res.status(400).json({ error: `invalid Role ${role}` });
+      }
+      const page =
+        parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+      let limit =
+        parseInt(req.query.limit) > 50
+          ? 50
+          : parseInt(req.query.limit) < 1
+          ? 1
+          : parseInt(req.query.limit) || 10;
+
+      const list = await User.find({ role: role })
+        .select([
+          "firstName",
+          "lastName",
+          "username",
+          "avatar",
+          "about",
+          "skills",
+          "gender",
+          "status",
+        ])
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+      res.status(200).json({
+        message: `Data retrieved`,
+        list,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 //* Moderator routes
+
+//* To change the role to moderator or user
 profileRouter.patch(
   "/moderator/changeRole/:role/:userId",
   userAuth,
@@ -330,6 +386,170 @@ profileRouter.patch(
         message: `Role of ${
           user.firstName[0].toUpperCase() + user.firstName.slice(1)
         } is updated to ${role}`,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* to view all moderators and user
+profileRouter.get(
+  "/moderator/viewRole/:role",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { role } = req.params;
+
+      const allowedRole = ["moderator", "user"];
+
+      if (!allowedRole.includes(role)) {
+        return res.status(400).json({
+          error: `Could not access ${role} list. If your are admin try admin api.`,
+        });
+      }
+
+      const page =
+        parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+      let limit =
+        parseInt(req.query.limit) > 50
+          ? 50
+          : parseInt(req.query.limit) < 1
+          ? 1
+          : parseInt(req.query.limit) || 10;
+
+      const list = await User.find({ role: role })
+        .select([
+          "firstName",
+          "lastName",
+          "username",
+          "avatar",
+          "about",
+          "skills",
+          "gender",
+          "status",
+        ])
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+      res.status(200).json({
+        message: `Data retrieved`,
+        list,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* to get the number of active, deactivated or blocked user
+profileRouter.get(
+  "/moderator/userNumbers/:status",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status } = req.params;
+      const allowedStatus = ["all", "active", "deactivated", "blocked"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({
+          error: `Invalid status : ${status}`,
+        });
+      }
+      let userNumbers;
+      if (status === "all") {
+        userNumbers = await User.countDocuments();
+      } else {
+        userNumbers = await User.countDocuments({ status });
+      }
+
+      res.status(200).json({
+        message: `Data retrieved`,
+        userNumbers,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+profileRouter.get(
+  "/moderator/viewUsers/:status",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status } = req.params;
+      const allowedStatus = ["all", "active", "deactivated", "blocked"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({
+          error: `Invalid status : ${status}`,
+        });
+      }
+      let list;
+      const page =
+        parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+      let limit =
+        parseInt(req.query.limit) > 50
+          ? 50
+          : parseInt(req.query.limit) < 1
+          ? 1
+          : parseInt(req.query.limit) || 10;
+      if (status === "all") {
+        list = await User.find()
+          .select([
+            "firstName",
+            "lastName",
+            "username",
+            "avatar",
+            "about",
+            "skills",
+            "gender",
+            "status",
+          ])
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } else {
+        list = await User.find({ status })
+          .select([
+            "firstName",
+            "lastName",
+            "username",
+            "avatar",
+            "about",
+            "skills",
+            "gender",
+            "status",
+          ])
+          .skip((page - 1) * limit)
+          .limit(limit);
+      }
+
+      res.status(200).json({
+        message: `Data retrieved`,
+        list,
       });
     } catch (err) {
       return res.status(500).json({ error: err.message });
