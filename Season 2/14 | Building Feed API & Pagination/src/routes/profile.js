@@ -1,6 +1,6 @@
 const express = require("express");
 const profileRouter = express.Router();
-const { mongoose, get } = require("mongoose");
+const { mongoose } = require("mongoose");
 const { userAuth } = require("../middlewares/auth");
 const User = require("../models/user");
 const { validateProfileData } = require("../utils/validation");
@@ -308,9 +308,106 @@ profileRouter.get(
   }
 );
 
+//* to change status active, deactivated or block
+profileRouter.patch(
+  "/admin/changeStatus/:status/:userId",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      //* storing logged user data
+      const loggedInUser = req.user;
+
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status, userId } = req.params;
+
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const user = await User.findById(userId);
+
+      //* Ensure `status` is valid
+      if (!["active", "deactivated", "banned"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status." });
+      }
+
+      //* Handle status change logic
+      if (user.status === status) {
+        return res
+          .status(200)
+          .json({ message: `User's account is already ${status}` });
+      }
+
+      //* Update the user's status
+      user.status = status;
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: `User's account is has been updated to ${status}` });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* to delete user profile
+profileRouter.delete(
+  "/admin/user/delete/:userId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { userId } = req.params;
+      const user = await User.findById(userId);
+
+      if (user.role === "admin") {
+        return res.status(400).json({
+          message: `Admin Profile could not be deleted.`,
+        });
+      }
+
+      //! deleting all the connectionRequests
+      const { deletedCount: noOfConnectionDeleted } =
+        await ConnectionRequest.deleteMany({
+          $or: [{ fromUserId: userId }, { toUserId: userId }],
+        });
+
+      const { deletedCount } = await User.deleteOne({ _id: userId });
+
+      if (deletedCount === 1) {
+        res.status(200).json({
+          message: `Account with username : ${user.username} and email : ${user.email} having total ${noOfConnectionDeleted} connection requests has been deleted`,
+        });
+      } else {
+        throw new Error("Account has not deleted");
+      }
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 //* Moderator routes
 
-//* To change the role to moderator or user
+//* to change the role to moderator or user
 profileRouter.patch(
   "/moderator/changeRole/:role/:userId",
   userAuth,
@@ -450,7 +547,7 @@ profileRouter.get(
   }
 );
 
-//* to get the number of active, deactivated or blocked user
+//* to get the number of all, active, deactivated or banned user
 profileRouter.get(
   "/moderator/userNumbers/:status",
   userAuth,
@@ -465,7 +562,7 @@ profileRouter.get(
       }
 
       const { status } = req.params;
-      const allowedStatus = ["all", "active", "deactivated", "blocked"];
+      const allowedStatus = ["all", "active", "deactivated", "banned"];
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({
           error: `Invalid status : ${status}`,
@@ -488,6 +585,7 @@ profileRouter.get(
   }
 );
 
+//* to view profiles of all, active, deactivated or banned user
 profileRouter.get(
   "/moderator/viewUsers/:status",
   userAuth,
@@ -502,7 +600,7 @@ profileRouter.get(
       }
 
       const { status } = req.params;
-      const allowedStatus = ["all", "active", "deactivated", "blocked"];
+      const allowedStatus = ["all", "active", "deactivated", "banned"];
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({
           error: `Invalid status : ${status}`,
@@ -551,6 +649,66 @@ profileRouter.get(
         message: `Data retrieved`,
         list,
       });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* To change status active, deactivated or block
+profileRouter.patch(
+  "/moderator/changeStatus/:status/:userId",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      //* storing logged user data
+      const loggedInUser = req.user;
+
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status, userId } = req.params;
+
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const user = await User.findById(userId);
+
+      //* Ensure `status` is valid
+      if (!["active", "deactivated"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status." });
+      }
+
+      if (user.role === "admin") {
+        return res.status(400).json({
+          message: `Admin status could not be changed. If you are admin try admin api.`,
+        });
+      }
+
+      //* Handle status change logic
+      if (user.status === status) {
+        return res
+          .status(200)
+          .json({ message: `User's account is already ${status}` });
+      }
+
+      //* Update the user's status
+      user.status = status;
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: `User's account is has been updated to ${status}` });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }

@@ -15,6 +15,21 @@
 - [x] **DELETE** /profile/delete - To delete a user account.
 - [x] **PATCH** /profile/changeStatus - To temporarily deactivate a user account if active or reactive user account if deactivated.
 - [x] **GET** /profile/:userId - To view another user's public profile.
+- [x] **GET** /moderator/userNumbers/:status - To view the total number of users according to their status. [admin/moderator only]
+- [x] **GET** /moderator/users/:status - To view the list of users according to their status. [admin/moderator only]
+
+  ### Admin
+
+  - [x] **GET** /admin/viewRole/:role - To view a list of user according to their role
+  - [x] **PATCH** /admin/changeRole/:role/:userId - To change the role of a user
+  - [x] **PATCH** /admin/changeStatus/:status/:userId - To change user status including blocking.
+  - [x] **DELETE** /admin/user/delete/:userId - To delete a user account.
+
+  ### Moderator
+
+  - [x] **GET** /moderator/viewRole/:role - To view a list of user according to their role (moderator/user role only)
+  - [x] **PATCH** /moderator/changeRole/:role/:userId - To change the role of a user (to moderator/user role only)
+  - [x] **PATCH** /moderator/changeStatus/:userId - To temporarily deactivate a user account if active or reactive user account if deactivated.
 
 ## APIs related to connections
 
@@ -22,16 +37,18 @@
 
 - [x] **POST** /request/send/interested/:userId - to send connection request.
 - [x] **POST** /request/send/ignored/:userId - to ignore user.
-  
 - [x] **GET** /requests/send - to show all the connection requests sent.
 - [x] **GET** /requests/received - to show all the connection requests received.
 - [x] **GET** /requests/ignored - to show all the ignored connection requests received.
-  
 - [x] **DELETE** /request/review/retrieve/:requestId - to retrieve a connection request that has been sent.
 - [x] **DELETE** /request/review/ignored/:requestId - to delete an ignored connection request.
 
 - [x] **POST** /request/review/accepted/:requestId - to accept a connection request.
 - [x] **POST** /request/review/rejected/:requestId - to reject a connection request.
+
+- [ ] **GET** /moderator/requests/totalRequests
+- [ ] **GET** /admin/request/:status
+- [ ] **GET** /admin/request/:userId
 
 ### **userConnectionsRouter**
 
