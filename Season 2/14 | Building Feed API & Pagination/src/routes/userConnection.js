@@ -14,6 +14,14 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
     }
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
 
     //* finding all the connections
     const connections = await ConnectionRequest.find({
@@ -21,16 +29,19 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         { fromUserId: user._id, status: "accepted" },
         { toUserId: user._id, status: "accepted" },
       ],
-    }).populate("fromUserId toUserId", [
-      "firstName",
-      "lastName",
-      "username",
-      "avatar",
-      "about",
-      "skills",
-      "gender",
-      "status",
-    ]);
+    })
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json({ message: connections });
   } catch (err) {

@@ -3,6 +3,7 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const { default: mongoose } = require("mongoose");
 const User = require("../models/user");
+const { userRole } = require("../middlewares/role");
 const requestRouter = express.Router();
 
 //* To send interested or ignored request to user profile
@@ -89,21 +90,31 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
     }
-
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
     //* finding all the connection with interested status send form logged in user
     const requestSent = await ConnectionRequest.find({
       fromUserId: user._id,
       status: "interested",
-    }).populate("fromUserId toUserId", [
-      "firstName",
-      "lastName",
-      "username",
-      "avatar",
-      "about",
-      "skills",
-      "gender",
-      "status",
-    ]);
+    })
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json({ message: requestSent });
   } catch (err) {
@@ -117,25 +128,36 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
     const user = req.user;
     if (!user) {
       return res
-      .status(401)
-      .json({ error: "Unauthorized. Please login again." });
+        .status(401)
+        .json({ error: "Unauthorized. Please login again." });
     }
-    
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
+
     //* finding all the connection with interested status send to logged in user
     const requestSent = await ConnectionRequest.find({
       toUserId: user._id,
       status: "interested",
-    }).populate("fromUserId toUserId", [
-      "firstName",
-      "lastName",
-      "username",
-      "avatar",
-      "about",
-      "skills",
-      "gender",
-      "status",
-    ]);
-    
+    })
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
+
     res.status(200).json({ message: requestSent });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -148,23 +170,34 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
     const user = req.user;
     if (!user) {
       return res
-      .status(401)
-      .json({ error: "Unauthorized. Please login again." });
+        .status(401)
+        .json({ error: "Unauthorized. Please login again." });
     }
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
     //* finding all the connection with ignored status send form logged in user
     const requestSent = await ConnectionRequest.find({
       fromUserId: user._id,
       status: "ignored",
-    }).populate("fromUserId toUserId", [
-      "firstName",
-      "lastName",
-      "username",
-      "avatar",
-      "about",
-      "skills",
-      "gender",
-      "status",
-    ]);
+    })
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json({ message: requestSent });
   } catch (err) {
@@ -326,6 +359,171 @@ requestRouter.delete(
           .status(400)
           .json({ error: "Connection request could not retrieved" });
       }
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+requestRouter.get(
+  "/moderator/requests/totalRequests/:status",
+  userAuth,
+  userRole("admin", "moderator"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status } = req.params;
+      //* Ensure `status` is valid
+      if (
+        !["all", "interested", "ignored", "accepted", "rejected"].includes(
+          status
+        )
+      ) {
+        return res.status(400).json({ error: "Invalid status." });
+      }
+      //* finding all the connection with interested status
+      let totalRequest;
+      if (status === "all")
+        totalRequest = await ConnectionRequest.countDocuments();
+      else totalRequest = await ConnectionRequest.countDocuments({ status });
+
+      res.status(200).json({ message: "Data retrieved", totalRequest });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* to get the request of overall user according to status
+requestRouter.get(
+  "/admin/requests/:status",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+
+      const { status } = req.params;
+      //* Ensure `status` is valid
+      if (
+        !["all", "interested", "ignored", "accepted", "rejected"].includes(
+          status
+        )
+      ) {
+        return res.status(400).json({ error: "Invalid status." });
+      }
+
+      const page =
+        parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+      let limit =
+        parseInt(req.query.limit) > 50
+          ? 50
+          : parseInt(req.query.limit) < 1
+          ? 1
+          : parseInt(req.query.limit) || 10;
+      //* finding all the connection with status
+      let requests;
+      if (status === "all")
+        requests = await ConnectionRequest.find()
+          .populate("fromUserId toUserId", [
+            "firstName",
+            "lastName",
+            "username",
+            "avatar",
+            "about",
+            "skills",
+            "gender",
+            "status",
+          ])
+          .skip((page - 1) * limit)
+          .limit(limit);
+      else {
+        requests = await ConnectionRequest.find({
+          status,
+        })
+          .populate("fromUserId toUserId", [
+            "firstName",
+            "lastName",
+            "username",
+            "avatar",
+            "about",
+            "skills",
+            "gender",
+            "status",
+          ])
+          .skip((page - 1) * limit)
+          .limit(limit);
+      }
+
+      res.status(200).json({ message: "Data retrieved", requests });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+//* to get the request of one user
+requestRouter.get(
+  "/admin/user/requests/:userId",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
+      const { userId } = req.params;
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const page =
+        parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+      let limit =
+        parseInt(req.query.limit) > 50
+          ? 50
+          : parseInt(req.query.limit) < 1
+          ? 1
+          : parseInt(req.query.limit) || 10;
+
+      //* finding all the connection with status
+      const userRequests = await ConnectionRequest.find({
+        $or: [{ fromUserId: userId }, { toUserId: userId }],
+      })
+        .populate("fromUserId toUserId", [
+          "firstName",
+          "lastName",
+          "username",
+          "avatar",
+          "about",
+          "skills",
+          "gender",
+          "status",
+        ])
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+      res.status(200).json({ message: "Data retrieved", userRequests });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }

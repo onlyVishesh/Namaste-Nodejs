@@ -46,9 +46,9 @@
 - [x] **POST** /request/review/accepted/:requestId - to accept a connection request.
 - [x] **POST** /request/review/rejected/:requestId - to reject a connection request.
 
-- [ ] **GET** /moderator/requests/totalRequests
-- [ ] **GET** /admin/request/:status
-- [ ] **GET** /admin/request/:userId
+- [x] **GET** /moderator/requests/totalRequests/:status
+- [x] **GET** /admin/requests/:status
+- [x] **GET** /admin/requests/:userId
 
 ### **userConnectionsRouter**
 
