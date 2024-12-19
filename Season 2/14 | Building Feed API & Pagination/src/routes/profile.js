@@ -61,26 +61,29 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 //* To delete profile/account
 profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
     }
     const { password } = req.body;
-    const isPasswordValid = await user.validatePassword(password);
+    const isPasswordValid = await loggedInUser.validatePassword(password);
     if (isPasswordValid) {
       //! deleting all the connectionRequests
 
       const { deletedCount: noOfConnectionDeleted } =
         await ConnectionRequest.deleteMany({
-          $or: [{ fromUserId: user._id }, { toUserId: user._id }],
+          $or: [
+            { fromUserId: loggedInUser._id },
+            { toUserId: loggedInUser._id },
+          ],
         });
-      const { deletedCount } = await User.deleteOne({ _id: user._id });
+      const { deletedCount } = await User.deleteOne({ _id: loggedInUser._id });
 
       if (deletedCount === 1) {
         res.status(200).json({
-          message: `Account with username : ${user.username} and email : ${user.email} having total ${noOfConnectionDeleted} connection requests has been deleted`,
+          message: `Account with username : ${loggedInUser.username} and email : ${loggedInUser.email} having total ${noOfConnectionDeleted} connection requests has been deleted`,
         });
       } else {
         throw new Error("Account has not deleted");
@@ -376,6 +379,16 @@ profileRouter.delete(
       }
 
       const { userId } = req.params;
+      //* Checking if userId exist in user database
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        const isUserExist = await User.findById(userId);
+        if (!isUserExist) {
+          return res.status(400).json({ error: "Invalid user ID" });
+        }
+      } else {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
       const user = await User.findById(userId);
 
       if (user.role === "admin") {
@@ -655,7 +668,7 @@ profileRouter.get(
   }
 );
 
-//* To change status active, deactivated or block
+//* To change status active and deactivated 
 profileRouter.patch(
   "/moderator/changeStatus/:status/:userId",
   userAuth,
