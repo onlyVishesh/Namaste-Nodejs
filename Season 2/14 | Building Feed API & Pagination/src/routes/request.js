@@ -12,14 +12,14 @@ requestRouter.post(
   userAuth,
   async (req, res) => {
     try {
-      const user = req.user;
-      if (!user) {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
         return res
           .status(401)
           .json({ error: "Unauthorized. Please login again." });
       }
 
-      const fromUserId = user._id;
+      const fromUserId = loggedInUser._id;
       const { status, toUserId } = req.params;
 
       //* Checking if toUserId exist in user database
@@ -84,8 +84,8 @@ requestRouter.post(
 //* To view all the request send
 requestRouter.get("/request/send", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
@@ -100,7 +100,7 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with interested status send form logged in user
     const requestSent = await ConnectionRequest.find({
-      fromUserId: user._id,
+      fromUserId: loggedInUser._id,
       status: "interested",
     })
       .populate("fromUserId toUserId", [
@@ -125,8 +125,8 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
 //* To view all the request received
 requestRouter.get("/request/received", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
@@ -142,7 +142,7 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
 
     //* finding all the connection with interested status send to logged in user
     const requestSent = await ConnectionRequest.find({
-      toUserId: user._id,
+      toUserId: loggedInUser._id,
       status: "interested",
     })
       .populate("fromUserId toUserId", [
@@ -167,8 +167,8 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
 //* To view all the ignored profiles
 requestRouter.get("/request/ignored", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
@@ -183,7 +183,7 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with ignored status send form logged in user
     const requestSent = await ConnectionRequest.find({
-      fromUserId: user._id,
+      fromUserId: loggedInUser._id,
       status: "ignored",
     })
       .populate("fromUserId toUserId", [
@@ -211,8 +211,8 @@ requestRouter.delete(
   userAuth,
   async (req, res) => {
     try {
-      const user = req.user;
-      if (!user) {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
         return res
           .status(401)
           .json({ error: "Unauthorized. Please login again." });
@@ -227,7 +227,7 @@ requestRouter.delete(
       //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
-        fromUserId: user._id,
+        fromUserId: loggedInUser._id,
         status: "ignored",
       });
 
@@ -261,8 +261,8 @@ requestRouter.post(
   userAuth,
   async (req, res) => {
     try {
-      const user = req.user;
-      if (!user) {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
         return res
           .status(401)
           .json({ error: "Unauthorized. Please login again." });
@@ -284,7 +284,7 @@ requestRouter.post(
       //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
-        toUserId: user._id,
+        toUserId: loggedInUser._id,
         status: "interested",
       });
 
@@ -318,8 +318,8 @@ requestRouter.delete(
   userAuth,
   async (req, res) => {
     try {
-      const user = req.user;
-      if (!user) {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
         return res
           .status(401)
           .json({ error: "Unauthorized. Please login again." });
@@ -335,7 +335,7 @@ requestRouter.delete(
       //* checking if there is connectionRequest with status interested
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
-        fromUserId: user._id,
+        fromUserId: loggedInUser._id,
         status: "interested",
       });
 

@@ -8,8 +8,8 @@ const userRouter = express.Router();
 //* To view all the connections
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
@@ -52,22 +52,22 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 //* To create user feed
 userRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
       return res
         .status(401)
         .json({ error: "Unauthorized. Please login again." });
     }
 
     const connectionRequests = await ConnectionRequest.find({
-      $or: [{ fromUserId: user._id }, { toUserId: user._id }],
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select("fromUserId toUserId");
 
     //* to get a set of all the user whom user have send/received request including himself
     const hiddenUserProfiles = new Set();
 
     //* Hiding logged user
-    hiddenUserProfiles.add(user._id.toString());
+    hiddenUserProfiles.add(loggedInUser._id.toString());
 
     //* Hiding user requests
     connectionRequests.forEach((request) => {
@@ -116,8 +116,8 @@ userRouter.delete(
   userAuth,
   async (req, res) => {
     try {
-      const user = req.user;
-      if (!user) {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
         return res
           .status(401)
           .json({ error: "Unauthorized. Please login again." });
@@ -130,7 +130,7 @@ userRouter.delete(
       const connectionExist = await ConnectionRequest.findOneAndDelete({
         _id: connectionId,
         status: "accepted",
-        $or: [{ fromUserId: user._id }, { toUserId: user._id }],
+        $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
       });
 
       if (connectionExist) {
