@@ -7,21 +7,6 @@ const { validateProfileData } = require("../utils/validation");
 const ConnectionRequest = require("../models/connectionRequest");
 const { userRole } = require("../middlewares/role");
 
-//* To view all the users (admin)
-profileRouter.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find();
-
-    if (users.length === 0) {
-      return res.status(404).json({ error: "0 user exist" });
-    }
-    res.status(200).json({ message: users });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
 //* To view ourself profile
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
@@ -417,6 +402,28 @@ profileRouter.delete(
     }
   }
 );
+
+//* To view all the users (admin)
+profileRouter.get("/admin/feed",userAuth, userRole("admin"), async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ error: "Unauthorized. Please login again." });
+    }
+    
+    const users = await User.find();
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "0 user exist" });
+    }
+    res.status(200).json({ message: users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 //* Moderator routes
 
