@@ -58,7 +58,7 @@
 
 ## APIs related to search user - searchRouter
 
-- [ ] **GET** /search - To search for users, skills, or topics (with query parameters like name, skill, etc.).
+- [x] **GET** /search - To search for users, skills, or topics (with query parameters like name, skill, etc.).
 
 ## Extra APIs (future scope)
 

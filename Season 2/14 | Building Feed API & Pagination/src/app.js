@@ -13,12 +13,14 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/userConnection");
+const searchRouter = require("./routes/search");
 
 //* Using routers for handling different routes
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", searchRouter);
 
 //* Connect to the database and start the server once connected
 const PORT = process.env.PORT || 3001;
