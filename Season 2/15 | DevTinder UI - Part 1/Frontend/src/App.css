@@ -1,11 +1,11 @@
-
 /* Reset */
 *,
 *::before,
 *::after {
-  box-sizing: inherit;
+  box-sizing: border-box;
   padding: 0;
   margin: 0;
+  font-family: "Roboto", sans-serif;
 }
 
 ol,
@@ -52,7 +52,6 @@ input:focus {
 /* Main styling */
 body {
   scroll-behavior: smooth;
-  font-family: "Roboto", sans-serif;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;

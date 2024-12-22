@@ -1,3 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark Mode Default */
+    /* Primary Colors */
+    --color-primary: #3b82f6; /* Primary Blue */
+    --color-secondary: #10b981; /* Secondary Green */
+    --color-accent-1: #f59e0b; /* Accent Amber */
+    --color-accent-2: #ef4444; /* Accent Red */
+
+    /* Background Colors */
+    --color-bg: #1f2937; /* Dark Gray Background */
+    --color-card-bg: #374151; /* Medium Gray Card Background */
+
+    /* Text Colors */
+    --color-text: #e5e7eb; /* Light Gray Text */
+    --color-text-muted: #9ca3af; /* Gray Text for muted content */
+
+    /* Border & Divider Colors */
+    --color-border: #4b5563; /* Darker Gray Border */
+    --color-hover: #2563eb; /* Blue Hover State */
+
+    /* Accent & Tint Colors */
+    --color-primary-tint: #93c5fd; /* Light Blue Tint (Primary) */
+    --color-secondary-tint: #6ee7b7; /* Light Green Tint (Secondary) */
+
+    /* Status Colors (Optional for additional UI states) */
+    --color-success: #4caf50; /* Green for success */
+    --color-warning: #ff9800; /* Amber for warnings */
+    --color-error: #f44336; /* Red for errors */
+    --color-info: #2196f3; /* Blue for info messages */
+
+    /* Shadow & Neutral Colors */
+    --color-shadow: rgba(0, 0, 0, 0.3); /* Darker Shadow for elements */
+    --color-light-gray: #4b5563; /* Darker light gray for background or muted text */
+  }
+
+  * {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+}
+
+.light {
+  /* Background Colors */
+  --color-bg: #f9fafb; /* Light Gray Background */
+  --color-card-bg: #ffffff; /* White Card Background */
+
+  /* Text Colors */
+  --color-text: #111827; /* Dark Gray / Black Text */
+  --color-text-muted: #6b7280; /* Medium Gray Text (for secondary text) */
+
+  /* Border & Divider Colors */
+  --color-border: #d1d5db; /* Light Gray Border */
+
+  /* Shadow & Neutral Colors */
+  --color-shadow: rgba(0, 0, 0, 0.1); /* Light Shadow for elements */
+  --color-light-gray: #e5e7eb; /* Lighter Gray (use for backgrounds or light text) */
+}
