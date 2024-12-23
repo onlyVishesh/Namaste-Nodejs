@@ -22,7 +22,7 @@ const NavBar = () => {
 
   return (
     <div>
-      <h1 className="bg-bg text-text text-xl">Hello, World!</h1>
+      <h1 className="bg-bg text-text text-xl">DevRoot</h1>
       <button onClick={toggleTheme}>
         {theme === "dark" ? <LightbulbOff /> : <Lightbulb />}
       </button>
