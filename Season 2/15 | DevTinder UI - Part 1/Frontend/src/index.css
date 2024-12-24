@@ -15,6 +15,7 @@
 
     /* Background Colors */
     --color-bg: #1f2937; /* Dark Gray Background */
+    --color-bg-secondary: #121821; /* Dark Gray Background */
     --color-card-bg: #374151; /* Medium Gray Card Background */
 
     /* Text Colors */
@@ -41,13 +42,15 @@
   }
 
   * {
-    @apply transition-colors duration-300 ease-in-out;
+    @apply transition-colors duration-[50ms] ease-in-out;
   }
 }
 
 .light {
   /* Background Colors */
   --color-bg: #f9fafb; /* Light Gray Background */
+  --color-bg-secondary: #dee4ed; /* Dark Gray Background */
+
   --color-card-bg: #ffffff; /* White Card Background */
 
   /* Text Colors */

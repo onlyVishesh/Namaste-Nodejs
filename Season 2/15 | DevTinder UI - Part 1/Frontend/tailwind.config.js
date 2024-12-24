@@ -12,6 +12,7 @@ export default {
 
         /* Background Colors */
         bg: "var(--color-bg)", // Light Gray Background
+        bgSecondary: "var(--color-bg-secondary)", // Light Gray Background
         cardBg: "var(--color-card-bg)", // White Card Background
 
         /* Text Colors */

@@ -15,7 +15,7 @@ const App = () => {
   }, [isLocal]);
 
   return (
-    <div className="bg-bg text-text h-screen w-screen">
+    <div className="bg-bg text-text h-full w-full main-body">
       <BrowserRouter basename="/">
         <Routes>
           <Route path="/" element={<BodyContainer />}>
