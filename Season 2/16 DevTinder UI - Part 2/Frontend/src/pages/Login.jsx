@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { FaUserCheck } from "react-icons/fa";
 
 const Login = () => {
   const [userId, setUserId] = useState("");
@@ -31,6 +32,14 @@ const Login = () => {
     // Password validation
     if (password.trim().length < 8) {
       newErrors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password =
+        "Password must contain at least one uppercase letter.";
+    } else if (!/[0-9]/.test(password)) {
+      newErrors.password = "Password must contain at least one number.";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      newErrors.password =
+        "Password must contain at least one special character.";
     }
 
     setErrors(newErrors);
@@ -59,18 +68,30 @@ const Login = () => {
 
   return (
     <div className="flex min-h-fit justify-center">
-      <div className="flex-2 m-10 flex justify-center rounded-lg bg-bgSecondary shadow">
+      <div className="flex-2 m-10 flex justify-center rounded-lg bg-bgSecondary shadow-md shadow-shadow">
         <div className="w-full p-6 sm:p-16">
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-extrabold xl:text-3xl">
               Welcome Back
             </h1>
-            <p className="text-textMuted mt-1">Login to continue your journey</p>
-            <div className="mt-8 w-full flex-1">
+            <p className="mt-1 text-textMuted">
+              Login to continue your journey
+            </p>
+            <div className="mt-2 w-full flex-1">
               <div className="mx-auto max-w-xs">
+                {errors.email && !isUsername && (
+                  <p className="mb-1 text-center text-xs text-error">
+                    {errors.email}
+                  </p>
+                )}
+                {errors.username && isUsername && (
+                  <p className="mb-1 text-center text-xs text-error">
+                    {errors.username}
+                  </p>
+                )}
                 {isUsername ? (
                   <input
-                    className="md:text-md w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
+                    className="md:text-md mb-3 w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
                     type="text"
                     placeholder="Username"
                     value={userId}
@@ -78,24 +99,20 @@ const Login = () => {
                   />
                 ) : (
                   <input
-                    className="border-1 md:text-md w-full rounded-lg border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
+                    className="md:text-md mb-3 w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
                     type="email"
                     placeholder="Email"
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
                   />
                 )}
-                {errors.email && !isUsername && (
-                  <p className="mt-1 text-center text-sm text-error">
-                    {errors.email}
+
+                {errors.password && (
+                  <p className="mb-1 text-center text-xs text-error">
+                    {errors.password}
                   </p>
                 )}
-                {errors.username && isUsername && (
-                  <p className="mt-1 text-center text-sm text-error">
-                    {errors.username}
-                  </p>
-                )}
-                <div className="relative mt-5">
+                <div className="relative">
                   <input
                     className="md:text-md w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
                     type={showPassword ? "text" : "password"}
@@ -113,27 +130,15 @@ const Login = () => {
                     {showPassword ? <Eye /> : <EyeOff />}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="mt-1 text-center text-sm text-error">
-                    {errors.password}
-                  </p>
-                )}
+
+                <p className="mt-2 text-right text-sm text-error hover:cursor-pointer">
+                  Forgot Password?
+                </p>
                 <button
-                  className="focus:shadow-outline mt-5 flex w-full items-center justify-center rounded-lg bg-indigo-500 bg-primary py-4 font-semibold tracking-wide text-text transition-all duration-300 ease-in-out hover:bg-hover focus:outline-none"
+                  className="focus:shadow-outline mt-3 flex w-full items-center justify-center rounded-lg bg-indigo-500 bg-primary py-4 font-semibold tracking-wide text-text transition-all duration-300 ease-in-out hover:bg-hover focus:outline-none"
                   onClick={handleLogin}
                 >
-                  <svg
-                    className="-ml-2 h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="8.5" cy="7" r="4" />
-                    <path d="M20 8v6M23 11h-6" />
-                  </svg>
+                  <FaUserCheck/>
                   <span className="ml-3">Login</span>
                 </button>
                 <p className="mt-6 text-center text-xs text-textMuted">

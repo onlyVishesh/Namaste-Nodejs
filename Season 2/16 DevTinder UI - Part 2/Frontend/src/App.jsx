@@ -11,7 +11,7 @@ import Signup from "./pages/Signup";
 import appStore from "./utils/appStore";
 
 const App = () => {
-  const isLocal = import.meta.env.NODE_ENV === "development";
+  const isLocal = process.env.NODE_ENV === "development";
 
   useEffect(() => {
     document.body.className = isLocal ? "debug-screens" : "";
