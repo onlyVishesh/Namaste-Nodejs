@@ -3,6 +3,7 @@ import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 import logo from "../assets/logo.png";
 
@@ -16,12 +17,21 @@ const NAVBAR_LINKS = {
   admin: <LockKeyhole />,
 };
 
+const HAMBURGER_SECTIONS = {
+  "Company History": "history",
+  "Meet the Team": "team",
+  Careers: "careers",
+  FAQs: "faqs",
+  Support: "support",
+};
+
 const NavBar = () => {
   // Retrieve theme from localStorage or default to "dark"
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
   const [showNavbar, setShowNavbar] = useState(false);
+  const user = useSelector((store) => store.user);
   const handleShowNavbar = () => {
     setShowNavbar(!showNavbar);
   };
@@ -55,20 +65,25 @@ const NavBar = () => {
     };
   }, []);
 
-  const newLocal = "z-50  fixed top-0 h-auto w-full bg-bgSecondary";
+  const newLocal = "z-50 fixed top-0 h-auto w-full bg-bgSecondary";
   return (
     <nav className={newLocal}>
       <div className="container mx-auto flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-2 md:gap-4">
-          <img src={logo} className="w-24" />
-          <div className="relative">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
-            <input
-              type="text"
-              className="w-32 rounded-xl border-2 border-border p-1 pl-10 text-black 2xs:w-48"
-              placeholder="Search"
-            />
-          </div>
+          <NavLink to={user ? "/feed" : "/"}>
+            <img src={logo} className="w-24" />
+          </NavLink>
+
+          {user && (
+            <div className="relative">
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
+              <input
+                type="text"
+                className="w-32 rounded-xl border-2 border-border p-1 pl-10 text-black 2xs:w-48"
+                placeholder="Search"
+              />
+            </div>
+          )}
         </div>
         <div className="md:hidden" onClick={handleShowNavbar}>
           <Menu />
@@ -80,28 +95,67 @@ const NavBar = () => {
               : ""
           }`}
         >
-          <ul className="emd:space-x-12 flex flex-col space-x-2 font-medium md:flex-row">
-            {Object.keys(NAVBAR_LINKS).map((link) => {
-              return (
-                <li key={link}>
-                  <NavLink
-                    to={"/" + link}
-                    className={({ isActive }) =>
-                      `relative flex flex-col items-center justify-center px-4 py-2 font-semibold hover:text-hover ${
-                        isActive
-                          ? "text-hover after:h-0.5 after:w-full after:bg-hover after:content-['']"
-                          : ""
-                      }`
-                    }
-                  >
-                    {NAVBAR_LINKS[link]}
-                    <span className="sm:block md:hidden lg:block">
-                      {link[0].toUpperCase() + link.slice(1)}
-                    </span>
+          <ul className="flex flex-col space-x-2 font-medium md:flex-row md:space-x-6">
+            {user ? (
+              Object.keys(NAVBAR_LINKS).map((link) => {
+                return (
+                  <li key={link}>
+                    <NavLink
+                      to={"/" + link}
+                      className={({ isActive }) =>
+                        `relative flex flex-col items-center justify-center px-4 py-2 font-semibold hover:text-hover ${
+                          isActive
+                            ? "text-hover after:h-0.5 after:w-full after:bg-hover after:content-['']"
+                            : ""
+                        }`
+                      }
+                    >
+                      {NAVBAR_LINKS[link]}
+                      <span className="sm:block md:hidden lg:block">
+                        {link[0].toUpperCase() + link.slice(1)}
+                      </span>
+                    </NavLink>
+                  </li>
+                );
+              })
+            ) : (
+              <div className="flex h-[70vh] flex-col justify-between md:h-0">
+                <div className="md:hidden">
+                  {Object.keys(HAMBURGER_SECTIONS).map((link) => {
+                    return (
+                      <li key={link}>
+                        <NavLink
+                          to={"/" + HAMBURGER_SECTIONS[link]}
+                          className={({ isActive }) =>
+                            `relative flex flex-col items-center justify-center px-4 py-2 font-semibold hover:text-hover ${
+                              isActive
+                                ? "text-hover after:h-0.5 after:w-full after:bg-hover after:content-['']"
+                                : ""
+                            }`
+                          }
+                        >
+                          <span className="sm:block md:hidden lg:block">
+                            {link[0].toUpperCase() + link.slice(1)}
+                          </span>
+                        </NavLink>
+                      </li>
+                    );
+                  })}
+                </div>
+                <div className="mb-4 flex flex-col justify-center gap-2 text-center font-medium md:mb-0 md:flex-row">
+                  <NavLink to="/login">
+                    <button className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80">
+                      Login
+                    </button>
                   </NavLink>
-                </li>
-              );
-            })}
+                  <NavLink to="/signup">
+                    <button className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80">
+                      Create Account
+                    </button>
+                  </NavLink>
+                </div>
+              </div>
+            )}
             <li className="relative flex flex-col items-center justify-center text-hover hover:text-hover">
               <SliderToggle theme={theme} toggleTheme={toggleTheme} />
             </li>
@@ -112,6 +166,7 @@ const NavBar = () => {
   );
 };
 
+// eslint-disable-next-line react/prop-types
 const SliderToggle = ({ theme, toggleTheme }) => {
   return (
     <div className="relative flex w-fit items-center rounded-full border-[1.5px] border-border">

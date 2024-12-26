@@ -2,6 +2,9 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { FaUserCheck } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [userId, setUserId] = useState("");
@@ -13,6 +16,9 @@ const Login = () => {
     username: "",
     password: "",
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const validateInputs = () => {
     const newErrors = { email: "", username: "", password: "" };
@@ -30,16 +36,8 @@ const Login = () => {
     }
 
     // Password validation
-    if (password.trim().length < 8) {
-      newErrors.password = "Password must be at least 8 characters long.";
-    } else if (!/[A-Z]/.test(password)) {
-      newErrors.password =
-        "Password must contain at least one uppercase letter.";
-    } else if (!/[0-9]/.test(password)) {
-      newErrors.password = "Password must contain at least one number.";
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      newErrors.password =
-        "Password must contain at least one special character.";
+    if (password.trim().length <= 0) {
+      newErrors.password = "Enter A Password.";
     }
 
     setErrors(newErrors);
@@ -61,6 +59,9 @@ const Login = () => {
         data,
         { withCredentials: true },
       );
+
+      dispatch(addUser(res.data));
+      return navigate("/feed");
     } catch (err) {
       console.error(err.message);
     }
@@ -138,7 +139,7 @@ const Login = () => {
                   className="focus:shadow-outline mt-3 flex w-full items-center justify-center rounded-lg bg-indigo-500 bg-primary py-4 font-semibold tracking-wide text-text transition-all duration-300 ease-in-out hover:bg-hover focus:outline-none"
                   onClick={handleLogin}
                 >
-                  <FaUserCheck/>
+                  <FaUserCheck />
                   <span className="ml-3">Login</span>
                 </button>
                 <p className="mt-6 text-center text-xs text-textMuted">

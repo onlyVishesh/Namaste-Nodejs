@@ -2,6 +2,7 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -10,6 +11,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({
     email: "",
     username: "",
@@ -73,8 +75,8 @@ const Signup = () => {
     return !Object.values(newErrors).some((error) => error !== "");
   };
 
-  // to fetch login api
-  const handleLogin = async () => {
+  // to fetch sign up api
+  const handleSignUp = async () => {
     if (!validateInputs()) return;
 
     try {
@@ -85,6 +87,7 @@ const Signup = () => {
         data,
         { withCredentials: true },
       );
+      return navigate("/profile");
     } catch (err) {
       console.error(err.message);
     }
@@ -181,7 +184,7 @@ const Signup = () => {
 
                 <button
                   className="focus:shadow-outline mt-5 flex w-full items-center justify-center rounded-lg bg-indigo-500 bg-primary py-4 font-semibold tracking-wide text-text transition-all duration-300 ease-in-out hover:bg-hover focus:outline-none"
-                  onClick={handleLogin}
+                  onClick={handleSignUp}
                 >
                   <FaUserPlus />
                   <span className="ml-3">Sign Up</span>

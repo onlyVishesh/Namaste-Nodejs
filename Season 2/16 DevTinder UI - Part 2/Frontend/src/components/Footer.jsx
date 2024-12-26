@@ -1,24 +1,24 @@
-import {
-  FileUser,
-  Github,
-  Linkedin,
-  Mail,
-  MapPinHouse,
-  Twitter,
-  Wallpaper,
-} from "lucide-react";
+import { FileUser, Mail, MapPinHouse } from "lucide-react";
+import { CgWebsite } from "react-icons/cg";
+import { FaGithub, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import logo from "../assets/logo.png";
 
 const SOCIAL_LINKS = {
-  github: ["https://github.com/onlyVishesh", <Github className="size-8 p-1" />],
+  github: [
+    "https://github.com/onlyVishesh",
+    <FaGithub className="size-8 p-1" key="github" />,
+  ],
   linkedin: [
     "https://www.linkedin.com/in/vishesh-%E2%80%8E-48b1b8257",
-    <Linkedin className="size-8 p-1" />,
+    <FaLinkedinIn className="size-8 p-1" key="linkedin" />,
   ],
-  twitter: ["https://x.com/onlyVishesh14", <Twitter className="size-8 p-1" />],
+  twitter: [
+    "https://x.com/onlyVishesh14",
+    <FaTwitter className="size-8 p-1" key="twitter" />,
+  ],
   portfolio: [
     "https://onlyvishesh.vercel.app/",
-    <Wallpaper className="size-8 p-1" />,
+    <CgWebsite className="size-8 p-1" key="portfolio" />,
   ],
 };
 
