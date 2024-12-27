@@ -6,7 +6,7 @@ const BodyContainer = () => {
   return (
     <>
       <NavBar />
-      <div className="container mx-auto mt-24 min-h-[calc(100vh-25rem)]">
+      <div className="container mx-auto mt-20 min-h-[calc(100vh-25rem)]">
         <Outlet />
       </div>
       <Footer/>

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { useSelector } from "react-redux";
@@ -31,7 +31,9 @@ const NavBar = () => {
     return localStorage.getItem("theme") || "dark";
   });
   const [showNavbar, setShowNavbar] = useState(false);
+  const menuRef = useRef(null); // Ref for the hamburger menu container
   const user = useSelector((store) => store.user);
+
   const handleShowNavbar = () => {
     setShowNavbar(!showNavbar);
   };
@@ -56,22 +58,35 @@ const NavBar = () => {
       }
     };
 
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowNavbar(false); // Close the menu
+      }
+    };
+
     window.addEventListener("resize", handleResize);
+    document.addEventListener("click", handleClickOutside);
 
     handleResize();
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
   const newLocal = "z-50 fixed top-0 h-auto w-full bg-bgSecondary";
   return (
-    <nav className={newLocal}>
+    <nav className={newLocal} ref={menuRef}>
       <div className="container mx-auto flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-2 md:gap-4">
-          <NavLink to={user ? "/feed" : "/"}>
-            <img src={logo} className="w-24" />
+          <NavLink
+            to={user ? "/feed" : "/"}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            <img src={logo} className="w-20" />
           </NavLink>
 
           {user && (
@@ -126,6 +141,9 @@ const NavBar = () => {
                       <li key={link}>
                         <NavLink
                           to={"/" + HAMBURGER_SECTIONS[link]}
+                          onClick={() => {
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
                           className={({ isActive }) =>
                             `relative flex flex-col items-center justify-center px-4 py-2 font-semibold hover:text-hover ${
                               isActive
@@ -142,14 +160,24 @@ const NavBar = () => {
                     );
                   })}
                 </div>
-                <div className="mb-4 flex flex-col justify-center gap-2 text-center font-medium md:mb-0 md:flex-row">
+                <div className="mb-4 flex flex-col justify-center gap-2 text-center font-medium md:mb-0 md:flex-row md:-translate-y-1">
                   <NavLink to="/login">
-                    <button className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80">
+                    <button
+                      className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80"
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
                       Login
                     </button>
                   </NavLink>
                   <NavLink to="/signup">
-                    <button className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80">
+                    <button
+                      className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80"
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
                       Create Account
                     </button>
                   </NavLink>
