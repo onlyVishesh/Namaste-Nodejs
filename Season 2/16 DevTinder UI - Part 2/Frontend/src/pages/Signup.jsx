@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -87,8 +88,24 @@ const Signup = () => {
         data,
         { withCredentials: true },
       );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      } else {
+        toast.success(res.data.message || "Signup successful!");
+        navigate("/profile");
+      }
       return navigate("/profile");
     } catch (err) {
+      if (err.response) {
+        // The request was made, and the server responded with a status code that falls out of the range of 2xx
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        // The request was made, but no response was received
+        toast.error("No response from the server. Please try again.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        toast.error("An unexpected error occurred.");
+      }
       console.error(err.message);
     }
   };

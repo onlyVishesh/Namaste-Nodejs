@@ -17,6 +17,21 @@ authRouter.post("/signup", async (req, res) => {
     validateSignUpData(req);
     const { username, firstName, lastName, email, password } = req.body;
 
+    const isEmailExist = await User.find({ email });
+    if (isEmailExist.length > 0) {
+      return res
+        .status(400)
+        .json({ succuss: false, error: "Email already exist, try to login" });
+    }
+
+    const isUsernameExist = await User.find({ username });
+    if (isUsernameExist.length > 0) {
+      return res.status(400).json({
+        succuss: false,
+        error: "Username already exist, try another username",
+      });
+    }
+
     //* Creating password hash and saving it to data base
     const passwordHash = await bcrypt.hash(password, 10);
     const adminEmails = process.env.adminEmails
@@ -45,9 +60,11 @@ authRouter.post("/signup", async (req, res) => {
     //? Need to add email otp verification
 
     await user.save();
-    res.status(201).json({ message: "Account Created successfully" });
+    res
+      .status(201)
+      .json({ succuss: true, message: "Account Created successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ succuss: false, error: err.message });
   }
 });
 
@@ -65,7 +82,9 @@ authRouter.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ error: "Invalid Credential" });
+      return res
+        .status(400)
+        .json({ succuss: false, error: "Account does not exist" });
     }
 
     //* checking if password is valid
@@ -77,12 +96,14 @@ authRouter.post("/login", async (req, res) => {
 
       //* adding the token to cookie and send back to user
       res.cookie("token", token);
-      res.status(200).json({ user });
+      res
+        .status(200)
+        .json({ succuss: true, message: "Logged successfully", user });
     } else {
-      throw new Error("Invalid Credential");
+      res.status(400).json({ succuss: false, error: "Invalid Credential" });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ succuss: false, error: err.message });
   }
 });
 
@@ -92,7 +113,7 @@ authRouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
-  res.status(200).json({ message: "Logout successfully" });
+  res.status(200).json({ succuss: true, message: "Logout successfully" });
 });
 
 //* To change password not not login

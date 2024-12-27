@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FaUserCheck } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { addUser } from "../utils/userSlice";
 
 const Login = () => {
@@ -59,10 +60,24 @@ const Login = () => {
         data,
         { withCredentials: true },
       );
-
-      dispatch(addUser(res.data));
-      return navigate("/feed");
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      } else {
+        toast.success(res.data.message || "Logged In successful!");
+        dispatch(addUser(res.data));
+        return navigate("/feed");
+      }
     } catch (err) {
+      if (err.response) {
+        // The request was made, and the server responded with a status code that falls out of the range of 2xx
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        // The request was made, but no response was received
+        toast.error("No response from the server. Please try again.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        toast.error("An unexpected error occurred.");
+      }
       console.error(err.message);
     }
   };
