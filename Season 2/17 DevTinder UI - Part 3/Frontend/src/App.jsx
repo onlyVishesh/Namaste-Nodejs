@@ -13,15 +13,12 @@ import Signup from "./pages/Signup";
 import appStore from "./utils/appStore";
 
 const App = () => {
+  // eslint-disable-next-line no-undef
   const isLocal = process.env.NODE_ENV === "development";
 
   useEffect(() => {
     document.body.className = isLocal ? "debug-screens" : "";
   }, [isLocal]);
-
-  useEffect(() => {
-    // docu
-  });
 
   return (
     <Provider store={appStore}>

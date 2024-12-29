@@ -1,6 +1,7 @@
 import { FileUser, Mail, MapPinHouse } from "lucide-react";
 import { CgWebsite } from "react-icons/cg";
 import { FaGithub, FaLinkedinIn, FaTwitter } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const SOCIAL_LINKS = {
@@ -60,8 +61,8 @@ const Footer = () => {
                 {Object.keys(SOCIAL_LINKS).map((link) => {
                   return (
                     <li key={link}>
-                      <a
-                        href={SOCIAL_LINKS[link][0]}
+                      <Link
+                        to={SOCIAL_LINKS[link][0]}
                         rel="noopener noreferrer"
                         target="_blank"
                         className="text-primary transition hover:cursor-pointer hover:text-hover"
@@ -70,7 +71,7 @@ const Footer = () => {
                         <span className="flex size-10 items-center justify-center rounded-full bg-hover text-text hover:scale-110">
                           {SOCIAL_LINKS[link][1]}
                         </span>
-                      </a>
+                      </Link>
                     </li>
                   );
                 })}
@@ -89,12 +90,15 @@ const Footer = () => {
                       {FOOTER_SECTIONS[section].map((link) => {
                         return (
                           <li key={Object.values(link)}>
-                            <a
+                            <Link
                               className="transition hover:text-textMuted"
-                              href={Object.values(link)}
+                              to={Object.values(link)[0]}
+                              onClick={() => {
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
                             >
                               {Object.keys(link)}
-                            </a>
+                            </Link>
                           </li>
                         );
                       })}
@@ -121,15 +125,18 @@ const Footer = () => {
                 </li>
 
                 <li>
-                  <a
+                  <Link
                     className="group flex items-center justify-center gap-1.5 sm:justify-start"
-                    href="/form"
+                    to="/form"
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
                   >
                     <FileUser className="size-6 group-hover:text-textMuted" />
                     <span className="transition group-hover:text-textMuted">
                       Contact Form
                     </span>
-                  </a>
+                  </Link>
                 </li>
 
                 <li className="group flex items-start justify-center gap-1.5 sm:justify-start">
@@ -148,20 +155,26 @@ const Footer = () => {
           <div className="text-center sm:flex sm:justify-between sm:text-left">
             <p className="space-x-2 text-sm text-gray-400">
               <span className="block sm:inline">All rights reserved.</span>
-              <a
+              <Link
                 className="inline-block text-hover underline transition hover:text-hover hover:opacity-75"
-                href="/"
+                to="/"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
                 Terms & Conditions
-              </a>
+              </Link>
 
               <span>&middot;</span>
-              <a
+              <Link
                 className="inline-block text-hover underline transition hover:text-hover hover:opacity-75"
-                href="/"
+                to="/"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
                 Privacy Policy
-              </a>
+              </Link>
             </p>
 
             <p className="mt-4 text-sm text-gray-500 sm:order-first sm:mt-0">
