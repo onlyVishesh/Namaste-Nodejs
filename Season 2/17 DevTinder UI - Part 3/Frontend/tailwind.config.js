@@ -7,8 +7,9 @@ export default {
         /* Primary Colors */
         primary: "var(--color-primary)", // Primary Blue
         secondary: "var(--color-secondary)", // Secondary Green
-        accent1: "var(--color-accent-1)", // Accent Amber
-        accent2: "var(--color-accent-2)", // Accent Red
+        accent1: "var(--color-accent-1)", // Accent Green
+        accent2: "var(--color-accent-2)", // Accent amber
+        accent3: "var(--color-accent-3)", // Accent red
 
         /* Background Colors */
         bg: "var(--color-bg)", // Light Gray Background

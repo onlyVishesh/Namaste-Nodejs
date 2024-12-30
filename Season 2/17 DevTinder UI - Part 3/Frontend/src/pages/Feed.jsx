@@ -23,7 +23,7 @@ const Feed = () => {
   useEffect(() => {
     getFeed();
   }, []);
-  
+
   return (
     <div className="h-screen">
       <div className="absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2">
