@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Card from "../components/card";
+import Card from "../components/Card";
 import { addFeed } from "../utils/feedSlice";
 
 const Feed = () => {
@@ -23,11 +23,12 @@ const Feed = () => {
   useEffect(() => {
     getFeed();
   }, []);
+  
   return (
     <div className="h-screen">
       <div className="absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2">
         <div className="border-3 border-border">
-          <Card />
+          {feed && <Card user={feed[0]} />}
         </div>
       </div>
     </div>
