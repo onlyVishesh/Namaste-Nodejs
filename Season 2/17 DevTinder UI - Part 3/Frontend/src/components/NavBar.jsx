@@ -138,7 +138,7 @@ const NavBar = () => {
           profileMenuRef2.current.contains(event.target))
       ) {
         setShowProfileMenu2(true);
-      }else {
+      } else {
         setShowProfileMenu2(false);
       }
     };
@@ -169,7 +169,7 @@ const NavBar = () => {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            <img src={logo} className="w-20" />
+            <img draggable="false" src={logo} className="w-20" />
           </NavLink>
 
           {user && (
@@ -191,6 +191,7 @@ const NavBar = () => {
               onClick={() => setShowProfileMenu1(!showProfileMenu1)} // Toggle on click
             >
               <img
+                draggable="false"
                 src={
                   user?.avatar ??
                   "https://cdn-icons-png.flaticon.com/512/149/149071.png"
@@ -268,6 +269,7 @@ const NavBar = () => {
                   onClick={() => setShowProfileMenu2(!showProfileMenu2)} // Toggle on click
                 >
                   <img
+                    draggable="false"
                     src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
                     alt=""
                     className="z-[100] size-8 rounded-full border-2 border-border shadow-lg shadow-shadow lg:size-10"

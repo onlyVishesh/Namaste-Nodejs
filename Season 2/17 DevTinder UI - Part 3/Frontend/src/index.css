@@ -31,7 +31,7 @@
     --color-error: #f44336; /* Red for errors */
     --color-info: #2196f3; /* Blue for info messages */
     /* Shadow & Neutral Colors */
-    --color-shadow: rgba(255, 255, 255, 0.1); /* Darker Shadow for elements */
+    --color-shadow: rgba(255, 255, 255, 0.2); /* Darker Shadow for elements */
     --color-light-gray: #4b5563; /* Darker light gray for background or muted text */
   }
   * {
@@ -49,6 +49,6 @@
   /* Border & Divider Colors */
   --color-border: #4b5563; /* Light Gray Border */
   /* Shadow & Neutral Colors */
-  --color-shadow: rgba(0, 0, 0, 0.1); /* Light Shadow for elements */
+  --color-shadow: rgba(0, 0, 0, 0.2); /* Light Shadow for elements */
   --color-light-gray: #e5e7eb; /* Lighter Gray (use for backgrounds or light text) */
 }

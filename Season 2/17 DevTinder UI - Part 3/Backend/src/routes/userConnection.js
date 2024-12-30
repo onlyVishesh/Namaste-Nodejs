@@ -50,13 +50,13 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 
 //* To create user feed
-userRouter.get("/user/feed", userAuth, async (req, res) => {
+userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
 
     const connectionRequests = await ConnectionRequest.find({
@@ -104,9 +104,11 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.status(200).json({ message: userProfiles });
+    res
+      .status(200)
+      .json({ success: true, message: "feed send", users: userProfiles });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
