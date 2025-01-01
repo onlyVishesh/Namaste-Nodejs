@@ -26,10 +26,10 @@ const Card = ({ user }) => {
 
   return (
     <div
-      className="lg-w-[380px] xl:hover-h-[650px] group relative h-96 w-[380px] select-none rounded-2xl bg-bgSecondary shadow-lg shadow-shadow transition-all duration-700 hover:h-[450px] 2xs:hover:h-[550px] sm:h-[400px] sm:w-[400px] md:h-[500px] md:w-[500px] md:hover:h-[650px] lg:h-96 lg:hover:h-[450px] xl:h-[500px] xl:w-[500px] xl:hover:h-[650px]"
+      className="group relative mt-20 h-96 w-[380px] select-none rounded-2xl bg-bgSecondary shadow-lg shadow-shadow transition-all duration-700 hover:h-[475px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[400px] sm:w-[400px] md:h-[500px] md:w-[500px] md:hover:h-[575px] lg:mt-24 lg:h-96 lg:w-[380px] lg:hover:h-[475px] xl:mt-0 xl:h-[475px] xl:w-[500px] xl:hover:h-[550px]"
       ref={cardRef}
     >
-      <div className="bg-primary/20 absolute -top-12 left-1/2 size-32 -translate-x-1/2 overflow-hidden rounded-2xl bg-opacity-20 bg-clip-padding shadow-sm shadow-cardBg backdrop-blur-lg backdrop-filter transition-all duration-700 group-hover:size-40 2xs:size-36 2xs:group-hover:size-52 md:size-48 md:group-hover:size-64 lg:size-32 lg:group-hover:size-40 xl:size-48 xl:group-hover:size-64">
+      <div className="bg-primary/20 absolute -top-12 left-1/2 size-48 -translate-x-1/2 overflow-hidden rounded-2xl bg-opacity-20 bg-clip-padding shadow-sm shadow-cardBg backdrop-blur-lg backdrop-filter transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
         <img
           draggable="false"
           src={
@@ -47,13 +47,38 @@ const Card = ({ user }) => {
             @{user.username}
           </p>
         </h2>
-        <p className="sm:text-lg md:text-xl">skills</p>
+        <p className="md:text-md my-2 sm:text-sm">
+          <ul className="flex flex-wrap gap-3 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-3 [&_li]:py-2 [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer">
+            {user?.skills?.slice(0, 5)?.length > 0 ? (
+              user.skills.slice(0, 5).map((skill) =>
+                typeof skill === "string" ? (
+                  <li
+                    className="hover:scale-105 hover:cursor-pointer"
+                    key={skill}
+                  >
+                    {capitalize(skill)}
+                  </li>
+                ) : (
+                  <li
+                    className="hover:scale-105 hover:cursor-pointer"
+                    key={skill}
+                  >
+                    Enter Skill and Save for preview
+                  </li>
+                ),
+              )
+            ) : (
+              <li>No Skills Added By the User.</li>
+            )}
+          </ul>
+        </p>
+
         <div
           className={`overflow-hidden transition-[max-height] duration-700 ${
             expanded ? "max-h-[300px]" : "max-h-[120px]"
           }`}
         >
-          <div className="flex justify-evenly">
+          <div className="flex justify-evenly gap-14">
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
                 {abbreviateNumber(100000)}
@@ -67,7 +92,7 @@ const Card = ({ user }) => {
               <p className="text-lg text-textMuted">Following</p>
             </div>
           </div>
-          <p
+          {/* <p
             className={`text-md duration-800 line-clamp-5 transition-all md:line-clamp-[7] md:text-lg lg:line-clamp-4 xl:line-clamp-[7]${
               expanded ? "" : ""
             }`}
@@ -75,7 +100,7 @@ const Card = ({ user }) => {
             {user.about
               ? user.about
               : "User Does not add any details. Click view profile for more detail about user."}
-          </p>
+          </p> */}
         </div>
       </div>
       <div className="absolute bottom-2 left-1/2 mx-auto flex w-[90%] -translate-x-1/2 items-center justify-center gap-10 xl:bottom-3">
