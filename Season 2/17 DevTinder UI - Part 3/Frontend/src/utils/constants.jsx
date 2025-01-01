@@ -1,6 +1,9 @@
 export const capitalize = (string) => {
   if (!string) return "";
-  return string[0].toUpperCase() + string.slice(1);
+  return string
+    .split(" ") 
+    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase()) 
+    .join(" ");
 };
 
 const SI_SYMBOL = ["", "k", "M", "T", "P", "E"];

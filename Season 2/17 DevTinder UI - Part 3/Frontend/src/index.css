@@ -10,8 +10,8 @@
     /* Primary Colors */
     --color-primary: #3b82f6; /* Primary Blue */
     --color-secondary: #10b981; /* Secondary Green */
-    --color-accent-1: hsl(123, 92%, 50%); /* Accent green */
-    --color-accent-2: #f59f0a; /* Accent Amber */
+    --color-accent-1: hsl(123, 60%, 50%); /* Accent green */
+    --color-accent-2: hsl(38, 60%, 50%); /* Accent Amber */
     --color-accent-3: #ef4444; /* Accent Red */
     /* Background Colors */
     --color-bg: #1f2937; /* Dark Gray Background */

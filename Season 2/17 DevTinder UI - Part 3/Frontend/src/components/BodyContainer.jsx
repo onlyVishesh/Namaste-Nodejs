@@ -27,7 +27,6 @@ const BodyContainer = () => {
         return navigate("/login");
       } else {
         dispatch(addUser(user.data));
-        return navigate("/feed");
       }
     } catch (err) {
       if (err.response) {

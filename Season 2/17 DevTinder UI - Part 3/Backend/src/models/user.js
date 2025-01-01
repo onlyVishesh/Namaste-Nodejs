@@ -77,6 +77,18 @@ const userSchema = new Schema(
       },
       default: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
     },
+    banner: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          return validator.isURL(value);
+        },
+        message: "Give string is not an URL",
+      },
+      default:
+        "https://cdn.fstoppers.com/styles/full/s3/media/2020/12/21/nando-vertical-horizontal-11.jpg",
+    },
     about: {
       type: String,
       maxLength: [500, "Too many words"],
