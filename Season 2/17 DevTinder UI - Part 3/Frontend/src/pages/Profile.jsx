@@ -219,7 +219,7 @@ const Profile = () => {
             </button>
           </div>
         </Model>
-        <div className="mx-auto w-full py-5 sm:w-5/6 [&_input]:border-2 [&_input]:border-border [&_input]:bg-bgSecondary [&_select]:bg-bgSecondary [&_textarea]:bg-bgSecondary">
+        <div className="mx-auto w-full py-5 sm:w-5/6 [&_input]:border-2 [&_input]:border-border [&_input]:bg-bgSecondary [&_select]:border-2 [&_select]:border-border [&_select]:bg-bgSecondary [&_textarea]:border-2 [&_textarea]:border-border [&_textarea]:bg-bgSecondary">
           <div className="relative rounded-xl bg-bgSecondary">
             {isEditProfile && (
               <MdEdit
@@ -237,17 +237,17 @@ const Profile = () => {
 
             <div className="relative mx-5 flex flex-col gap-10 xs:mx-10 lg:flex-row">
               <div className="absolute left-1/2 z-10 flex size-48 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-bgSecondary shadow-md shadow-shadow xs:size-52 sm:size-60 lg:left-0 lg:translate-x-0">
-                <div className="relative">
+                <div className="relative h-full w-full">
                   {isEditProfile && (
                     <MdEdit
-                      className="absolute right-3 top-3 size-9 rounded-full border-2 border-border bg-bgSecondary p-1 transition duration-200 hover:scale-105 hover:cursor-pointer md:right-5 md:top-5 md:size-8"
+                      className="absolute right-3 top-3 z-10 size-9 rounded-full border-2 border-border bg-bgSecondary p-1 transition duration-200 hover:scale-105 hover:cursor-pointer md:right-5 md:top-5 md:size-8"
                       onClick={() => {
                         setIsAvatarModelShow(true);
                       }}
                     />
                   )}
                   <img
-                    className="h-full w-full rounded-full object-cover p-2"
+                    className="absolute inset-0 h-full w-full rounded-full object-cover p-2"
                     src={profileData?.avatar}
                     alt="user profile"
                   />
@@ -299,9 +299,9 @@ const Profile = () => {
                           />
                         </div>
                       ) : profileData?.lastName?.length > 14 ? (
-                        profileData?.firstName +
+                        capitalize(profileData?.firstName) +
                         " " +
-                        capitalize(profileData?.lastName.slice(0, 14))
+                        capitalize(profileData?.lastName.slice(0, 14) + "...")
                       ) : (
                         capitalize(profileData?.firstName) +
                         " " +
@@ -458,37 +458,31 @@ const Profile = () => {
                         onChange={(e) => {
                           setProfileData({
                             ...profileData,
-                            skills: [
-                              e.target.value.split(",").map((skill) => skill),
-                            ],
+                            skills: e.target.value
+                              .split(",")
+                              .map((skill) => skill.trim()),
                           });
                         }}
                         onBlur={(e) => {
-                          if (e.target.value.split(",").length <= 15) {
+                          const skills = e.target.value
+                            .split(",")
+                            .map((skill) => skill.trim())
+                            .filter((skill) => skill !== ""); // Remove empty skills
+
+                          if (skills.length <= 15) {
                             setProfileData({
                               ...profileData,
-                              skills: [
-                                ...new Set(
-                                  e.target.value
-                                    .split(",")
-                                    .map((skill) => skill.trim()),
-                                ),
-                              ],
+                              skills: [...new Set(skills)], // Ensure unique skills
                             });
                           } else {
                             setProfileData({
                               ...profileData,
-                              skills: [
-                                ...new Set(
-                                  e.target.value
-                                    .split(",")
-                                    .map((skill) => skill.trim()),
-                                ),
-                              ].slice(0, 15),
+                              skills: [...new Set(skills)].slice(0, 15), // Limit to 15 unique skills
                             });
                           }
                         }}
                       />
+
                       <p
                         className={`absolute bottom-6 right-2 text-sm ${
                           profileData?.skills.length > 3
@@ -496,8 +490,11 @@ const Profile = () => {
                             : "text-gray-500"
                         }`}
                       >
-                        {15 - profileData?.skills.length}{" "}
-                        {profileData?.skills.length < 2 ? "Skill" : "Skills"}{" "}
+                        {profileData?.skills.length >= 15
+                          ? "0 Skill"
+                          : profileData?.skills.length >= 14
+                            ? "1 Skill"
+                            : 15 - profileData?.skills.length + " Skills"}{" "}
                         left
                       </p>
 
@@ -513,14 +510,20 @@ const Profile = () => {
                     </>
                   ) : (
                     <ul className="flex flex-wrap gap-3 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-5 [&_li]:py-2 [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer">
-                      {profileData?.skills?.map((skill) => (
-                        <li
-                          className="hover:scale-105 hover:cursor-pointer"
-                          key={skill}
-                        >
-                          {capitalize(skill)}
+                      {profileData?.skills?.length > 0 ? (
+                        profileData?.skills?.map((skill) => (
+                          <li
+                            className="hover:scale-105 hover:cursor-pointer"
+                            key={skill}
+                          >
+                            {capitalize(skill)}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="hover:scale-105 hover:cursor-pointer">
+                          No Skills
                         </li>
-                      )) || "No SkillS Added By the user."}
+                      )}
                     </ul>
                   )}
                 </div>
@@ -612,7 +615,7 @@ const Profile = () => {
           </div>
         </div>
         <div className="m-10 flex flex-col items-center justify-center">
-          <h2 className="mb-5 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
+          <h2 className="-mb-10 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
             This is how{" "}
             <span className="relative">
               Your Profile{" "}

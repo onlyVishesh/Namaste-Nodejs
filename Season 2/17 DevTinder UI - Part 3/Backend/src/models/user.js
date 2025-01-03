@@ -32,14 +32,14 @@ const userSchema = new Schema(
       trim: true,
       lowercase: true,
       maxLength: [25, "First name too large"],
-      match: /^[a-zA-Z]+$/,
+      match: /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
     },
     lastName: {
       type: String,
       trim: true,
       lowercase: true,
       maxLength: [25, "Last name too large"],
-      match: /^[a-zA-Z]+$/,
+      match: /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
     },
     email: {
       type: String,
