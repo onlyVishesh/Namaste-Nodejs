@@ -62,7 +62,9 @@ const validateProfileData = (req) => {
   const isEditAllowed = Object.keys(req.body).every((field) =>
     allowEditFields.includes(field)
   );
-
+  if (isEditAllowed.length > 0) {
+    throw new Error(`Invalid fields: ${isEditAllowed.join(", ")}`);
+  }
   const {
     username,
     firstName,
@@ -70,6 +72,7 @@ const validateProfileData = (req) => {
     avatar,
     about,
     skills,
+    banner,
     dateOfBirth,
     gender,
     status,
@@ -86,6 +89,9 @@ const validateProfileData = (req) => {
   }
   if (avatar && !validator.isURL(avatar)) {
     throw new Error("Invalid Profile URL");
+  }
+  if (banner && !validator.isURL(banner)) {
+    throw new Error("Invalid Banner URL");
   }
   if (about && about.length > 500) {
     throw new Error("About contain too many words");

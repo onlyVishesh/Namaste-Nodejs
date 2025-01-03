@@ -26,8 +26,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     //* finding all the connections
     const connections = await ConnectionRequest.find({
       $or: [
-        { fromUserId: user._id, status: "accepted" },
-        { toUserId: user._id, status: "accepted" },
+        { fromUserId: loggedInUser._id, status: "accepted" },
+        { toUserId: loggedInUser._id, status: "accepted" },
       ],
     })
       .populate("fromUserId toUserId", [
@@ -42,10 +42,22 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       ])
       .skip((page - 1) * limit)
       .limit(limit);
+    const following = await ConnectionRequest.countDocuments({
+      fromUserId: loggedInUser._id,
+    });
+    const followers = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+    });
 
-    res.status(200).json({ message: connections });
+    res.status(200).json({
+      success: true,
+      message: "connection fetched",
+      connections,
+      following,
+      followers,
+    });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -104,9 +116,11 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res
-      .status(200)
-      .json({ success: true, message: "feed send", users: userProfiles });
+    res.status(200).json({
+      success: true,
+      message: "feed send",
+      users: userProfiles,
+    });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

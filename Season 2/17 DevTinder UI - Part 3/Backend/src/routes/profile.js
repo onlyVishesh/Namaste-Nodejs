@@ -20,14 +20,12 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 //* To edit fields in profile
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
-    //* checking if fields are updatable
-    if (!validateProfileData(req)) {
-      throw new Error("Update not allow");
-    }
+    // Validate profile data
+    validateProfileData(req);
 
     const loggedInUser = req.user;
 
-    //* updating values of field given in request
+    // Update only allowed fields
     Object.keys(req.body).forEach(
       (field) => (loggedInUser[field] = req.body[field])
     );
@@ -35,11 +33,12 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     await loggedInUser.save();
 
     res.status(200).json({
-      message: `${loggedInUser.firstName}, Your profile has been updated`,
+      success: true,
+      message: `${loggedInUser.firstName}, your profile has been updated`,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error("Validation Error:", err.message);
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 
@@ -404,26 +403,31 @@ profileRouter.delete(
 );
 
 //* To view all the users (admin)
-profileRouter.get("/admin/feed",userAuth, userRole("admin"), async (req, res) => {
-  try {
-    const loggedInUser = req.user;
-    if (!loggedInUser) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized. Please login again." });
-    }
-    
-    const users = await User.find();
+profileRouter.get(
+  "/admin/feed",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ error: "Unauthorized. Please login again." });
+      }
 
-    if (users.length === 0) {
-      return res.status(404).json({ error: "0 user exist" });
+      const users = await User.find();
+
+      if (users.length === 0) {
+        return res.status(404).json({ error: "0 user exist" });
+      }
+      res.status(200).json({ message: users });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
     }
-    res.status(200).json({ message: users });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
   }
-});
+);
 
 //* Moderator routes
 
@@ -675,7 +679,7 @@ profileRouter.get(
   }
 );
 
-//* To change status active and deactivated 
+//* To change status active and deactivated
 profileRouter.patch(
   "/moderator/changeStatus/:status/:userId",
   userAuth,

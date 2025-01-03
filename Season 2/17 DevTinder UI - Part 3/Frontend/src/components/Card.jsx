@@ -1,13 +1,43 @@
 /* eslint-disable react/prop-types */
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { abbreviateNumber, capitalize } from "../utils/constants";
 
 // eslint-disable-next-line react/prop-types
 const Card = ({ user }) => {
-  console.log(user);
   const [expanded, setExpanded] = useState(false);
   const cardRef = useRef(null);
+  const [followers, setFollowers] = useState(null);
+  const [following, setFollowing] = useState(null);
+
+  const getConnections = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL + "/user/connections",
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      setFollowers(res.data.followers);
+      setFollowing(res.data.following);
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    getConnections();
+  }, []);
 
   useEffect(() => {
     const handleExpand = (event) => {
@@ -47,7 +77,7 @@ const Card = ({ user }) => {
             @{user.username}
           </p>
         </h2>
-        <p className="md:text-md my-2 sm:text-sm">
+        <div className="md:text-md my-2 sm:text-sm">
           <ul className="flex flex-wrap gap-3 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-3 [&_li]:py-2 [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer">
             {user?.skills?.slice(0, 5)?.length > 0 ? (
               user.skills.slice(0, 5).map((skill) =>
@@ -68,10 +98,10 @@ const Card = ({ user }) => {
                 ),
               )
             ) : (
-              <li>No Skills Added By the User.</li>
+              <li>No Skills</li>
             )}
           </ul>
-        </p>
+        </div>
 
         <div
           className={`overflow-hidden transition-[max-height] duration-700 ${
@@ -81,13 +111,17 @@ const Card = ({ user }) => {
           <div className="flex justify-evenly gap-14">
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
-                {abbreviateNumber(100000)}
+                {following !== null && following !== undefined
+                  ? abbreviateNumber(following)
+                  : "NA"}
               </p>
               <p className="text-lg text-textMuted">Follow</p>
             </div>
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
-                {abbreviateNumber(100000)}
+                {followers !== null && followers !== undefined
+                  ? abbreviateNumber(followers)
+                  : "NA"}
               </p>
               <p className="text-lg text-textMuted">Following</p>
             </div>

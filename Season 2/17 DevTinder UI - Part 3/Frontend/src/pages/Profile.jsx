@@ -16,6 +16,8 @@ const Profile = () => {
   const [isAvatarModelShow, setIsAvatarModelShow] = useState(false);
   const user = useSelector((store) => store.user);
   const [profileData, setProfileData] = useState(null);
+  const [followers, setFollowers] = useState(null);
+  const [following, setFollowing] = useState(null);
   useEffect(() => {
     setProfileData(user?.message);
   }, [user]);
@@ -44,10 +46,65 @@ const Profile = () => {
     } else
       setProfileData((prevData) => ({
         ...prevData,
-        age: "NA",
+        age: 0,
       }));
   }, [profileData?.dateOfBirth]);
 
+  const updateProfile = async () => {
+    try {
+      const res = await axios.patch(
+        import.meta.env.VITE_BackendURL + "/profile/edit",
+        profileData,
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      } else {
+        toast.success(res.data.message || "Profile Data Fetched");
+        // dispatch(addUser(res.data));
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
+  const getConnections = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL + "/user/connections",
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        setProfileData(user?.message);
+        toast.error(res.data.message || "An error occurred");
+      }
+      setFollowers(res.data.followers);
+      setFollowing(res.data.following);
+    } catch (err) {
+      if (err.response) {
+        setProfileData(user?.message);
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        setProfileData(user?.message);
+        toast.error("No response from the server. Please try again.");
+      } else {
+        setProfileData(user?.message);
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    getConnections();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -83,6 +140,7 @@ const Profile = () => {
 
   const handleSave = () => {
     setIsEditProfile(false);
+    updateProfile();
   };
 
   const handleCancel = () => {
@@ -262,26 +320,37 @@ const Profile = () => {
                               <input
                                 type="date"
                                 className="w-32 rounded-md border px-2 text-sm"
-                                defaultValue={profileData?.date || new Date()}
+                                defaultValue={
+                                  profileData?.dateOfBirth
+                                    ? new Date(profileData?.dateOfBirth)
+                                        ?.toISOString()
+                                        ?.split("T")[0]
+                                    : new Date().toISOString().split("T")[0]
+                                }
                                 onChange={(e) => {
                                   setProfileData({
                                     ...profileData,
                                     dateOfBirth: e.target.value,
                                   });
                                 }}
+                                max={new Date().toISOString().split("T")[0]}
                               />
                             </span>
                             <span className="pl-2">
                               <select
                                 className="rounded-md border px-2 text-[18px]"
-                                value={profileData?.gender}
-                                onChange={(e) =>
+                                value={profileData?.gender || ""}
+                                onChange={(e) => {
+                                  if (e.target.value === "") return;
                                   setProfileData({
                                     ...profileData,
                                     gender: e.target.value,
-                                  })
-                                }
+                                  });
+                                }}
                               >
+                                <option value="" disabled>
+                                  Select Gender
+                                </option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                               </select>
@@ -289,15 +358,33 @@ const Profile = () => {
                           </>
                         ) : (
                           <>
-                            {profileData?.age && profileData?.gender && (
+                            {profileData?.age && profileData?.gender ? (
                               <>
-                                <span className="pr-2">{profileData.age}</span>
+                                {profileData?.age > 0 && (
+                                  <span className="pr-2">
+                                    {profileData?.age}
+                                  </span>
+                                )}
                                 <span className="font-bold text-textMuted">
-                                  |
+                                  {" "}
+                                  |{" "}
                                 </span>
-                                <span className="pl-2">
-                                  {profileData.gender}
-                                </span>
+                                {profileData?.gender && (
+                                  <span className="pl-2">
+                                    {capitalize(profileData?.gender)}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {profileData?.age > 0 && (
+                                  <span className="">{profileData?.age}</span>
+                                )}
+                                {profileData?.gender && (
+                                  <span className="">
+                                    {capitalize(profileData?.gender)}
+                                  </span>
+                                )}
                               </>
                             )}
                           </>
@@ -344,14 +431,20 @@ const Profile = () => {
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {abbreviateNumber(100000)}
+                      {followers !== null && followers !== undefined
+                        ? abbreviateNumber(followers)
+                        : "NA"}
                     </p>
-                    <p className="text-bo text-lg">Follower</p>
+
+                    <p className="text-lg text-textMuted">Follower</p>
                   </div>
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {abbreviateNumber(100000)}
+                      {following !== null && following !== undefined
+                        ? abbreviateNumber(following)
+                        : "NA"}
                     </p>
+
                     <p className="text-lg text-textMuted">Following</p>
                   </div>
                 </div>
@@ -518,8 +611,33 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="m-10 flex flex-col  items-center justify-center">
-          <h2 className="mb-20 font-extrabold text-3xl">This is how your profile will look like to other</h2>
+        <div className="m-10 flex flex-col items-center justify-center">
+          <h2 className="mb-5 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
+            This is how{" "}
+            <span className="relative">
+              Your Profile{" "}
+              <svg
+                viewBox="0 0 687 155"
+                className="absolute -bottom-3 right-4 w-40 text-primary 2xs:right-16 xs:right-4"
+              >
+                <g
+                  stroke="currentColor"
+                  strokeWidth="7"
+                  fill="none"
+                  fillRule="evenodd"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path
+                    d="M20 98c27-13.3333333 54-20 81-20 40.5 0 40.5 20 81 20s40.626917-20 81-20 40.123083 20 80.5 20 40.5-20 81-20 40.5 20 81 20 40.626917-20 81-20c26.915389 0 53.748722 6.6666667 80.5 20"
+                    opacity=".3"
+                  ></path>
+                  <path d="M20 118c27-13.3333333 54-20 81-20 40.5 0 40.5 20 81 20s40.626917-20 81-20 40.123083 20 80.5 20 40.5-20 81-20 40.5 20 81 20 40.626917-20 81-20c26.915389 0 53.748722 6.6666667 80.5 20"></path>
+                </g>
+              </svg>
+            </span>{" "}
+            will look like to other
+          </h2>
           <Card user={profileData} />
         </div>
       </>
