@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
+import UserProfile from "./pages/UserProfile";
 import appStore from "./utils/appStore";
 
 const App = () => {
@@ -33,6 +34,10 @@ const App = () => {
               <Route path="/feed" element={<Feed />}></Route>
               <Route path="/network" element={<Networks />}></Route>
               <Route path="/profile" element={<Profile />}></Route>
+              <Route
+                path="/user/profile/:userId"
+                element={<UserProfile />}
+              ></Route>
               <Route path="*" element={<Error />}></Route>
             </Route>
           </Routes>

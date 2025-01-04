@@ -64,7 +64,7 @@ const Login = () => {
         toast.error(res.data.message || "An error occurred");
       } else {
         toast.success(res.data.message || "Logged In successful!");
-        dispatch(addUser(res.data));
+        dispatch(addUser(res.data.user));
         return navigate("/feed");
       }
     } catch (err) {

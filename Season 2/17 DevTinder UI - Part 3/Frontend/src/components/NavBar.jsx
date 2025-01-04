@@ -43,6 +43,7 @@ const NavBar = () => {
   const profileMenuRef2 = useRef(null);
 
   const user = useSelector((store) => store.user);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -68,7 +69,7 @@ const NavBar = () => {
       } else {
         toast.success(res?.data?.message || "Logout successful!");
         dispatch(removeUser());
-        return navigate("/home");
+        return navigate("/");
       }
     } catch (err) {
       if (err.response) {
@@ -164,7 +165,7 @@ const NavBar = () => {
       <div className="container mx-auto flex h-full items-center justify-between px-4">
         <div className="flex items-center gap-2 md:gap-4">
           <NavLink
-            to={user ? "/feed" : "/"}
+            to={"/"}
             onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
@@ -193,25 +194,33 @@ const NavBar = () => {
               <img
                 draggable="false"
                 src={
-                  user?.avatar ??
-                  "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                  user?.avatar
+                    ? user.avatar
+                    : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 }
                 alt=""
-                className="z-[100] size-8 rounded-full border-2 border-border shadow-lg shadow-shadow lg:size-10"
+                className="inset-0 z-[100] size-8 rounded-full border-2 border-border object-cover shadow-lg shadow-shadow lg:size-10"
               />
               {showProfileMenu1 && (
                 <ul
                   className="absolute -right-16 flex w-40 flex-col gap-2 rounded-b-md bg-bgSecondary px-4 py-2 pb-4 pt-6 text-center text-lg font-bold transition duration-100"
                   ref={profileMenuRef1}
                 >
-                  <li className="hover:cursor-pointer hover:text-hover">
-                    <NavLink to="/profile">Profile</NavLink>
-                  </li>
-                  <li className="hover:cursor-pointer hover:text-hover">
-                    <NavLink to="/setting">Setting</NavLink>
-                  </li>
-                  <li className="hover:cursor-pointer hover:text-hover">
+                  <NavLink
+                    to="/profile"
+                    className="hover:cursor-pointer hover:text-hover"
+                  >
+                    Profile
+                  </NavLink>
+                  <NavLink
+                    to="/setting"
+                    className="hover:cursor-pointer hover:text-hover"
+                  >
+                    Setting
+                  </NavLink>
+                  <li>
                     <button
+                      className="hover:cursor-pointer hover:text-hover"
                       onClick={() => {
                         handleLogout();
                       }}
@@ -242,7 +251,7 @@ const NavBar = () => {
                   return (
                     <li key={link}>
                       <NavLink
-                        to={"/" + link}
+                        to={link === "home" ? "/feed" : "/" + link}
                         className={({ isActive }) =>
                           `relative flex flex-col items-center justify-center px-4 py-2 font-semibold hover:text-hover ${
                             isActive
@@ -270,23 +279,34 @@ const NavBar = () => {
                 >
                   <img
                     draggable="false"
-                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    src={
+                      user?.avatar
+                        ? user.avatar
+                        : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    }
                     alt=""
-                    className="z-[100] size-8 rounded-full border-2 border-border shadow-lg shadow-shadow lg:size-10"
+                    className="inset-0 z-[100] size-8 rounded-full border-2 border-border object-cover shadow-lg shadow-shadow lg:size-10"
                   />
                   {showProfileMenu2 && (
                     <ul
-                      className="absolute -left-3 flex w-40 flex-col gap-2 rounded-b-md bg-bgSecondary px-4 py-2 pb-4 pt-6 text-center transition duration-100"
+                      className="absolute -left-3 flex w-40 flex-col gap-2 rounded-b-md bg-bgSecondary px-4 py-2 pb-4 pt-6 text-center font-bold transition duration-100"
                       ref={profileMenuRef2}
                     >
-                      <li className="hover:cursor-pointer hover:text-hover">
-                        <NavLink to="/profile">Profile</NavLink>
-                      </li>
-                      <li className="hover:cursor-pointer hover:text-hover">
-                        <NavLink to="/setting">Setting</NavLink>
-                      </li>
-                      <li className="hover:cursor-pointer hover:text-hover">
+                      <NavLink
+                        to="/profile"
+                        className="hover:cursor-pointer hover:text-hover"
+                      >
+                        Profile
+                      </NavLink>
+                      <NavLink
+                        to="/setting"
+                        className="hover:cursor-pointer hover:text-hover"
+                      >
+                        Setting
+                      </NavLink>
+                      <li>
                         <button
+                          className="hover:cursor-pointer hover:text-hover"
                           onClick={() => {
                             handleLogout();
                           }}

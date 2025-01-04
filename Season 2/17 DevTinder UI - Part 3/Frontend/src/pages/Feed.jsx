@@ -25,7 +25,7 @@ const Feed = () => {
   }, []);
 
   return (
-    <div className="h-screen">
+    <div className="min-h-[calc(100vh-5rem)]">
       <div className="absolute left-1/2 top-1/2 block -translate-x-1/2 -translate-y-1/2">
         <div className="border-3 border-border">
           {feed && <Card user={feed[0]} />}

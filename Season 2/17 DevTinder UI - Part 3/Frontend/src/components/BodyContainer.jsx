@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { useEffect } from "react";
@@ -12,32 +12,37 @@ import NavBar from "./NavBar";
 const BodyContainer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const user = useSelector((store) => store.user);
 
   const fetchUser = async () => {
     if (user) return;
     try {
-      const user = await axios.get(
+      const res = await axios.get(
         import.meta.env.VITE_BackendURL + "/profile/view",
         { withCredentials: true },
       );
-      if (user.data.success === false) {
-        toast.error(user?.data?.message || "An error occurred");
+      if (res.data.success === false) {
+        toast.error(res?.data?.message || "An error occurred");
         return navigate("/login");
       } else {
-        dispatch(addUser(user.data));
+        dispatch(addUser(res.data.user));
       }
     } catch (err) {
-      if (err.response) {
-        toast.error(err?.response?.data?.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
+      if (location.pathname === "/") {
+        toast.success("Welcome To DevRoot");
       } else {
-        toast.error("An unexpected error occurred.");
+        if (err.response) {
+          toast.error(err?.response?.data?.error || "Something went wrong!");
+        } else if (err.request) {
+          toast.error("No response from the server. Please try again.");
+        } else {
+          toast.error("An unexpected error occurred.");
+        }
+        console.error(err.message);
+        return navigate("/");
       }
-      console.error(err.message);
-      return navigate("/home");
     }
   };
 
@@ -48,10 +53,10 @@ const BodyContainer = () => {
   return (
     <>
       <NavBar />
-      <div className="container mx-auto mt-20 min-h-[calc(100vh-25rem)]">
+      <div className="container mx-auto mt-20 max-h-fit min-h-[calc(100vh-5rem)]">
         <Outlet />
       </div>
-      <Footer />
+      {location.pathname === "/" && <Footer />}
     </>
   );
 };

@@ -116,7 +116,7 @@ const Card = ({ user }) => {
             }}
             ref={scrollRef}
           >
-            <ul className="flex justify-start gap-3 px-2 py-2 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-3 [&_li]:py-2 [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer [&_li]:font-semibold">
+            <ul className="flex justify-start gap-3 px-2 py-2 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-3 [&_li]:py-2 [&_li]:font-semibold [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer">
               {user?.skills?.length > 0 ? (
                 user.skills.map((skill) =>
                   typeof skill === "string" ? (
@@ -180,7 +180,7 @@ const Card = ({ user }) => {
           </button>
         }
         <Link
-          to={"/profile/"+user.username}
+          to={"/user/profile/" + user.username}
           className="rounded-md bg-primary px-4 py-2 text-text hover:bg-hover"
         >
           View Profile

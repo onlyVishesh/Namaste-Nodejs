@@ -11,7 +11,9 @@ const { userRole } = require("../middlewares/role");
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    res.status(200).json({ message: loggedInUser });
+    res
+      .status(200)
+      .json({ message: "Profile Data Fetched", user: loggedInUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -150,20 +152,26 @@ profileRouter.get("/profile/:userId", async (req, res) => {
     const { userId } = req.params;
 
     if (!userId) {
-      return res.status(400).json({ error: "Username must be provided" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Username must be provided" });
     }
 
     //* finding if user present in collection
     const user = await User.findOne({ username: userId });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    res.status(200).json({ message: user });
+    res.status(200).json({
+      success: true,
+      message: `${user.firstName}'s profile data fetched`,
+      user,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

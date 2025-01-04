@@ -2,12 +2,13 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { IoMdSettings } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import Card from "../components/Card";
 import Model from "../components/Model";
 import { abbreviateNumber, capitalize } from "../utils/constants";
+import { addUser } from "../utils/userSlice";
 
 const Profile = () => {
   const [showSettingMenu, setShowSettingMenu] = useState(false);
@@ -15,11 +16,12 @@ const Profile = () => {
   const [isBannerModelShow, setIsBannerModelShow] = useState(false);
   const [isAvatarModelShow, setIsAvatarModelShow] = useState(false);
   const user = useSelector((store) => store.user);
+  const dispatch = useDispatch();
   const [profileData, setProfileData] = useState(null);
   const [followers, setFollowers] = useState(null);
   const [following, setFollowing] = useState(null);
   useEffect(() => {
-    setProfileData(user?.message);
+    setProfileData(user);
   }, [user]);
 
   const [tempBanner, setTempBanner] = useState(
@@ -61,14 +63,17 @@ const Profile = () => {
         toast.error(res.data.message || "An error occurred");
       } else {
         toast.success(res.data.message || "Profile Data Fetched");
-        // dispatch(addUser(res.data));
+        dispatch(addUser(res.data.user));
       }
     } catch (err) {
       if (err.response) {
+        setProfileData(user);
         toast.error(err.response.data.error || "Something went wrong!");
       } else if (err.request) {
+        setProfileData(user);
         toast.error("No response from the server. Please try again.");
       } else {
+        setProfileData(user);
         toast.error("An unexpected error occurred.");
       }
       console.error(err.message);
@@ -89,13 +94,10 @@ const Profile = () => {
       setFollowing(res.data.following);
     } catch (err) {
       if (err.response) {
-        setProfileData(user?.message);
         toast.error(err.response.data.error || "Something went wrong!");
       } else if (err.request) {
-        setProfileData(user?.message);
         toast.error("No response from the server. Please try again.");
       } else {
-        setProfileData(user?.message);
         toast.error("An unexpected error occurred.");
       }
       console.error(err.message);
@@ -145,10 +147,11 @@ const Profile = () => {
 
   const handleCancel = () => {
     setIsEditProfile(false);
-    setProfileData(user.message);
+    setProfileData(user);
   };
 
   return (
+    user &&
     profileData && (
       <>
         <Model isModelShow={isBannerModelShow}>
@@ -614,7 +617,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="m-10 flex flex-col items-center justify-center">
+        <div className="p-10 flex flex-col items-center justify-center">
           <h2 className="-mb-10 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
             This is how{" "}
             <span className="relative">
