@@ -12,6 +12,10 @@ import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
 import UserProfile from "./pages/UserProfile";
 import appStore from "./utils/appStore";
+import Followers from "./pages/Followers";
+import Following from "./pages/Following";
+import Connections from "./pages/Connections";
+import Invitations from "./pages/Invitations ";
 
 const App = () => {
   // eslint-disable-next-line no-undef
@@ -32,7 +36,12 @@ const App = () => {
               <Route path="/login" element={<Login />}></Route>
               <Route path="/signup" element={<Signup />}></Route>
               <Route path="/feed" element={<Feed />}></Route>
-              <Route path="/network" element={<Networks />}></Route>
+              <Route path="/networks" element={<Networks />}>
+                <Route path="/networks" element={<Invitations />} />
+                <Route path="/networks/followers" element={<Followers />} />
+                <Route path="/networks/following" element={<Following />} />
+                <Route path="/networks/connections" element={<Connections />} />
+              </Route>
               <Route path="/profile" element={<Profile />}></Route>
               <Route
                 path="/user/profile/:userId"
