@@ -18,8 +18,8 @@ const Profile = () => {
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const [profileData, setProfileData] = useState(null);
-  const [followers, setFollowers] = useState(null);
-  const [following, setFollowing] = useState(null);
+  const [requestCount, setRequestCount] = useState(null);
+
   useEffect(() => {
     setProfileData(user);
   }, [user]);
@@ -80,18 +80,16 @@ const Profile = () => {
     }
   };
 
-  const getConnections = async () => {
+  const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/connections",
+        import.meta.env.VITE_BackendURL + "/user/totalStatus",
         { withCredentials: true },
       );
       if (res.data.success === false) {
-        setProfileData(user?.message);
         toast.error(res.data.message || "An error occurred");
       }
-      setFollowers(res.data.followers);
-      setFollowing(res.data.following);
+      setRequestCount(res.data.requestCount);
     } catch (err) {
       if (err.response) {
         toast.error(err.response.data.error || "Something went wrong!");
@@ -105,7 +103,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    getConnections();
+    getRequestCount();
   }, []);
 
   useEffect(() => {
@@ -434,17 +432,19 @@ const Profile = () => {
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {followers !== null && followers !== undefined
-                        ? abbreviateNumber(followers)
+                      {requestCount?.following !== null &&
+                      requestCount?.following !== undefined
+                        ? abbreviateNumber(requestCount?.following)
                         : "NA"}
                     </p>
 
-                    <p className="text-lg text-textMuted">Follower</p>
+                    <p className="text-lg text-textMuted">Follow</p>
                   </div>
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {following !== null && following !== undefined
-                        ? abbreviateNumber(following)
+                      {requestCount?.followers !== null &&
+                      requestCount?.followers !== undefined
+                        ? abbreviateNumber(requestCount?.followers)
                         : "NA"}
                     </p>
 
@@ -617,7 +617,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        <div className="p-10 flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center p-10">
           <h2 className="-mb-10 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
             This is how{" "}
             <span className="relative">

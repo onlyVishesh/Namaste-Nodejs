@@ -17,7 +17,7 @@ const NAVBAR_LINKS = {
   home: <House />,
   networks: <Users />,
   profile: <UserRoundPen />,
-  admin: <LockKeyhole />,
+  // admin: <LockKeyhole />,
 };
 
 const HAMBURGER_SECTIONS = {

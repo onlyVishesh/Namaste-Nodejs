@@ -1,26 +1,9 @@
-import NetworkCard from "../components/NetworkCard";
+import React from 'react'
 
 const Followers = () => {
   return (
-    <div className="rounded-md bg-bgSecondary">
-      <h2 className="px-4 py-2 text-2xl font-bold">Followers  (20)</h2>
-      <hr className="border-textMuted" />
-      <div className="flex flex-col divide-y divide-textMuted">
-        <div>
-          <NetworkCard type="follower" />
-        </div>
-        <div>
-          <NetworkCard type="follower" />
-        </div>
-        <div>
-          <NetworkCard type="follower" />
-        </div>
-        <div>
-          <NetworkCard type="follower" />
-        </div>
-      </div>
-    </div>
-  );
-};
+    <div>Followers</div>
+  )
+}
 
-export default Followers;
+export default Followers

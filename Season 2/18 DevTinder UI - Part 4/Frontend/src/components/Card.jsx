@@ -10,20 +10,18 @@ import { abbreviateNumber, capitalize } from "../utils/constants";
 const Card = ({ user }) => {
   const [expanded, setExpanded] = useState(false);
   const cardRef = useRef(null);
-  const [followers, setFollowers] = useState(null);
-  const [following, setFollowing] = useState(null);
+  const [requestCount, setRequestCount] = useState(null);
 
-  const getConnections = async () => {
+  const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/connections",
+        import.meta.env.VITE_BackendURL + "/user/totalStatus",
         { withCredentials: true },
       );
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       }
-      setFollowers(res.data.followers);
-      setFollowing(res.data.following);
+      setRequestCount(res.data.requestCount);
     } catch (err) {
       if (err.response) {
         toast.error(err.response.data.error || "Something went wrong!");
@@ -35,6 +33,10 @@ const Card = ({ user }) => {
       console.error(err.message);
     }
   };
+
+  useEffect(() => {
+    getRequestCount();
+  }, []);
 
   const scrollRef = useRef(null);
 
@@ -51,10 +53,6 @@ const Card = ({ user }) => {
       scrollRef.current.scrollLeft += 150; // Adjust this value for more or less scroll distance
     }
   };
-
-  useEffect(() => {
-    getConnections();
-  }, []);
 
   useEffect(() => {
     const handleExpand = (event) => {
@@ -156,16 +154,18 @@ const Card = ({ user }) => {
           <div className="flex justify-evenly gap-14">
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
-                {following !== null && following !== undefined
-                  ? abbreviateNumber(following)
+                {requestCount?.following !== null &&
+                requestCount?.following !== undefined
+                  ? abbreviateNumber(requestCount?.following)
                   : "NA"}
               </p>
               <p className="text-lg text-textMuted">Follow</p>
             </div>
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
-                {followers !== null && followers !== undefined
-                  ? abbreviateNumber(followers)
+                {requestCount?.followers !== null &&
+                requestCount?.followers !== undefined
+                  ? abbreviateNumber(requestCount?.followers)
                   : "NA"}
               </p>
               <p className="text-lg text-textMuted">Following</p>

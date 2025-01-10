@@ -5,56 +5,63 @@ const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
 const userRouter = express.Router();
 
-//* To view all the connections
-userRouter.get("/user/connections", userAuth, async (req, res) => {
+userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
-    const page =
-      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
-    let limit =
-      parseInt(req.query.limit) > 50
-        ? 50
-        : parseInt(req.query.limit) < 1
-        ? 1
-        : parseInt(req.query.limit) || 10;
-
     //* finding all the connections
-    const connections = await ConnectionRequest.find({
+    const connections = await ConnectionRequest.countDocuments({
       $or: [
         { fromUserId: loggedInUser._id, status: "accepted" },
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
-    })
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
-      .skip((page - 1) * limit)
-      .limit(limit);
+    });
+    const interestedSend = await ConnectionRequest.countDocuments({
+      fromUserId: loggedInUser._id,
+      status: "interested",
+    });
+
+    const interestedReceived = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+      status: "interested",
+    });
+
+    const ignoredSend = await ConnectionRequest.countDocuments({
+      fromUserId: loggedInUser._id,
+      status: "ignored",
+    });
+
+    const ignoredReceived = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+      status: "ignored",
+    });
+
     const following = await ConnectionRequest.countDocuments({
       fromUserId: loggedInUser._id,
+      $or: [{ status: "accepted" }, { status: "interested" }],
     });
+
     const followers = await ConnectionRequest.countDocuments({
       toUserId: loggedInUser._id,
+      $or: [{ status: "accepted" }, { status: "interested" }],
     });
 
     res.status(200).json({
       success: true,
       message: "connection fetched",
-      connections,
-      following,
-      followers,
+      requestCount: {
+        connections,
+        interestedSend,
+        interestedReceived,
+        ignoredSend,
+        ignoredReceived,
+        following,
+        followers,
+      },
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });

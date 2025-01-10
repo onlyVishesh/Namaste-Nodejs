@@ -3,19 +3,20 @@ import { Provider } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
+import Connections from "./pages/Connections";
 import Error from "./pages/Error";
 import Feed from "./pages/Feed";
+import Followers from "./pages/Followers";
+import Following from "./pages/Following";
 import Home from "./pages/Home";
+import Ignored from "./pages/Ignored";
+import Interested from "./pages/Interested";
 import Login from "./pages/Login";
 import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
 import UserProfile from "./pages/UserProfile";
 import appStore from "./utils/appStore";
-import Followers from "./pages/Followers";
-import Following from "./pages/Following";
-import Connections from "./pages/Connections";
-import Invitations from "./pages/Invitations ";
 
 const App = () => {
   // eslint-disable-next-line no-undef
@@ -37,10 +38,11 @@ const App = () => {
               <Route path="/signup" element={<Signup />}></Route>
               <Route path="/feed" element={<Feed />}></Route>
               <Route path="/networks" element={<Networks />}>
-                <Route path="/networks" element={<Invitations />} />
+                <Route path="/networks" element={<Interested />} />
                 <Route path="/networks/followers" element={<Followers />} />
                 <Route path="/networks/following" element={<Following />} />
                 <Route path="/networks/connections" element={<Connections />} />
+                <Route path="/networks/ignored" element={<Ignored />} />
               </Route>
               <Route path="/profile" element={<Profile />}></Route>
               <Route

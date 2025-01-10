@@ -16,7 +16,7 @@ requestRouter.post(
       if (!loggedInUser) {
         return res
           .status(401)
-          .json({ error: "Unauthorized. Please login again." });
+          .json({ success: false, error: "Unauthorized. Please login again." });
       }
 
       const fromUserId = loggedInUser._id;
@@ -26,23 +26,30 @@ requestRouter.post(
       if (mongoose.Types.ObjectId.isValid(toUserId)) {
         const isToUserExist = await User.findById(toUserId);
         if (!isToUserExist) {
-          return res.status(400).json({ error: "Invalid user ID" });
+          return res
+            .status(400)
+            .json({ success: false, error: "Invalid user ID" });
         }
       } else {
-        return res.status(400).json({ error: "Invalid user ID" });
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid user ID" });
       }
 
       //* checking if toUserId === fromUserId
       if (fromUserId.equals(toUserId)) {
-        return res
-          .status(400)
-          .json({ error: "You Could not send request to yourself" });
+        return res.status(400).json({
+          success: false,
+          error: "You Could not send request to yourself",
+        });
       }
 
       const allowedStatus = ["interested", "ignored"];
 
       if (!allowedStatus.includes(status)) {
-        return res.status(400).json({ error: `invalid status type ${status}` });
+        return res
+          .status(400)
+          .json({ success: false, error: `invalid status type ${status}` });
       }
 
       //* checking if there is existing connectionRequest
@@ -56,7 +63,7 @@ requestRouter.post(
       if (existingConnectionRequest) {
         return res
           .status(400)
-          .json({ error: "Connection request already exist" });
+          .json({ success: false, error: "Connection request already exist" });
       }
 
       //* if user connection does not exist create a new connection
@@ -69,14 +76,16 @@ requestRouter.post(
       await connectionRequest.save();
 
       if (status === "interested") {
-        res.status(200).json({ message: "Connection request Send" });
+        res
+          .status(200)
+          .json({ success: true, message: "Connection request Send" });
       } else if (status === "ignored") {
-        res.status(200).json({ message: "User ignored" });
+        res.status(200).json({ success: true, message: "User ignored" });
       } else {
-        res.status(400).json({ error: "Invalid request type" });
+        res.status(400).json({ success: false, error: "Invalid request type" });
       }
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ success: false, error: err.message });
     }
   }
 );
@@ -88,7 +97,7 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
     const page =
       parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
@@ -99,9 +108,14 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         ? 1
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with interested status send form logged in user
+    const totalRequests = await ConnectionRequest.countDocuments({
+      fromUserId: loggedInUser._id,
+      $or: [{ status: "interested" }, { status: "accepted" }],
+    });
+
     const requestSent = await ConnectionRequest.find({
       fromUserId: loggedInUser._id,
-      status: "interested",
+      $or: [{ status: "interested" }, { status: "accepted" }],
     })
       .populate("fromUserId toUserId", [
         "firstName",
@@ -116,9 +130,19 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.status(200).json({ message: requestSent });
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: requestSent,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -126,25 +150,29 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
 requestRouter.get("/request/received", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
+
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
-    const page =
-      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
-    let limit =
-      parseInt(req.query.limit) > 50
-        ? 50
-        : parseInt(req.query.limit) < 1
-        ? 1
-        : parseInt(req.query.limit) || 10;
 
-    //* finding all the connection with interested status send to logged in user
+    // Get pagination parameters with validation
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+
+    // Fetch total count of matching requests for pagination
+    const totalRequests = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+      status: "interested",
+    });
+
+    // Fetch paginated and sorted data
     const requestSent = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "interested",
     })
+      .sort({ createdAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", [
         "firstName",
         "lastName",
@@ -158,9 +186,178 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.status(200).json({ message: requestSent });
+    // Respond with the fetched data and pagination info
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: requestSent,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+requestRouter.get("/request/followers/:userId", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const { userId } = req.params;
+
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+
+    // Fetch total count of matching requests for pagination
+    const request = await ConnectionRequest.find({
+      $or: [
+        {
+          toUserId: loggedInUser._id,
+          fromUserId: userId,
+          $or: [{ status: "interested" }, { status: "accepted" }],
+        },
+        {
+          toUserId: userId,
+          fromUserId: loggedInUser._id,
+          $or: [{ status: "interested" }, { status: "accepted" }],
+        },
+      ],
+    });
+
+    if (request.length === 0)
+      return res.status(400).json({
+        success: false,
+        message: "No request found",
+        user: false,
+        request,
+      });
+    // Respond with the fetched data and pagination info
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: true,
+      request,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+requestRouter.get("/request/followers", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+
+    // Get pagination parameters with validation
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+
+    // Fetch total count of matching requests for pagination
+    const totalRequests = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+      $or: [{ status: "interested" }, { status: "accepted" }],
+    });
+
+    // Fetch paginated and sorted data
+    const requestSent = await ConnectionRequest.find({
+      toUserId: loggedInUser._id,
+      $or: [{ status: "interested" }, { status: "accepted" }],
+    })
+      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Respond with the fetched data and pagination info
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: requestSent,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+//* To view all the request accepted
+requestRouter.get("/request/accepted", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+
+    // Get pagination parameters with validation
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+
+    // Fetch total count of matching requests for pagination
+    const totalRequests = await ConnectionRequest.countDocuments({
+      $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }],
+      status: "accepted",
+    });
+
+    // Fetch paginated and sorted data
+    const connections = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }],
+      status: "accepted",
+    })
+      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Respond with the fetched data and pagination info
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: connections,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -182,7 +379,11 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
         ? 1
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with ignored status send form logged in user
-    const requestSent = await ConnectionRequest.find({
+    const totalRequests = await ConnectionRequest.countDocuments({
+      fromUserId: loggedInUser._id,
+      status: "ignored",
+    });
+    const requestIgnored = await ConnectionRequest.find({
       fromUserId: loggedInUser._id,
       status: "ignored",
     })
@@ -199,7 +400,17 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    res.status(200).json({ message: requestSent });
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: requestIgnored,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -255,30 +466,35 @@ requestRouter.delete(
   }
 );
 
-//* To accepted or rejected request send to logged in user
+//* To accepted, rejected or ignored request send to logged in user
 requestRouter.post(
   "/request/review/:status/:requestId",
   userAuth,
   async (req, res) => {
     try {
       const loggedInUser = req.user;
+
       if (!loggedInUser) {
         return res
           .status(401)
-          .json({ error: "Unauthorized. Please login again." });
+          .json({ success: false, error: "Unauthorized. Please login again." });
       }
 
       const { status, requestId } = req.params;
 
       //* checking if requestId is valid
       if (!mongoose.Types.ObjectId.isValid(requestId)) {
-        return res.status(400).json({ error: "Invalid request ID" });
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
       }
 
-      const allowedStatus = ["accepted", "rejected"];
+      const allowedStatus = ["accepted", "rejected", "ignored"];
 
       if (!allowedStatus.includes(status)) {
-        return res.status(400).json({ error: `invalid status type ${status}` });
+        return res
+          .status(400)
+          .json({ success: false, error: `invalid status type ${status}` });
       }
 
       //* checking if there is connectionRequest with status interested
@@ -291,7 +507,7 @@ requestRouter.post(
       if (!connectionRequest) {
         return res
           .status(400)
-          .json({ error: "Connection request does not exist" });
+          .json({ success: false, error: "Connection request does not exist" });
       }
 
       //* updating new status
@@ -300,14 +516,22 @@ requestRouter.post(
       await connectionRequest.save();
 
       if (status === "accepted") {
-        res.status(200).json({ message: "Connection request accepted" });
+        res
+          .status(200)
+          .json({ success: true, message: "Connection request accepted" });
       } else if (status === "rejected") {
-        res.status(200).json({ message: "Connection request rejected" });
+        res
+          .status(200)
+          .json({ success: true, message: "Connection request rejected" });
+      } else if (status === "ignored") {
+        res
+          .status(200)
+          .json({ success: true, message: "Connection request ignored" });
       } else {
-        res.status(400).json({ error: "Invalid request type" });
+        res.status(400).json({ success: false, error: "Invalid request type" });
       }
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ success: false, error: err.message });
     }
   }
 );
@@ -365,6 +589,123 @@ requestRouter.delete(
   }
 );
 
+//* To view all the connections
+requestRouter.get("/request/connections", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+    const page =
+      parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
+    let limit =
+      parseInt(req.query.limit) > 50
+        ? 50
+        : parseInt(req.query.limit) < 1
+        ? 1
+        : parseInt(req.query.limit) || 10;
+
+    //* finding all the connections
+    const totalRequests = await ConnectionRequest.countDocuments({
+      $or: [
+        { fromUserId: loggedInUser._id, status: "accepted" },
+        { toUserId: loggedInUser._id, status: "accepted" },
+      ],
+    });
+    const connections = await ConnectionRequest.find({
+      $or: [
+        { fromUserId: loggedInUser._id, status: "accepted" },
+        { toUserId: loggedInUser._id, status: "accepted" },
+      ],
+    })
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      message: "connection fetched",
+      user: connections,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+//* To delete connection and convert to interested
+requestRouter.patch(
+  "/request/review/accepted/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ success: false, error: "Unauthorized. Please login again." });
+      }
+
+      const { requestId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
+      }
+
+      //* Find the connection request by ID
+      const connectionRequest = await ConnectionRequest.findById(requestId);
+
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Connection request does not exist" });
+      }
+
+      //* Check if the logged-in user is involved in the connection request
+      const { fromUserId, toUserId } = connectionRequest;
+
+      //* Determine if the logged-in user is the sender or receiver
+      if (loggedInUser._id.equals(fromUserId)) {
+        // Logged-in user is the sender; switch roles
+        connectionRequest.fromUserId = toUserId;
+        connectionRequest.toUserId = fromUserId;
+      }
+
+      //* Set the status to "interested"
+      connectionRequest.status = "interested";
+
+      //* Save the updated connection request
+      await connectionRequest.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Connection request updated successfully",
+      });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
+
+//* To get the count of all status
 requestRouter.get(
   "/moderator/requests/totalRequests/:status",
   userAuth,

@@ -11,8 +11,8 @@ const UserProfile = () => {
   const user = useSelector((store) => store.user);
   console.log(user);
   const [profileData, setProfileData] = useState(null);
-  const [followers, setFollowers] = useState(null);
-  const [following, setFollowing] = useState(null);
+  const [requestCount, setRequestCount] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(null);
 
   const navigate = useNavigate();
 
@@ -22,7 +22,6 @@ const UserProfile = () => {
         import.meta.env.VITE_BackendURL + "/profile/" + userId,
         { withCredentials: true },
       );
-      console.log(res?.data?.user);
       if (res.data.success === false) {
         setProfileData(res?.data?.user);
         toast.error(res.data.message || "An error occurred");
@@ -42,18 +41,65 @@ const UserProfile = () => {
       return navigate("/feed");
     }
   };
-  const getConnections = async () => {
+
+  const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/connections",
+        import.meta.env.VITE_BackendURL + "/user/totalStatus",
         { withCredentials: true },
       );
       if (res.data.success === false) {
-        setProfileData(res?.data.user);
         toast.error(res.data.message || "An error occurred");
       }
-      setFollowers(res.data.followers);
-      setFollowing(res.data.following);
+      setRequestCount(res.data.requestCount);
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
+  const isUserFollowed = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL +
+          "/request/followers/" +
+          profileData._id,
+        { withCredentials: true },
+      );
+
+      setIsFollowing(res.data.user);
+      // window.location.reload();
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+  const interestedUser = async () => {
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_BackendURL +
+          "/request/send/interested/" +
+          profileData._id,
+        {},
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      setIsFollowing(true);
+      // window.location.reload();
     } catch (err) {
       if (err.response) {
         toast.error(err.response.data.error || "Something went wrong!");
@@ -67,14 +113,19 @@ const UserProfile = () => {
   };
 
   useEffect(() => {
-    console.log(user?.username, userId);
     if (user?.username === userId) {
       return navigate("/profile");
     } else {
       getUserData();
-      getConnections();
+      getRequestCount();
     }
   }, [user?.username, userId, navigate]);
+
+  useEffect(() => {
+    if (profileData?._id) {
+      isUserFollowed();
+    }
+  }, [profileData]);
 
   return (
     profileData && (
@@ -165,27 +216,41 @@ const UserProfile = () => {
                         {capitalize(profileData?.status)}
                       </span>
                     </p>
-                    {profileData?.status === "active" && (
-                      <div className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90">
-                        <p className="text-lg font-bold">Follow</p>
+                    {isFollowing ? (
+                      <div
+                        className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
+                        
+                      >
+                        <p className="text-lg font-bold">Following</p>
                       </div>
+                    ) : (
+                      profileData?.status === "active" && (
+                        <div
+                          className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
+                          onClick={() => interestedUser()}
+                        >
+                          <p className="text-lg font-bold">Interested</p>
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {followers !== null && followers !== undefined
-                        ? abbreviateNumber(followers)
+                      {requestCount?.following !== null &&
+                      requestCount?.following !== undefined
+                        ? abbreviateNumber(requestCount?.following)
                         : "NA"}
                     </p>
 
-                    <p className="text-lg text-textMuted">Follower</p>
+                    <p className="text-lg text-textMuted">Follow</p>
                   </div>
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
-                      {following !== null && following !== undefined
-                        ? abbreviateNumber(following)
+                      {requestCount?.followers !== null &&
+                      requestCount?.followers !== undefined
+                        ? abbreviateNumber(requestCount?.followers)
                         : "NA"}
                     </p>
 
