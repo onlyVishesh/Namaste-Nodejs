@@ -11,6 +11,7 @@ import { capitalize, timeSince } from "../utils/constants";
 import { removeIgnoredRequest } from "../utils/ignoredRequestsSlice";
 import { removeInterestedRequest } from "../utils/interestedRequestsSlice";
 import { fetchRequestCount } from "../utils/requestCountSlice";
+import { removeConnectionRequest } from "../utils/connectionsSlice";
 
 const NetworkCard = ({ type, request }) => {
   const loggedInUser = useSelector((store) => store.user);
@@ -89,7 +90,7 @@ const NetworkCard = ({ type, request }) => {
     try {
       const res = await axios.patch(
         import.meta.env.VITE_BackendURL +
-          "/request/review/accepted/" +
+          "/request/review/removeConnection/" +
           request._id,
         {},
         { withCredentials: true },
@@ -98,7 +99,8 @@ const NetworkCard = ({ type, request }) => {
         toast.error(res.data.message || "An error occurred");
       }
       if (res.data.success === true) {
-        window.location.reload();
+        dispatch(removeConnectionRequest(request._id));
+        dispatch(fetchRequestCount());
         toast.success(res.data.message);
       }
     } catch (err) {

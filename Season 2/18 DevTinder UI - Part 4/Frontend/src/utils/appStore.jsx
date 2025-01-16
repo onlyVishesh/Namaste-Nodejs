@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
+import connectionsReducer from "./connectionsSlice";
 import feedReducer from "./feedSlice";
-import ignoredRequestsSlice from "./ignoredRequestsSlice";
-import interestedRequestsSlice from "./interestedRequestsSlice";
+import ignoredRequestsReducer from "./ignoredRequestsSlice";
+import interestedRequestsReducer from "./interestedRequestsSlice";
 import requestCountReducer from "./requestCountSlice";
 import userReducer from "./userSlice";
 
@@ -10,8 +11,9 @@ const appStore = configureStore({
     user: userReducer,
     feed: feedReducer,
     requestCount: requestCountReducer,
-    interestedRequests: interestedRequestsSlice,
-    ignoredRequests: ignoredRequestsSlice,
+    interestedRequests: interestedRequestsReducer,
+    connections: connectionsReducer,
+    ignoredRequests: ignoredRequestsReducer,
   },
 });
 
