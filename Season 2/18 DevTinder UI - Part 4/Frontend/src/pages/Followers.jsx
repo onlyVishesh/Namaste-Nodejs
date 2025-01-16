@@ -1,14 +1,20 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import NetworkCard from "../components/NetworkCard";
+import {
+  addFollowerRequests,
+  clearFollowerRequests,
+} from "../utils/followersSlice";
 
 const Followers = () => {
-  const [followersRequests, setFollowersRequests] = useState([]);
+  const followers = useSelector((store) => store.followers);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const getFollowerRequest = async (currentPage) => {
     setIsLoading(true);
@@ -20,7 +26,7 @@ const Followers = () => {
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        setFollowersRequests((prev) => [...prev, ...res.data.user]);
+        dispatch(addFollowerRequests(res.data.user));
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (err) {
@@ -31,17 +37,18 @@ const Followers = () => {
   };
 
   useEffect(() => {
+    dispatch(clearFollowerRequests());
     getFollowerRequest(page);
   }, [page]);
 
   return (
     <div className="rounded-md bg-bgSecondary">
       <h2 className="px-4 py-2 text-2xl font-bold">
-        Followers ({followersRequests.length})
+        Followers ({followers.length})
       </h2>
       <hr className="border-textMuted" />
       <div className="flex flex-col divide-y divide-textMuted">
-        {followersRequests.length === 0 ? (
+        {followers.length === 0 ? (
           <div className="py-5 text-center">
             No one follow you. Try to{" "}
             <Link to="/feed" className="font-bold text-primary underline">
@@ -50,7 +57,7 @@ const Followers = () => {
             profiles
           </div>
         ) : (
-          followersRequests.map((request) => (
+          followers.map((request) => (
             <NetworkCard type="follower" request={request} key={request._id} />
           ))
         )}

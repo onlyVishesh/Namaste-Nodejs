@@ -7,11 +7,11 @@ import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { removeConnectionRequest } from "../utils/connectionsSlice";
 import { capitalize, timeSince } from "../utils/constants";
 import { removeIgnoredRequest } from "../utils/ignoredRequestsSlice";
 import { removeInterestedRequest } from "../utils/interestedRequestsSlice";
 import { fetchRequestCount } from "../utils/requestCountSlice";
-import { removeConnectionRequest } from "../utils/connectionsSlice";
 
 const NetworkCard = ({ type, request }) => {
   const loggedInUser = useSelector((store) => store.user);
@@ -143,6 +143,35 @@ const NetworkCard = ({ type, request }) => {
     }
   };
 
+  const rejectRequest = async () => {
+    try {
+      const res = await axios.patch(
+        import.meta.env.VITE_BackendURL +
+          "/request/review/rejectRequest/" +
+          request._id,
+        {},
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      if (res.data.success === true) {
+        dispatch(removeInterestedRequest(request._id));
+        dispatch(fetchRequestCount());
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -171,12 +200,12 @@ const NetworkCard = ({ type, request }) => {
     invitation: (
       <>
         <button
-          className="px-2 py-1 text-textMuted hover:bg-cardBg"
+          className="rounded-full px-2 py-1 font-semibold text-error hover:bg-cardBg hover:text-red-400"
           onClick={() => {
-            setRequestIgnored();
+            rejectRequest();
           }}
         >
-          Ignore
+          Reject
         </button>
         <button
           className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
@@ -238,23 +267,35 @@ const NetworkCard = ({ type, request }) => {
         >
           View Profile
         </Link>
+        <Link
+          to={`/user/profile/${
+            request.fromUserId.username === loggedInUser
+              ? request.toUserId.username
+              : request.fromUserId.username
+          }`}
+          className="rounded-full px-2 py-1 font-semibold text-error hover:bg-cardBg hover:text-red-400"
+        >
+          Not Interested
+        </Link>
       </>
     ),
     ignored: (
       <>
         {loggedInUser._id?.toString() === request.toUserId._id?.toString() ? (
-          <button
-            className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
-            onClick={() => removeIgnored()}
-          >
-            Un-Ignore
-          </button>
+          <>
+            <button
+              className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
+              onClick={() => removeIgnored()}
+            >
+              Un-Ignore
+            </button>
+          </>
         ) : (
           <button
             className="rounded-full px-2 py-1 font-semibold text-error hover:bg-cardBg hover:text-red-400"
             onClick={() => removeIgnored()}
           >
-            Reject
+            Un-Ignore
           </button>
         )}
       </>
@@ -294,7 +335,9 @@ const NetworkCard = ({ type, request }) => {
         </div>
       </Link>
 
-      <div className="flex gap-2">{renderButtons[type]}</div>
+      <div className="flex items-center justify-center gap-2">
+        {renderButtons[type]}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   FaUserCheck,
   FaUserClock,
@@ -146,12 +146,9 @@ const Networks = () => {
               <FaUserFriends /> Ignored
             </p>
             <p>
-              {(!requestCount?.ignoredSend && !requestCount?.ignoredReceived) ||
-              requestCount?.ignoredSend + requestCount?.ignoredReceived === 0
+              {!requestCount?.ignoredSend || requestCount?.ignoredSend === 0
                 ? ""
-                : "(" +
-                  (requestCount?.ignoredSend + requestCount?.ignoredReceived) +
-                  ")"}
+                : "(" + requestCount?.ignoredSend + ")"}
             </p>
           </NavLink>
         </div>

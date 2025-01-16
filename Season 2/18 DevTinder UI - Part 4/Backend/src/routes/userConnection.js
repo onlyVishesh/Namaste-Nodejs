@@ -41,13 +41,37 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
     });
 
     const following = await ConnectionRequest.countDocuments({
-      fromUserId: loggedInUser._id,
-      $or: [{ status: "accepted" }, { status: "interested" }],
+      $or: [
+        {
+          fromUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          toUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     });
 
     const followers = await ConnectionRequest.countDocuments({
-      toUserId: loggedInUser._id,
-      $or: [{ status: "accepted" }, { status: "interested" }],
+      $or: [
+        {
+          toUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          fromUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     });
 
     res.status(200).json({

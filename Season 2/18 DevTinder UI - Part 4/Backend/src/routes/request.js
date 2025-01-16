@@ -109,13 +109,37 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with interested status send form logged in user
     const totalRequests = await ConnectionRequest.countDocuments({
-      fromUserId: loggedInUser._id,
-      $or: [{ status: "interested" }, { status: "accepted" }],
+      $or: [
+        {
+          fromUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          toUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     });
 
     const requestSent = await ConnectionRequest.find({
-      fromUserId: loggedInUser._id,
-      $or: [{ status: "interested" }, { status: "accepted" }],
+      $or: [
+        {
+          fromUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          toUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     })
       .populate("fromUserId toUserId", [
         "firstName",
@@ -164,13 +188,13 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
     // Fetch total count of matching requests for pagination
     const totalRequests = await ConnectionRequest.countDocuments({
       toUserId: loggedInUser._id,
-      status: "interested",
+      $or: [{ status: "interested" }],
     });
 
     // Fetch paginated and sorted data
     const requestSent = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
-      status: "interested",
+      $or: [{ status: "interested" }],
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", [
@@ -220,12 +244,22 @@ requestRouter.get("/request/followers/:userId", userAuth, async (req, res) => {
         {
           toUserId: loggedInUser._id,
           fromUserId: userId,
-          $or: [{ status: "interested" }, { status: "accepted" }],
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+            { status: "ignored" },
+          ],
         },
         {
           toUserId: userId,
           fromUserId: loggedInUser._id,
-          $or: [{ status: "interested" }, { status: "accepted" }],
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+            { status: "ignored" },
+          ],
         },
       ],
     });
@@ -265,14 +299,38 @@ requestRouter.get("/request/followers", userAuth, async (req, res) => {
 
     // Fetch total count of matching requests for pagination
     const totalRequests = await ConnectionRequest.countDocuments({
-      toUserId: loggedInUser._id,
-      $or: [{ status: "interested" }, { status: "accepted" }],
+      $or: [
+        {
+          toUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          fromUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     });
 
     // Fetch paginated and sorted data
     const requestSent = await ConnectionRequest.find({
-      toUserId: loggedInUser._id,
-      $or: [{ status: "interested" }, { status: "accepted" }],
+      $or: [
+        {
+          toUserId: loggedInUser._id,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          fromUserId: loggedInUser._id,
+          $or: [{ status: "accepted" }],
+        },
+      ],
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", [
@@ -381,11 +439,11 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with ignored status send form logged in user
     const totalRequests = await ConnectionRequest.countDocuments({
-      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser }],
+      fromUserId: loggedInUser._id,
       status: "ignored",
     });
     const requestIgnored = await ConnectionRequest.find({
-      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser }],
+      fromUserId: loggedInUser._id,
       status: "ignored",
     })
       .populate("fromUserId toUserId", [
@@ -459,7 +517,7 @@ requestRouter.delete(
         await connectionRequest.save();
         return res.status(200).json({
           success: true,
-          message: "Connection request updated to interested",
+          message: "Connection request deleted",
         });
       } else {
         // If the logged-in user is not the toUserId, delete the connection request
@@ -545,6 +603,55 @@ requestRouter.patch(
   }
 );
 
+requestRouter.patch(
+  "/request/review/rejectRequest/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ success: false, error: "Unauthorized. Please login again." });
+      }
+
+      const { requestId } = req.params;
+
+      //* checking if requestId is valid
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
+      }
+
+      //* checking if there is connectionRequest with status interested
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Connection request does not exist" });
+      }
+
+      //* updating new status
+      connectionRequest.status = "rejected";
+
+      await connectionRequest.save();
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Connection request rejected" });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
+
 //* To accepted, rejected or ignored request send to logged in user
 requestRouter.patch(
   "/request/review/:status/:requestId",
@@ -614,7 +721,6 @@ requestRouter.patch(
     }
   }
 );
-
 
 //* To delete interested request
 requestRouter.delete(

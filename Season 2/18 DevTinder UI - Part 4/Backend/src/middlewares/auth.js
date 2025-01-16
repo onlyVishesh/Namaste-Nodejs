@@ -6,7 +6,9 @@ const userAuth = async (req, res, next) => {
     //* Read the token from req cookies
     const { token } = req.cookies;
     if (!token) {
-      throw new Error("Session Expired, Please login again");
+      return res
+        .status(500)
+        .json({ success: false, error: "Session Expired, Please login again" });
     }
     //* validate the token
     const { _id } = await isTokenValid(token);
@@ -14,14 +16,14 @@ const userAuth = async (req, res, next) => {
     //* find the user
     const user = await User.findById(_id);
     if (!user) {
-      throw new Error("User not found");
+      return res.status(500).json({ success: false, error: "User not found" });
     }
 
     //* add user data to request object
     req.user = user;
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
