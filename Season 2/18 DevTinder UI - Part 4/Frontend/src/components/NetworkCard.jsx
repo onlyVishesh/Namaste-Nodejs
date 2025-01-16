@@ -1,17 +1,22 @@
+/* eslint-disable react/prop-types */
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { RiDeleteBin7Fill } from "react-icons/ri";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { capitalize, timeSince } from "../utils/constants";
+import { removeIgnoredRequest } from "../utils/ignoredRequestsSlice";
+import { removeInterestedRequest } from "../utils/interestedRequestsSlice";
+import { fetchRequestCount } from "../utils/requestCountSlice";
 
 const NetworkCard = ({ type, request }) => {
   const loggedInUser = useSelector((store) => store.user);
   const [showConnection, setShowConnection] = useState(false);
   const menuRef = useRef();
+  const dispatch = useDispatch();
 
   const formattedName = () => {
     const { firstName, lastName } = request.fromUserId || {};
@@ -20,9 +25,11 @@ const NetworkCard = ({ type, request }) => {
     return `${capitalize(firstName)} ${capitalize(truncatedLastName)}`;
   };
 
+  useEffect(() => {}, []);
+
   const setRequestAccepted = async () => {
     try {
-      const res = await axios.post(
+      const res = await axios.patch(
         import.meta.env.VITE_BackendURL +
           "/request/review/accepted/" +
           request._id,
@@ -33,7 +40,8 @@ const NetworkCard = ({ type, request }) => {
         toast.error(res.data.message || "An error occurred");
       }
       if (res.data.success === true) {
-        window.location.reload();
+        dispatch(removeInterestedRequest(request._id));
+        dispatch(fetchRequestCount());
         toast.success(res.data.message);
       }
     } catch (err) {
@@ -47,9 +55,10 @@ const NetworkCard = ({ type, request }) => {
       console.error(err.message);
     }
   };
+
   const setRequestIgnored = async () => {
     try {
-      const res = await axios.post(
+      const res = await axios.patch(
         import.meta.env.VITE_BackendURL +
           "/request/review/ignored/" +
           request._id,
@@ -60,7 +69,8 @@ const NetworkCard = ({ type, request }) => {
         toast.error(res.data.message || "An error occurred");
       }
       if (res.data.success === true) {
-        window.location.reload();
+        dispatch(removeInterestedRequest(request._id));
+        dispatch(fetchRequestCount());
         toast.success(res.data.message);
       }
     } catch (err) {
@@ -102,6 +112,7 @@ const NetworkCard = ({ type, request }) => {
       console.error(err.message);
     }
   };
+
   const removeIgnored = async () => {
     try {
       const res = await axios.delete(
@@ -114,7 +125,8 @@ const NetworkCard = ({ type, request }) => {
         toast.error(res.data.message || "An error occurred");
       }
       if (res.data.success === true) {
-        window.location.reload();
+        dispatch(removeIgnoredRequest(request._id));
+        dispatch(fetchRequestCount());
         toast.success(res.data.message);
       }
     } catch (err) {
@@ -228,12 +240,21 @@ const NetworkCard = ({ type, request }) => {
     ),
     ignored: (
       <>
-        <button
-          className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
-          onClick={() => removeIgnored()}
-        >
-          Un-Ignore
-        </button>
+        {loggedInUser._id?.toString() === request.toUserId._id?.toString() ? (
+          <button
+            className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
+            onClick={() => removeIgnored()}
+          >
+            Un-Ignore
+          </button>
+        ) : (
+          <button
+            className="rounded-full px-2 py-1 font-semibold text-error hover:bg-cardBg hover:text-red-400"
+            onClick={() => removeIgnored()}
+          >
+            Reject
+          </button>
+        )}
       </>
     ),
   };

@@ -17,7 +17,7 @@ const BodyContainer = () => {
   const user = useSelector((store) => store.user);
 
   const fetchUser = async () => {
-    if (user) return;
+    if (user.length !== 0) return;
     try {
       const res = await axios.get(
         import.meta.env.VITE_BackendURL + "/profile/view",

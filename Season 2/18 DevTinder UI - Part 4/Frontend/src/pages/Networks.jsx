@@ -6,11 +6,17 @@ import {
   FaUserFriends,
   FaUsers,
 } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Outlet } from "react-router-dom";
 import { toast } from "sonner";
+import { fetchRequestCount } from "../utils/requestCountSlice";
 
 const Networks = () => {
-  const [requestCount, setRequestCount] = useState(null);
+  // const [requestCount, setRequestCount] = useState(null);
+  const dispatch = useDispatch();
+  const { requestCount, loading, error } = useSelector(
+    (state) => state.requestCount,
+  );
 
   const getRequestCount = async () => {
     try {
@@ -34,9 +40,19 @@ const Networks = () => {
     }
   };
 
+  // useEffect(() => {
+  //   getRequestCount();
+  // }, []);
   useEffect(() => {
-    getRequestCount();
-  }, []);
+    // Fetch the initial request count when the component is mounted
+    dispatch(fetchRequestCount());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error); // Display the error if there is one
+    }
+  }, [error]);
 
   return (
     <div className="mx-auto flex w-full flex-col items-center justify-between gap-5 py-10 lg:w-11/12 lg:flex-row lg:items-start lg:gap-10 xl:w-10/12">
@@ -130,9 +146,12 @@ const Networks = () => {
               <FaUserFriends /> Ignored
             </p>
             <p>
-              {!requestCount?.ignoredSend || requestCount?.ignoredSend === 0
+              {(!requestCount?.ignoredSend && !requestCount?.ignoredReceived) ||
+              requestCount?.ignoredSend + requestCount?.ignoredReceived === 0
                 ? ""
-                : "(" + requestCount?.ignoredSend + ")"}
+                : "(" +
+                  (requestCount?.ignoredSend + requestCount?.ignoredReceived) +
+                  ")"}
             </p>
           </NavLink>
         </div>

@@ -1,14 +1,17 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import NetworkCard from "../components/NetworkCard";
+import { addInterestedRequests, clearInterestedRequests } from "../utils/interestedRequestsSlice";
 
 const Interested = () => {
-  const [interestedRequests, setInterestedRequests] = useState([]);
+  const interestedRequests = useSelector((store) => store.interestedRequests);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const getInterestedRequest = async (currentPage) => {
     setIsLoading(true);
@@ -20,7 +23,8 @@ const Interested = () => {
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        setInterestedRequests((prev) => [...prev, ...res.data.user]);
+        console.log(res.data.user);
+        dispatch(addInterestedRequests(res.data.user));
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (err) {
@@ -31,17 +35,18 @@ const Interested = () => {
   };
 
   useEffect(() => {
+    dispatch(clearInterestedRequests());
     getInterestedRequest(page);
   }, [page]);
 
   return (
     <div className="rounded-md bg-bgSecondary">
       <h2 className="px-4 py-2 text-2xl font-bold">
-        Interested ({interestedRequests.length})
+        Interested ({interestedRequests?.length})
       </h2>
       <hr className="border-textMuted" />
       <div className="flex flex-col divide-y divide-textMuted">
-        {interestedRequests.length === 0 ? (
+        {interestedRequests?.length === 0 ? (
           <div className="py-5 text-center">
             No Pending Requests exist. Try to{" "}
             <Link to="/feed" className="font-bold text-primary underline">
@@ -50,6 +55,7 @@ const Interested = () => {
             profiles
           </div>
         ) : (
+          interestedRequests?.length > 0 &&
           interestedRequests.map((request) => (
             <NetworkCard
               type="invitation"

@@ -1,14 +1,20 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import NetworkCard from "../components/NetworkCard";
+import {
+  addIgnoredRequests,
+  clearIgnoredRequests,
+} from "../utils/ignoredRequestsSlice";
 
 const Ignored = () => {
-  const [ignoredRequests, setIgnoredRequests] = useState([]);
+  const ignoredRequests = useSelector((store) => store.ignoredRequests);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const getIgnoredRequest = async (currentPage) => {
     setIsLoading(true);
@@ -20,7 +26,7 @@ const Ignored = () => {
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        setIgnoredRequests((prev) => [...prev, ...res.data.user]);
+        dispatch(addIgnoredRequests(res.data.user));
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (err) {
@@ -31,6 +37,7 @@ const Ignored = () => {
   };
 
   useEffect(() => {
+    dispatch(clearIgnoredRequests());
     getIgnoredRequest(page);
   }, [page]);
 

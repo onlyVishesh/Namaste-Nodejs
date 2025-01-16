@@ -248,6 +248,7 @@ requestRouter.get("/request/followers/:userId", userAuth, async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
+
 requestRouter.get("/request/followers", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
@@ -380,11 +381,11 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
         : parseInt(req.query.limit) || 10;
     //* finding all the connection with ignored status send form logged in user
     const totalRequests = await ConnectionRequest.countDocuments({
-      fromUserId: loggedInUser._id,
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser }],
       status: "ignored",
     });
     const requestIgnored = await ConnectionRequest.find({
-      fromUserId: loggedInUser._id,
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser }],
       status: "ignored",
     })
       .populate("fromUserId toUserId", [
@@ -416,7 +417,7 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
   }
 });
 
-//* To delete a ignored profiles
+//* To delete a ignored profiles if send by loggedInUser and change status to interested it send by other
 requestRouter.delete(
   "/request/review/ignored/:requestId",
   userAuth,
@@ -426,48 +427,67 @@ requestRouter.delete(
       if (!loggedInUser) {
         return res
           .status(401)
-          .json({ error: "Unauthorized. Please login again." });
+          .json({ success: false, error: "Unauthorized. Please login again." });
       }
 
       const { requestId } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(requestId)) {
-        return res.status(400).json({ error: "Invalid request ID" });
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
       }
 
-      //* checking if there is connectionRequest with status interested
+      // Find the connection request with the given requestId
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
-        fromUserId: loggedInUser._id,
         status: "ignored",
       });
 
       if (!connectionRequest) {
-        return res
-          .status(400)
-          .json({ error: "Connection request does not exist" });
+        return res.status(400).json({
+          success: false,
+          error: "Connection request does not exist or is not ignored",
+        });
       }
 
-      //* deleting ignored connection
-      const { deletedCount } = await connectionRequest.deleteOne({
-        _id: requestId,
-      });
-
-      if (deletedCount >= 1) {
-        res.status(200).json({ message: "User has been unignored" });
+      if (
+        connectionRequest.toUserId.toString() === loggedInUser._id.toString()
+      ) {
+        // If the logged-in user is the toUserId, update the status to 'interested'
+        connectionRequest.status = "interested";
+        await connectionRequest.save();
+        return res.status(200).json({
+          success: true,
+          message: "Connection request updated to interested",
+        });
       } else {
-        res
-          .status(400)
-          .json({ error: "Connection request could not retrieved" });
+        // If the logged-in user is not the toUserId, delete the connection request
+        const { deletedCount } = await ConnectionRequest.deleteOne({
+          _id: requestId,
+        });
+
+        if (deletedCount >= 1) {
+          return res
+            .status(200)
+            .json({ success: true, message: "Connection request deleted" });
+        } else {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              error: "Failed to delete connection request",
+            });
+        }
       }
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
     }
   }
 );
 
 //* To accepted, rejected or ignored request send to logged in user
-requestRouter.post(
+requestRouter.patch(
   "/request/review/:status/:requestId",
   userAuth,
   async (req, res) => {
