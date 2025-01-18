@@ -420,6 +420,63 @@ requestRouter.get("/request/accepted", userAuth, async (req, res) => {
   }
 });
 
+//* To view all the request rejected
+requestRouter.get("/request/rejected", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+
+    // Get pagination parameters with validation
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+
+    // Fetch total count of matching requests for pagination
+    const totalRequests = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser,
+      status: "rejected",
+    });
+
+    // Fetch paginated and sorted data
+    const connections = await ConnectionRequest.find({
+      toUserId: loggedInUser,
+      status: "rejected",
+    })
+      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .populate("fromUserId toUserId", [
+        "firstName",
+        "lastName",
+        "username",
+        "avatar",
+        "about",
+        "skills",
+        "gender",
+        "status",
+      ])
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Respond with the fetched data and pagination info
+    res.status(200).json({
+      success: true,
+      message: "Requests fetched successfully",
+      user: connections,
+      pagination: {
+        total: totalRequests,
+        page,
+        limit,
+        totalPages: Math.ceil(totalRequests / limit),
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 //* To view all the ignored profiles
 requestRouter.get("/request/ignored", userAuth, async (req, res) => {
   try {
@@ -646,6 +703,58 @@ requestRouter.patch(
       return res
         .status(200)
         .json({ success: true, message: "Connection request rejected" });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
+
+requestRouter.patch(
+  "/request/review/removeRejected/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ success: false, error: "Unauthorized. Please login again." });
+      }
+
+      const { requestId } = req.params;
+
+      //* checking if requestId is valid
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
+      }
+
+      //* checking if there is connectionRequest with status interested
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "rejected",
+      });
+
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Connection request does not exist" });
+      }
+
+      //* updating new status
+      connectionRequest.status = "interested";
+
+      await connectionRequest.save();
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Connection request moved to interested",
+        });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
     }

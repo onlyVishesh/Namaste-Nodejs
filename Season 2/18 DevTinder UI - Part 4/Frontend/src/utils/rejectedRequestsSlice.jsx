@@ -1,28 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const followingSlice = createSlice({
-  name: "followingRequests",
+const rejectedRequestsSlice = createSlice({
+  name: "rejectedRequests",
   initialState: [],
   reducers: {
-    addFollowingRequests: (state, action) => {
+    addRejectedRequests: (state, action) => {
       const newRequests = action.payload.filter(
         (request) => !state.some((item) => item._id === request._id),
       );
       state.push(...newRequests);
     },
-    removeFollowingRequest: (state, action) => {
+    removeRejectedRequest: (state, action) => {
       const idToRemove = action.payload;
       return state.filter((request) => request._id !== idToRemove);
     },
-    clearFollowingRequests: () => {
+    clearRejectedRequests: () => {
       return [];
     },
   },
 });
 
 export const {
-  addFollowingRequests,
-  removeFollowingRequest,
-  clearFollowingRequests,
-} = followingSlice.actions;
-export default followingSlice.reducer;
+  addRejectedRequests,
+  removeRejectedRequest,
+  clearRejectedRequests,
+} = rejectedRequestsSlice.actions;
+export default rejectedRequestsSlice.reducer;

@@ -14,6 +14,7 @@ import Interested from "./pages/Interested";
 import Login from "./pages/Login";
 import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
+import Rejected from "./pages/Rejected";
 import Signup from "./pages/Signup";
 import UserProfile from "./pages/UserProfile";
 import appStore from "./utils/appStore";
@@ -43,6 +44,7 @@ const App = () => {
                 <Route path="/networks/following" element={<Following />} />
                 <Route path="/networks/connections" element={<Connections />} />
                 <Route path="/networks/ignored" element={<Ignored />} />
+                <Route path="/networks/rejected" element={<Rejected />} />
               </Route>
               <Route path="/profile" element={<Profile />}></Route>
               <Route

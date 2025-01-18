@@ -12,6 +12,7 @@ import { capitalize, timeSince } from "../utils/constants";
 import { removeIgnoredRequest } from "../utils/ignoredRequestsSlice";
 import { removeInterestedRequest } from "../utils/interestedRequestsSlice";
 import { fetchRequestCount } from "../utils/requestCountSlice";
+import { removeRejectedRequest } from "../utils/rejectedRequestsSlice";
 
 const NetworkCard = ({ type, request }) => {
   const loggedInUser = useSelector((store) => store.user);
@@ -172,6 +173,35 @@ const NetworkCard = ({ type, request }) => {
     }
   };
 
+  const removeRejected = async () => {
+    try {
+      const res = await axios.patch(
+        import.meta.env.VITE_BackendURL +
+          "/request/review/removeRejected/" +
+          request._id,
+        {},
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      if (res.data.success === true) {
+        dispatch(removeRejectedRequest(request._id));
+        dispatch(fetchRequestCount());
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -300,6 +330,16 @@ const NetworkCard = ({ type, request }) => {
         )}
       </>
     ),
+    rejected: (
+      <>
+        <button
+          className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white"
+          onClick={() => removeRejected()}
+        >
+          Remove
+        </button>
+      </>
+    ),
   };
 
   return (
@@ -343,8 +383,13 @@ const NetworkCard = ({ type, request }) => {
 };
 
 NetworkCard.propTypes = {
-  type: PropTypes.oneOf(["invitation", "connection", "follower", "following"])
-    .isRequired,
+  type: PropTypes.oneOf([
+    "invitation",
+    "connection",
+    "follower",
+    "following",
+    "rejected",
+  ]).isRequired,
 };
 
 export default NetworkCard;

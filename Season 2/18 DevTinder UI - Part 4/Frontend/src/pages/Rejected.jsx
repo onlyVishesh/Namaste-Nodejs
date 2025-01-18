@@ -5,28 +5,28 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import NetworkCard from "../components/NetworkCard";
 import {
-  addFollowingRequests,
-  clearFollowingRequests,
-} from "../utils/followingSlice";
+  addRejectedRequests,
+  clearRejectedRequests,
+} from "../utils/rejectedRequestsSlice";
 
-const Following = () => {
-  const followingRequests = useSelector((store) => store.following);
+const Rejected = () => {
+  const rejectedRequests = useSelector((store) => store.rejected);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
-  const getFollowingRequest = async (currentPage) => {
+  const getRejectedRequest = async (currentPage) => {
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BackendURL}/request/send?page=${currentPage}&limit=10`,
+        `${import.meta.env.VITE_BackendURL}/request/rejected?page=${currentPage}&limit=10`,
         { withCredentials: true },
       );
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        dispatch(addFollowingRequests(res.data.user));
+        dispatch(addRejectedRequests(res.data.user));
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (err) {
@@ -37,28 +37,28 @@ const Following = () => {
   };
 
   useEffect(() => {
-    dispatch(clearFollowingRequests());
-    getFollowingRequest(page);
+    dispatch(clearRejectedRequests());
+    getRejectedRequest(page);
   }, [page]);
 
   return (
     <div className="rounded-md bg-bgSecondary">
       <h2 className="px-4 py-2 text-2xl font-bold">
-        Following ({followingRequests.length})
+        Rejected ({rejectedRequests.length})
       </h2>
       <hr className="border-textMuted" />
       <div className="flex flex-col divide-y divide-textMuted">
-        {followingRequests.length === 0 ? (
+        {rejectedRequests.length === 0 ? (
           <div className="py-5 text-center">
-            You haven&apos;t follow any one. Try to{" "}
+            You haven&apos;t rejected any request. Try to{" "}
             <Link to="/feed" className="font-bold text-primary underline">
               Explore
             </Link>{" "}
             profiles
           </div>
         ) : (
-          followingRequests.map((request) => (
-            <NetworkCard type="follower" request={request} key={request._id} />
+          rejectedRequests.map((request) => (
+            <NetworkCard type="rejected" request={request} key={request._id} />
           ))
         )}
       </div>
@@ -77,4 +77,4 @@ const Following = () => {
   );
 };
 
-export default Following;
+export default Rejected;

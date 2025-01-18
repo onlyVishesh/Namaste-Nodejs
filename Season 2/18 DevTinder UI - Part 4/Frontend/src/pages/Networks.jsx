@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect } from "react";
 import {
   FaUserCheck,
@@ -6,6 +5,7 @@ import {
   FaUserFriends,
   FaUsers,
 } from "react-icons/fa";
+import { FaUserXmark } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Outlet } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,31 +18,7 @@ const Networks = () => {
     (state) => state.requestCount,
   );
 
-  const getRequestCount = async () => {
-    try {
-      const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/totalStatus",
-        { withCredentials: true },
-      );
-      if (res.data.success === false) {
-        toast.error(res.data.message || "An error occurred");
-      }
-      setRequestCount(res.data.requestCount);
-    } catch (err) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-      console.error(err.message);
-    }
-  };
 
-  // useEffect(() => {
-  //   getRequestCount();
-  // }, []);
   useEffect(() => {
     // Fetch the initial request count when the component is mounted
     dispatch(fetchRequestCount());
@@ -149,6 +125,23 @@ const Networks = () => {
               {!requestCount?.ignoredSend || requestCount?.ignoredSend === 0
                 ? ""
                 : "(" + requestCount?.ignoredSend + ")"}
+            </p>
+          </NavLink>
+          <NavLink
+            to="/networks/rejected"
+            className={({ isActive }) =>
+              `flex justify-between px-4 py-2 hover:bg-shadow${
+                isActive ? "font-bold text-primary" : ""
+              }`
+            }
+          >
+            <p>
+              <FaUserXmark /> Rejected
+            </p>
+            <p>
+              {!requestCount?.rejected || requestCount?.rejected === 0
+                ? ""
+                : "(" + requestCount?.rejected + ")"}
             </p>
           </NavLink>
         </div>

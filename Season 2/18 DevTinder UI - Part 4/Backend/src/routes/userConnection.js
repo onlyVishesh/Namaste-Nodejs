@@ -73,7 +73,10 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
         },
       ],
     });
-
+    const rejected = await ConnectionRequest.countDocuments({
+      toUserId: loggedInUser._id,
+      status: "rejected",
+    });
     res.status(200).json({
       success: true,
       message: "connection fetched",
@@ -85,6 +88,7 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
         ignoredReceived,
         following,
         followers,
+        rejected,
       },
     });
   } catch (err) {
