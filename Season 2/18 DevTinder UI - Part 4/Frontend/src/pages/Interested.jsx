@@ -58,7 +58,7 @@ const Interested = () => {
           interestedRequests?.length > 0 &&
           interestedRequests.map((request) => (
             <NetworkCard
-              type="invitation"
+              type="interested"
               request={request}
               key={request._id}
             />

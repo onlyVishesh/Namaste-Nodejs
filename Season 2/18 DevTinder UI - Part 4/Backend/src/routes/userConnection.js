@@ -96,6 +96,135 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
   }
 });
 
+userRouter.get("/user/totalStatus/:userId", userAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    //* finding all the connections
+    const connections = await ConnectionRequest.countDocuments({
+      $or: [
+        { fromUserId: userId, status: "accepted" },
+        { toUserId: userId, status: "accepted" },
+      ],
+    });
+    const interestedSend = await ConnectionRequest.countDocuments({
+      fromUserId: userId,
+      status: "interested",
+    });
+
+    const interestedReceived = await ConnectionRequest.countDocuments({
+      toUserId: userId,
+      status: "interested",
+    });
+
+    const ignoredSend = await ConnectionRequest.countDocuments({
+      fromUserId: userId,
+      status: "ignored",
+    });
+
+    const ignoredReceived = await ConnectionRequest.countDocuments({
+      toUserId: userId,
+      status: "ignored",
+    });
+
+    const following = await ConnectionRequest.countDocuments({
+      $or: [
+        {
+          fromUserId: userId,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          toUserId: userId,
+          $or: [{ status: "accepted" }],
+        },
+      ],
+    });
+
+    const followers = await ConnectionRequest.countDocuments({
+      $or: [
+        {
+          toUserId: userId,
+          $or: [
+            { status: "interested" },
+            { status: "accepted" },
+            { status: "rejected" },
+          ],
+        },
+        {
+          fromUserId: userId,
+          $or: [{ status: "accepted" }],
+        },
+      ],
+    });
+    const rejected = await ConnectionRequest.countDocuments({
+      toUserId: userId,
+      status: "rejected",
+    });
+    res.status(200).json({
+      success: true,
+      message: "connection fetched",
+      requestCount: {
+        connections,
+        interestedSend,
+        interestedReceived,
+        ignoredSend,
+        ignoredReceived,
+        following,
+        followers,
+        rejected,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+userRouter.get("/user/connection/:userId", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const { userId } = req.params;
+
+    if (!loggedInUser) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Unauthorized. Please login again." });
+    }
+
+    //* Finding the connections
+    const connection = await ConnectionRequest.countDocuments({
+      $or: [
+        { fromUserId: loggedInUser._id, toUserId: userId },
+        { fromUserId: userId, toUserId: loggedInUser._id },
+      ],
+    });
+
+    let connectionRequest = null;
+
+    // If a connection exists, fetch detailed information
+    if (connection === 1) {
+      connectionRequest = await ConnectionRequest.findOne({
+        $or: [
+          { fromUserId: loggedInUser._id, toUserId: userId },
+          { fromUserId: userId, toUserId: loggedInUser._id },
+        ],
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Connection fetched",
+      connection,
+      connectionRequest,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 //* To create user feed
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {

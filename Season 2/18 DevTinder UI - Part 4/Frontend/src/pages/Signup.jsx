@@ -93,8 +93,8 @@ const Signup = () => {
       } else {
         toast.success(res.data.message || "Signup successful!");
         navigate("/profile");
+        window.location.reload();
       }
-      return navigate("/profile");
     } catch (err) {
       if (err.response) {
         // The request was made, and the server responded with a status code that falls out of the range of 2xx

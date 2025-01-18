@@ -58,7 +58,7 @@ const Following = () => {
           </div>
         ) : (
           followingRequests.map((request) => (
-            <NetworkCard type="follower" request={request} key={request._id} />
+            <NetworkCard type="following" request={request} key={request._id} />
           ))
         )}
       </div>

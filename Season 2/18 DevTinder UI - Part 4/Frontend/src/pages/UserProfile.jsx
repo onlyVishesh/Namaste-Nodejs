@@ -12,7 +12,7 @@ const UserProfile = () => {
   console.log(user);
   const [profileData, setProfileData] = useState(null);
   const [requestCount, setRequestCount] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(null);
+  const [connection, setConnection] = useState(null);
 
   const navigate = useNavigate();
 
@@ -45,7 +45,7 @@ const UserProfile = () => {
   const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/totalStatus",
+        import.meta.env.VITE_BackendURL + "/user/totalStatus/" + profileData._id,
         { withCredentials: true },
       );
       if (res.data.success === false) {
@@ -64,66 +64,38 @@ const UserProfile = () => {
     }
   };
 
-  const isUserFollowed = async () => {
+  const userConnection = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL +
-          "/request/followers/" +
-          profileData._id,
+        `${import.meta.env.VITE_BackendURL}/user/connection/${profileData._id}`,
         { withCredentials: true },
       );
 
-      setIsFollowing(res.data.user);
-      // window.location.reload();
-    } catch (err) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
+      if (res.data.success) {
+        setConnection(res.data.connectionRequest);
+        console.log(connection);
       } else {
-        toast.error("An unexpected error occurred.");
+        toast.error(res.data.message || "Error fetching connection status");
       }
-      console.error(err.message);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "An error occurred");
     }
   };
-  const interestedUser = async () => {
-    try {
-      const res = await axios.post(
-        import.meta.env.VITE_BackendURL +
-          "/request/send/interested/" +
-          profileData._id,
-        {},
-        { withCredentials: true },
-      );
-      if (res.data.success === false) {
-        toast.error(res.data.message || "An error occurred");
-      }
-      setIsFollowing(true);
-      // window.location.reload();
-    } catch (err) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-      console.error(err.message);
-    }
-  };
+
 
   useEffect(() => {
     if (user?.username === userId) {
       return navigate("/profile");
     } else {
       getUserData();
-      getRequestCount();
     }
   }, [user?.username, userId, navigate]);
 
   useEffect(() => {
     if (profileData?._id) {
-      isUserFollowed();
+      userConnection();
+      getRequestCount();
+
     }
   }, [profileData]);
 
@@ -216,22 +188,65 @@ const UserProfile = () => {
                         {capitalize(profileData?.status)}
                       </span>
                     </p>
-                    {isFollowing ? (
-                      <div
-                        className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
-                        
-                      >
-                        <p className="text-lg font-bold">Following</p>
-                      </div>
-                    ) : (
-                      profileData?.status === "active" && (
-                        <div
-                          className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
-                          onClick={() => interestedUser()}
-                        >
-                          <p className="text-lg font-bold">Interested</p>
+                    {profileData ? (
+                      connection ? (
+                        connection.status === "accepted" ? (
+                          <div className="flex flex-col items-center justify-center rounded-md bg-green-500 px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90">
+                            <p className="text-lg font-bold">Connected</p>
+                          </div>
+                        ) : connection.status === "interested" &&
+                          connection.fromUserId?.toString() !==
+                            profileData._id?.toString() ? (
+                          <div className="flex flex-col items-center justify-center rounded-md bg-yellow-500 px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90">
+                            <p className="text-lg font-bold">Pending</p>
+                          </div>
+                        ) : connection.status === "interested" &&
+                          connection.fromUserId?.toString() ===
+                            profileData._id?.toString() ? (
+                          <div
+                            className="flex items-center justify-center gap-2 rounded-md bg-blue-500 px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
+                          >
+                            <p className="text-lg font-bold">Interested</p>
+                          </div>
+                        ) : connection.status === "ignored" &&
+                          connection.fromUserId?.toString() ===
+                            profileData._id?.toString() ? (
+                          <div className="flex flex-col items-center justify-center rounded-md bg-gray-500 px-5 py-2 transition-all duration-200 ease-in-out">
+                            <p className="text-lg font-bold">Ignored</p>
+                          </div>
+                        ) : connection.status === "rejected" &&
+                          connection.fromUserId?.toString() ===
+                            profileData._id?.toString() ? (
+                          <div className="flex flex-col items-center justify-center rounded-md bg-red-500 px-5 py-2 transition-all duration-200 ease-in-out">
+                            <p className="text-lg font-bold">Rejected</p>
+                          </div>
+                        ) : connection.status === "rejected" &&
+                          connection.fromUserId?.toString() !==
+                            profileData._id?.toString() ? (
+                          <div className="flex flex-col items-center justify-center rounded-md bg-yellow-500 px-5 py-2 transition-all duration-200 ease-in-out">
+                            <p className="text-lg font-bold">Pending</p>
+                          </div>
+                        ) : null
+                      ) : (
+                        <div className="flex flex-col gap-4">
+                          <div
+                            className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
+                          >
+                            <p className="text-lg font-bold">Interested</p>
+                          </div>
+                          <div
+                            className="flex flex-col items-center justify-center rounded-md bg-secondary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
+                          >
+                            <p className="text-lg font-bold">Ignore</p>
+                          </div>
                         </div>
                       )
+                    ) : (
+                      <div className="flex flex-col items-center justify-center rounded-md bg-red-400 px-5 py-2 transition-all duration-200 ease-in-out">
+                        <p className="text-lg font-bold">
+                          Please log in to proceed
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -291,35 +306,6 @@ const UserProfile = () => {
             </div>
           </div>
         </div>
-        {/* <div className="m-10 flex flex-col items-center justify-center">
-          <h2 className="-mb-10 inline-block text-center text-3xl font-extrabold sm:mb-20 md:mb-24 lg:mb-20">
-            This is how{" "}
-            <span className="relative">
-              Your Profile{" "}
-              <svg
-                viewBox="0 0 687 155"
-                className="absolute -bottom-3 right-4 w-40 text-primary 2xs:right-16 xs:right-4"
-              >
-                <g
-                  stroke="currentColor"
-                  strokeWidth="7"
-                  fill="none"
-                  fillRule="evenodd"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path
-                    d="M20 98c27-13.3333333 54-20 81-20 40.5 0 40.5 20 81 20s40.626917-20 81-20 40.123083 20 80.5 20 40.5-20 81-20 40.5 20 81 20 40.626917-20 81-20c26.915389 0 53.748722 6.6666667 80.5 20"
-                    opacity=".3"
-                  ></path>
-                  <path d="M20 118c27-13.3333333 54-20 81-20 40.5 0 40.5 20 81 20s40.626917-20 81-20 40.123083 20 80.5 20 40.5-20 81-20 40.5 20 81 20 40.626917-20 81-20c26.915389 0 53.748722 6.6666667 80.5 20"></path>
-                </g>
-              </svg>
-            </span>{" "}
-            will look like to other
-          </h2>
-          <Card user={profileData} />
-        </div> */}
       </>
     )
   );

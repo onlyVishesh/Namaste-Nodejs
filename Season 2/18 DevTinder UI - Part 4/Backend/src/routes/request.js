@@ -599,6 +599,63 @@ requestRouter.delete(
   }
 );
 
+requestRouter.delete(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ success: false, error: "Unauthorized. Please login again." });
+      }
+
+      const { status, requestId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid request ID" });
+      }
+
+      // Find the connection request with the given requestId
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        status: status,
+      });
+
+      if (!connectionRequest) {
+        return res.status(400).json({
+          success: false,
+          error: "Connection request does not exist or is not ignored",
+        });
+      }
+
+      if (
+        connectionRequest.fromUserId.toString() === loggedInUser._id.toString()
+      ) {
+        const { deletedCount } = await ConnectionRequest.deleteOne({
+          _id: requestId,
+        });
+
+        if (deletedCount >= 1) {
+          return res
+            .status(200)
+            .json({ success: true, message: "Connection request deleted" });
+        } else {
+          return res.status(400).json({
+            success: false,
+            error: "Failed to delete connection request",
+          });
+        }
+      }
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
+
 //* To remove connection by potentially swap users or set the status to "interested"
 requestRouter.patch(
   "/request/review/removeConnection/:requestId",
@@ -749,12 +806,10 @@ requestRouter.patch(
 
       await connectionRequest.save();
 
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Connection request moved to interested",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Connection request moved to interested",
+      });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
     }

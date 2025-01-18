@@ -58,6 +58,8 @@ authRouter.post("/signup", async (req, res) => {
     }
 
     //? Need to add email otp verification
+    const token = user.getJWT();
+    res.cookie("token", token);
 
     await user.save();
     res
@@ -111,7 +113,7 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", async (req, res) => {
   //* expiring cookie to logout user
   res.cookie("token", "", {
-    expires: new Date(0), 
+    expires: new Date(0),
     httpOnly: true, // Ensure it's not accessible via JavaScript
     path: "/",
   });
