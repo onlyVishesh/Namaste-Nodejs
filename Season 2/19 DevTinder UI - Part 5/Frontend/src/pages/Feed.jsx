@@ -1,16 +1,18 @@
+/* eslint-disable react/prop-types */
 import axios from "axios";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import Card from "../components/Card";
 import { addFeed, removeRequest } from "../utils/feedSlice";
 
 // Wrapping the Card with motion and handling style
-const MotionCard = ({ user, index, totalCards, setRequestRef }) => {
+const MotionCard = ({ user, index, totalCards, requestRef }) => {
   const dispatch = useDispatch();
-  const x = useMotionValue(0); // Motion value for x-axis dragging
-  const opacity = useTransform(x, [-250, 0, 250], [0, 1, 0]);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const opacity = useTransform(x, [-250, 0, 250], [0.5, 1, 0.5]);
   const rotateRaw = useTransform(x, [-250, 250], [-18, 18]);
   const rotate = useTransform(() => {
     const offset = index === 0 ? 0 : index % 2 ? 3 : -3;
@@ -18,12 +20,21 @@ const MotionCard = ({ user, index, totalCards, setRequestRef }) => {
   });
 
   const handleDrag = () => {
+    console.log("y:" + y.get());
+    console.log("x:" + x.get());
+    if (y < -100) {
+      x.set(0);
+    } else if (x > 100 || x < -100) {
+      y.set(0);
+    }
     if (x.get() > 150) {
-      setRequestRef("Interested");
+      requestRef.current.textContent = "Interested";
     } else if (x.get() < -150) {
-      setRequestRef("Ignore");
+      requestRef.current.textContent = "Ignore";
+    } else if (y.get() < -100) {
+      requestRef.current.textContent = "skip";
     } else {
-      setRequestRef("Swipe");
+      requestRef.current.textContent = "Swipe";
     }
   };
 
@@ -34,20 +45,27 @@ const MotionCard = ({ user, index, totalCards, setRequestRef }) => {
     } else if (x.get() < -200) {
       console.log("left");
       dispatch(removeRequest(user._id));
+    } else if (y.get() < -250) {
+      console.log("up");
+      dispatch(removeRequest(user._id));
     } else {
       x.set(0);
+      y.set(0);
     }
     x.stop();
+    y.stop();
+    requestRef.current.textContent = "Swipe";
   };
 
   return (
     <motion.div
-      drag={index === 0 ? "x" : false}
-      dragConstraints={{ left: -150, right: 150 }}
+      drag
+      dragConstraints={{ left: -150, right: 150, top: -250, bottom: 0 }}
       style={{
         gridRow: 1,
         gridColumn: 1,
         x,
+        y,
         opacity,
         rotate,
         zIndex: totalCards - index,
@@ -58,8 +76,9 @@ const MotionCard = ({ user, index, totalCards, setRequestRef }) => {
         scale: index === 0 ? 1 : 0.98,
       }}
       layout
+      dragTransition={{ bounceStiffness: 600, bounceDamping: 10 }}
       transition={{ type: "spring", damping: 15, stiffness: 250 }}
-      // onDrag={handleDrag} ]]]
+      onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       className={`origin-bottom rounded-lg hover:cursor-grab active:cursor-grabbing ${index === 0 ? "" : ""}`}
     >
@@ -72,10 +91,9 @@ const Feed = () => {
   const dispatch = useDispatch();
   const feed = useSelector((store) => store.feed);
   const [page, setPage] = useState(1);
-  const [request, setRequest] = useState("Swipe");
 
   // Using useRef to store the swipe status
-  const requestRef = useRef(request);
+  const requestRef = useRef(null);
 
   const getFeed = async (pageNumber) => {
     try {
@@ -100,12 +118,6 @@ const Feed = () => {
     }
   }, [feed]);
 
-  const setRequestRef = (status) => {
-    // Update the requestRef without causing re-renders
-    requestRef.current = status;
-    setRequest(status); // Update the state once the drag ends or status changes significantly
-  };
-
   if (feed.length === 0 && page < 3)
     return (
       <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden">
@@ -115,7 +127,7 @@ const Feed = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden">
-      <div className="relative grid place-items-center">
+      <div className="relative grid place-items-center gap-5">
         {feed &&
           feed.map((user, index) => (
             <MotionCard
@@ -123,10 +135,12 @@ const Feed = () => {
               user={user}
               index={index}
               totalCards={feed.length}
-              setRequestRef={setRequestRef} // Pass the setRequestRef function to avoid re-rendering on each drag
+              requestRef={requestRef}
             />
           ))}
-        <p>{request}</p> {/* Display the current swipe status */}
+        <p ref={requestRef} className="text-xl">
+          {feed.length !== 0 && "Swipe"}
+        </p>
         {feed.length === 0 && (
           <div className="text-center text-2xl font-bold">
             You Have swiped all the users. Try again later...
