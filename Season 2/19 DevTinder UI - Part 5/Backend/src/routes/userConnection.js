@@ -99,7 +99,7 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
 userRouter.get("/user/totalStatus/:userId", userAuth, async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     //* finding all the connections
     const connections = await ConnectionRequest.countDocuments({
       $or: [
@@ -275,6 +275,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         "skills",
         "gender",
         "status",
+        "banner",
       ])
       //* adding paging
       .skip((page - 1) * limit)

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { abbreviateNumber, capitalize } from "../utils/constants";
 
 // eslint-disable-next-line react/prop-types
-const Card = ({ user }) => {
+const Card = ({ user, index = 0 }) => {
   const [expanded, setExpanded] = useState(false);
   const cardRef = useRef(null);
   const [requestCount, setRequestCount] = useState(null);
@@ -71,10 +71,16 @@ const Card = ({ user }) => {
 
   return (
     <div
-      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary shadow-lg shadow-shadow transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-24 lg:h-[450px] lg:w-[380px] lg:hover:h-[500px] xl:mt-0 xl:h-[500px] xl:w-[500px] xl:hover:h-[600px]"
+      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-24 lg:h-[450px] lg:w-[380px] lg:hover:h-[500px] xl:mt-0 xl:h-[500px] xl:w-[500px] xl:hover:h-[600px]"
       ref={cardRef}
+      style={{
+        boxShadow:
+          index === 0
+            ? "0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5)"
+            : undefined,
+      }}
     >
-      <div className="bg-primary/20 absolute -top-12 left-1/2 size-48 -translate-x-1/2 overflow-hidden rounded-2xl bg-opacity-20 bg-clip-padding shadow-sm shadow-cardBg backdrop-blur-lg backdrop-filter transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
+      <div className="bg-primary/20 absolute -top-12 left-1/2 z-10 size-48 -translate-x-1/2 overflow-hidden rounded-full bg-opacity-20 bg-clip-padding shadow-sm shadow-cardBg backdrop-blur-lg backdrop-filter transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
         <img
           draggable="false"
           src={
@@ -82,21 +88,29 @@ const Card = ({ user }) => {
             "https://cdn-icons-png.flaticon.com/512/149/149071.png"
           }
           alt=""
-          className="absolute left-0 top-0 size-full object-cover"
+          className="absolute left-0 top-0 size-full object-cover drop-shadow-lg"
         />
       </div>
+      <div className="absolute mb-5 w-full overflow-hidden transition-all duration-700">
+        <img
+          src={user?.banner}
+          draggable="false"
+          alt="banner"
+          className="h-40 w-full overflow-hidden rounded-lg object-cover transition-[height] duration-[600ms] group-hover:h-[200px] md:h-56 md:group-hover:h-[275px] lg:h-44 lg:group-hover:h-[225px] xl:h-60 xl:group-hover:h-[300px]"
+        />
+      </div>
+
       <div className="mx-auto flex h-[85%] w-10/12 flex-col items-center justify-end gap-1 xl:h-[87%]">
-        <h2 className="text-center text-2xl font-bold md:text-3xl">
+        <h2 className="line-clamp-1 text-center text-2xl font-bold md:text-3xl">
           {user?.lastName?.length > 14
             ? user?.firstName +
               " " +
               capitalize(user?.lastName.slice(0, 14) + "...")
             : capitalize(user?.firstName) + " " + capitalize(user?.lastName)}
-
-          <p className="-mt-1 font-normal text-textMuted md:text-lg">
-            @{user.username}
-          </p>
         </h2>
+        <p className="-mt-1 line-clamp-1 font-normal text-textMuted md:text-lg">
+          @{user.username}
+        </p>
         <div className="relative flex w-full items-center justify-evenly gap-2">
           <button
             onClick={scrollLeft}
