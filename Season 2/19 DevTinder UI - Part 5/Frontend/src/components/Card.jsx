@@ -71,7 +71,7 @@ const Card = ({ user, index = 0 }) => {
 
   return (
     <div
-      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-24 lg:h-[450px] lg:w-[380px] lg:hover:h-[500px] xl:mt-0 xl:h-[500px] xl:w-[500px] xl:hover:h-[600px]"
+      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-24 lg:h-[450px] lg:w-[380px] lg:hover:h-[500px] xl:mt-0 xl:h-[600px] xl:w-[500px] xl:hover:h-[650px]"
       ref={cardRef}
       style={{
         boxShadow:
@@ -111,6 +111,8 @@ const Card = ({ user, index = 0 }) => {
         <p className="-mt-1 line-clamp-1 font-normal text-textMuted md:text-lg">
           @{user.username}
         </p>
+        <div className="line-clamp-2">{user.headline}</div>
+
         <div className="relative flex w-full items-center justify-evenly gap-2">
           <button
             onClick={scrollLeft}
@@ -152,6 +154,7 @@ const Card = ({ user, index = 0 }) => {
               )}
             </ul>
           </div>
+
           <button
             onClick={scrollRight}
             className="transform rounded-full bg-cardBg p-1 text-text shadow-md transition duration-300 hover:scale-110"

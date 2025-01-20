@@ -53,3 +53,25 @@
   --color-shadow: rgba(0, 0, 0, 0.2); /* Light Shadow for elements */
   --color-light-gray: #e5e7eb; /* Lighter Gray (use for backgrounds or light text) */
 }
+
+.rc-md-editor .editor-container .sec-md .input {
+  background: var(--color-bg) !important;
+  border: 0px solid black !important;
+  color: var(--color-text) !important;
+
+}
+
+.sec-md,
+.sec-html {
+  background: var(--color-bg) !important;
+  border: 0px solid black !important;
+}
+
+.rc-md-editor {
+  background: var(--color-bg) !important;
+  border: 0px solid black !important;
+}
+
+.custom-html-style {
+  color: var(--color-text) !important;
+}

@@ -1,7 +1,9 @@
 import axios from "axios";
+import MarkdownIt from "markdown-it";
 import { useEffect, useRef, useState } from "react";
 import { IoMdSettings } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
+import MdEditor from "react-markdown-editor-lite";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -9,6 +11,8 @@ import Card from "../components/Card";
 import Model from "../components/Model";
 import { abbreviateNumber, capitalize } from "../utils/constants";
 import { addUser } from "../utils/userSlice";
+// import style manually
+import "react-markdown-editor-lite/lib/index.css";
 
 const Profile = () => {
   const [showSettingMenu, setShowSettingMenu] = useState(false);
@@ -19,6 +23,19 @@ const Profile = () => {
   const dispatch = useDispatch();
   const [profileData, setProfileData] = useState(null);
   const [requestCount, setRequestCount] = useState(null);
+  const mdParser = new MarkdownIt();
+  const [writing, setWriting] = useState(true);
+
+  // This function can convert File object to a datauri string
+  function onImageUpload(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (data) => {
+        resolve(data.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   useEffect(() => {
     setProfileData(user);
@@ -311,7 +328,7 @@ const Profile = () => {
                     </p>
 
                     <p className="text-xl font-semibold text-textMuted">
-                      @{profileData?.username}
+                      {profileData?.username && "@" + profileData.username}
                     </p>
                     <p className="flex items-center text-center text-xl">
                       <span className="pr-2">
@@ -393,6 +410,7 @@ const Profile = () => {
                       </span>
                     </p>
                   </div>
+
                   <div className="block text-right">
                     <p
                       className={`flex items-center justify-center sm:gap-2 ${isEditProfile ? "flex-col pt-3 sm:justify-start xl:flex-row" : ""}`}
@@ -424,10 +442,42 @@ const Profile = () => {
                         </span>
                       )}
                     </p>
-                    {/* <div className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90">
-                  <p className="text-lg font-bold">Follow</p>
-                </div> */}
                   </div>
+                </div>
+
+                <div className="relative w-full">
+                  {isEditProfile ? (
+                    <>
+                      <textarea
+                        className="mt-5 w-full rounded-md border px-2 py-1"
+                        value={profileData?.headline}
+                        rows="3"
+                        maxLength={220}
+                        onChange={(e) => {
+                          setProfileData({
+                            ...profileData,
+                            headline: e.target.value,
+                          });
+                        }}
+                      />
+                      <p
+                        className={`absolute bottom-3 right-2 text-sm ${
+                          profileData?.headline?.length > 200
+                            ? "text-error"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {profileData?.headline?.length
+                          ? 220 - profileData?.headline?.length
+                          : 220}{" "}
+                        char left
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-md lg:w-11/12">
+                      {profileData?.headline}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
@@ -457,7 +507,7 @@ const Profile = () => {
                     <>
                       <input
                         className="w-full rounded-md border px-2 py-2"
-                        value={profileData?.skills.join(", ")}
+                        value={profileData?.skills?.join(", ")}
                         onChange={(e) => {
                           setProfileData({
                             ...profileData,
@@ -488,20 +538,20 @@ const Profile = () => {
 
                       <p
                         className={`absolute bottom-6 right-2 text-sm ${
-                          profileData?.skills.length > 3
+                          profileData?.skills?.length > 3
                             ? "text-error"
                             : "text-gray-500"
                         }`}
                       >
-                        {profileData?.skills.length >= 15
+                        {profileData?.skills?.length >= 15
                           ? "0 Skill"
-                          : profileData?.skills.length >= 14
+                          : profileData?.skills?.length >= 14
                             ? "1 Skill"
-                            : 15 - profileData?.skills.length + " Skills"}{" "}
+                            : 15 - profileData?.skills?.length + " Skills"}{" "}
                         left
                       </p>
 
-                      {profileData?.skills.length >= 15 ? (
+                      {profileData?.skills?.length >= 15 ? (
                         <p className="mt-1 text-sm text-red-500">
                           You can only add up to 15 skills.
                         </p>
@@ -530,24 +580,61 @@ const Profile = () => {
                     </ul>
                   )}
                 </div>
-
-                <div className="relative w-full">
+                <div className="relative w-full mb-5">
                   <h2 className="pb-2 text-2xl font-bold">About</h2>
                   {isEditProfile ? (
                     <>
-                      <textarea
-                        className="w-full rounded-md border px-2 py-1"
-                        value={profileData?.about}
-                        maxLength={500}
-                        onChange={(e) => {
-                          setProfileData({
-                            ...profileData,
-                            about: e.target.value,
-                          });
-                        }}
-                      />
+                      <div className="flex gap-3">
+                        <button
+                          className={`${writing ? "border-b-[1px] border-primary bg-bg" : ""} rounded-t-md px-2 py-1 transition-[background] duration-300`}
+                          onClick={() => {
+                            setWriting(true);
+                            console.log(writing);
+                          }}
+                        >
+                          Write
+                        </button>
+                        <button
+                          className={`${!writing ? "border-b-[1px] border-primary bg-bg" : ""} rounded-t-md px-2 py-1 transition-[background] duration-300`}
+                          onClick={() => {
+                            setWriting(false);
+                            console.log(writing);
+                          }}
+                        >
+                          Preview
+                        </button>
+                      </div>
+                      {writing && (
+                        <MdEditor
+                          value={profileData.about}
+                          onChange={({ text }) => {
+                            setProfileData({
+                              ...profileData,
+                              about: text,
+                            });
+                          }}
+                          view={{ menu: false, md: true, html: false }}
+                          onImageUpload={onImageUpload}
+                          className="custom-markdown-editor h-96 rounded-md"
+                          renderHTML={(text) => mdParser.render(text)}
+                          markdownClass=""
+                        />
+                      )}
+                      {!writing && (
+                        <MdEditor
+                          value={profileData.about}
+                          view={{ menu: false, md: false, html: true }}
+                          className="h-96 rounded-md"
+                          renderHTML={(text) => mdParser.render(text)}
+                          style={{
+                            backgroundColor: "var(--color-bg)",
+                            border: "0px solid var(--color-bg)",
+                          }}
+                        />
+                      )}
+
                       <p
-                        className={`absolute bottom-3 right-2 text-sm ${
+                        className={`absolute bg-bg w-full -bottom-6 rounded-b-md text-right px-6 py-1 text-sm ${
                           profileData?.about?.length > 420
                             ? "text-error"
                             : "text-gray-500"
@@ -560,9 +647,16 @@ const Profile = () => {
                       </p>
                     </>
                   ) : (
-                    <p className="rounded-md bg-bg px-5 py-3">
-                      {profileData?.about || "No information provided."}
-                    </p>
+                    <MdEditor
+                      value={profileData.about || "No information provided."}
+                      view={{ menu: false, md: false, html: true }}
+                      className="rounded-md"
+                      renderHTML={(text) => mdParser.render(text)}
+                      style={{
+                        backgroundColor: "var(--color-bg)",
+                        border: "0px solid var(--color-bg)",
+                      }}
+                    />
                   )}
                 </div>
                 {isEditProfile && (

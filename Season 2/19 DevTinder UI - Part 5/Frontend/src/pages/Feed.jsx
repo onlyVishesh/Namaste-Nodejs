@@ -12,10 +12,17 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
   const dispatch = useDispatch();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const opacity = useTransform(x, [-250, 0, 250], [0.5, 1, 0.5]);
+  const combinedOpacity = useTransform([x, y], ([latestX, latestY]) => {
+    const opacityFromX =
+      latestX >= -250 && latestX <= 250 ? 1 - Math.abs(latestX) / 700 : 0.7;
+    const opacityFromY =
+      latestY >= -150 && latestY <= 150 ? 1 - Math.abs(latestY) / 700 : 0.7;
+    return Math.min(opacityFromX, opacityFromY);
+  });
+
   const rotateRaw = useTransform(x, [-250, 250], [-18, 18]);
   const rotate = useTransform(() => {
-    const offset = index === 0 ? 0 : index % 2 ? 3 : -3;
+    const offset = index === 0 ? 0 : index % 2 ? 4 : -4;
     return rotateRaw.get() + offset;
   });
 
@@ -66,7 +73,7 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
         gridColumn: 1,
         x,
         y,
-        opacity,
+        opacity: combinedOpacity,
         rotate,
         zIndex: totalCards - index,
         transition: "0.125s transform",
@@ -80,7 +87,7 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
       transition={{ type: "spring", damping: 15, stiffness: 250 }}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      className={`origin-bottom rounded-lg hover:cursor-grab active:cursor-grabbing ${index === 0 ? "" : ""}`}
+      className={`origin-bottom rounded-lg hover:cursor-grab active:cursor-grabbing`}
     >
       <Card user={user} index={index} />
     </motion.div>

@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
-import { useEffect, useState } from "react";
+import MarkdownIt from "markdown-it";
+import { useEffect, useRef, useState } from "react";
+import { BsThreeDots } from "react-icons/bs";
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -13,6 +17,9 @@ const UserProfile = () => {
   const [profileData, setProfileData] = useState(null);
   const [requestCount, setRequestCount] = useState(null);
   const [connection, setConnection] = useState(null);
+  const menuRef = useRef();
+  const [showConnection, setShowConnection] = useState(false);
+  const mdParser = new MarkdownIt();
 
   const navigate = useNavigate();
 
@@ -45,7 +52,9 @@ const UserProfile = () => {
   const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/totalStatus/" + profileData._id,
+        import.meta.env.VITE_BackendURL +
+          "/user/totalStatus/" +
+          profileData._id,
         { withCredentials: true },
       );
       if (res.data.success === false) {
@@ -82,7 +91,6 @@ const UserProfile = () => {
     }
   };
 
-
   useEffect(() => {
     if (user?.username === userId) {
       return navigate("/profile");
@@ -95,7 +103,6 @@ const UserProfile = () => {
     if (profileData?._id) {
       userConnection();
       getRequestCount();
-
     }
   }, [profileData]);
 
@@ -176,7 +183,9 @@ const UserProfile = () => {
                     </p>
                   </div>
                   <div className="block space-y-2 text-right">
-                    <p className={`flex items-center justify-center sm:gap-2`}>
+                    <p
+                      className={`flex items-center justify-center gap-1 sm:gap-2`}
+                    >
                       Status:
                       <span
                         className={
@@ -203,9 +212,7 @@ const UserProfile = () => {
                         ) : connection.status === "interested" &&
                           connection.fromUserId?.toString() ===
                             profileData._id?.toString() ? (
-                          <div
-                            className="flex items-center justify-center gap-2 rounded-md bg-blue-500 px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
-                          >
+                          <div className="flex items-center justify-center gap-2 rounded-md bg-blue-500 px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90">
                             <p className="text-lg font-bold">Interested</p>
                           </div>
                         ) : connection.status === "ignored" &&
@@ -228,17 +235,22 @@ const UserProfile = () => {
                           </div>
                         ) : null
                       ) : (
-                        <div className="flex flex-col gap-4">
-                          <div
-                            className="flex flex-col items-center justify-center rounded-md bg-primary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
-                          >
-                            <p className="text-lg font-bold">Interested</p>
-                          </div>
-                          <div
-                            className="flex flex-col items-center justify-center rounded-md bg-secondary px-5 py-2 transition-all duration-200 ease-in-out hover:scale-105 hover:cursor-pointer hover:opacity-90"
-                          >
-                            <p className="text-lg font-bold">Ignore</p>
-                          </div>
+                        <div className="relative flex justify-end">
+                          <BsThreeDots
+                            ref={menuRef}
+                            className="size-8 cursor-pointer rounded-full bg-cardBg p-2 duration-300 hover:scale-105"
+                            onClick={() => setShowConnection(!showConnection)}
+                          />
+                          {showConnection && (
+                            <div className="absolute right-0 top-10 flex flex-col items-center justify-center gap-2 rounded-md bg-cardBg">
+                              <button className="flex w-full gap-5 text-nowrap rounded-md px-3 py-2 hover:bg-hover">
+                                Interested ?
+                              </button>
+                              <button className="flex w-full items-center justify-center gap-2 text-nowrap rounded-md bg-cardBg px-3 py-2 hover:bg-gray-500 hover:bg-hover">
+                                Ignore User
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )
                     ) : (
@@ -250,6 +262,7 @@ const UserProfile = () => {
                     )}
                   </div>
                 </div>
+                <p className="text-md lg:w-11/12">{profileData?.headline}</p>
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
                     <p className="-mb-1 text-xl font-bold">
@@ -272,6 +285,7 @@ const UserProfile = () => {
                     <p className="text-lg text-textMuted">Following</p>
                   </div>
                 </div>
+
                 <div className="relative w-full">
                   <h2 className="pb-2 text-2xl font-bold">Skills</h2>
                   {
@@ -297,9 +311,16 @@ const UserProfile = () => {
                 <div className="relative w-full">
                   <h2 className="pb-2 text-2xl font-bold">About</h2>
                   {
-                    <p className="rounded-md bg-bg px-5 py-3">
-                      {profileData?.about || "No information provided."}
-                    </p>
+                    <MdEditor
+                      value={profileData.about || "No information provided."}
+                      view={{ menu: false, md: false, html: true }}
+                      className="rounded-md"
+                      renderHTML={(text) => mdParser.render(text)}
+                      style={{
+                        backgroundColor: "var(--color-bg)",
+                        border: "0px solid var(--color-bg)",
+                      }}
+                    />
                   }
                 </div>
               </div>

@@ -8,6 +8,20 @@ require("dotenv").config;
 // Define the User schema
 // Added new validations and SchemaTypes
 
+const bannerUrls = [
+  "https://images.all-free-download.com/images/graphicwebp/abstract_beach_cloud_dawn_evening_horizontal_599086.webp",
+  "https://images.unsplash.com/photo-1598449356475-b9f71db7d847?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1543304216-b46be324b571?q=80&w=2181&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://cdn.fstoppers.com/styles/full/s3/media/2020/12/21/nando-vertical-horizontal-11.jpg",
+  "https://plus.unsplash.com/premium_photo-1672116453014-58e0b56aa14c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://plus.unsplash.com/premium_photo-1672116452619-59897f28a938?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+];
+
+const getRandomBanner = () => {
+  const randomIndex = Math.floor(Math.random() * bannerUrls.length);
+  return bannerUrls[randomIndex];
+};
+
 const userSchema = new Schema(
   {
     username: {
@@ -86,8 +100,12 @@ const userSchema = new Schema(
         },
         message: "Give string is not an URL",
       },
-      default:
-        "https://cdn.fstoppers.com/styles/full/s3/media/2020/12/21/nando-vertical-horizontal-11.jpg",
+      default: getRandomBanner(),
+    },
+    headline: {
+      type: String,
+      maxLength: [220, "Too many words"],
+      trim: true,
     },
     about: {
       type: String,
