@@ -13,7 +13,6 @@ import { abbreviateNumber, capitalize } from "../utils/constants";
 const UserProfile = () => {
   const { userId } = useParams();
   const user = useSelector((store) => store.user);
-  console.log(user);
   const [profileData, setProfileData] = useState(null);
   const [requestCount, setRequestCount] = useState(null);
   const [connection, setConnection] = useState(null);
@@ -82,7 +81,6 @@ const UserProfile = () => {
 
       if (res.data.success) {
         setConnection(res.data.connectionRequest);
-        console.log(connection);
       } else {
         toast.error(res.data.message || "Error fetching connection status");
       }
@@ -143,43 +141,6 @@ const UserProfile = () => {
 
                     <p className="text-xl font-semibold text-textMuted">
                       @{profileData?.username}
-                    </p>
-                    <p className="flex items-center text-center text-xl">
-                      <span className="pr-2">
-                        {
-                          <>
-                            {profileData?.age && profileData?.gender ? (
-                              <>
-                                {profileData?.age > 0 && (
-                                  <span className="pr-2">
-                                    {profileData?.age}
-                                  </span>
-                                )}
-                                <span className="font-bold text-textMuted">
-                                  {" "}
-                                  |{" "}
-                                </span>
-                                {profileData?.gender && (
-                                  <span className="pl-2">
-                                    {capitalize(profileData?.gender)}
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                {profileData?.age > 0 && (
-                                  <span className="">{profileData?.age}</span>
-                                )}
-                                {profileData?.gender && (
-                                  <span className="">
-                                    {capitalize(profileData?.gender)}
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </>
-                        }
-                      </span>
                     </p>
                   </div>
                   <div className="block space-y-2 text-right">
@@ -262,9 +223,14 @@ const UserProfile = () => {
                     )}
                   </div>
                 </div>
-                <p className="text-md lg:w-11/12">{profileData?.headline}</p>
+                {profileData?.headline && (
+                  <p className="text-md -mt-2 rounded-md bg-bg px-2 py-1 lg:w-9/12">
+                    {profileData?.headline}
+                  </p>
+                )}
+
                 <div className="flex gap-5">
-                  <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
+                  <button className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2 transition-all hover:scale-105">
                     <p className="-mb-1 text-xl font-bold">
                       {requestCount?.following !== null &&
                       requestCount?.following !== undefined
@@ -272,9 +238,9 @@ const UserProfile = () => {
                         : "NA"}
                     </p>
 
-                    <p className="text-lg text-textMuted">Follow</p>
-                  </div>
-                  <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
+                    <p className="text-lg text-textMuted">Followers</p>
+                  </button>
+                  <button className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2 transition-all hover:scale-105">
                     <p className="-mb-1 text-xl font-bold">
                       {requestCount?.followers !== null &&
                       requestCount?.followers !== undefined
@@ -283,7 +249,7 @@ const UserProfile = () => {
                     </p>
 
                     <p className="text-lg text-textMuted">Following</p>
-                  </div>
+                  </button>
                 </div>
 
                 <div className="relative w-full">

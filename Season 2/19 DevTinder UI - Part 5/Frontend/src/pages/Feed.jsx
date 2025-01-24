@@ -2,7 +2,7 @@
 import axios from "axios";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { FaSpinner } from "react-icons/fa";
+import { FaSpinner, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import Card from "../components/Card";
 import { addFeed, removeRequest } from "../utils/feedSlice";
@@ -14,21 +14,21 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
   const y = useMotionValue(0);
   const combinedOpacity = useTransform([x, y], ([latestX, latestY]) => {
     const opacityFromX =
-      latestX >= -250 && latestX <= 250 ? 1 - Math.abs(latestX) / 700 : 0.7;
+      latestX >= -250 && latestX <= 250 ? 1 - Math.abs(latestX) / 1250 : 0.8;
     const opacityFromY =
-      latestY >= -150 && latestY <= 150 ? 1 - Math.abs(latestY) / 700 : 0.7;
-    return Math.min(opacityFromX, opacityFromY);
+      latestY >= -150 && latestY <= 150 ? 1 - Math.abs(latestY) / 1000 : 0.8;
+    return Math.max(0.8, Math.min(opacityFromX, opacityFromY));
   });
 
+  const scaleThumbsUp = useTransform(x, [0, 150, 225], [0, 0, 4]);
+  const scaleThumbsDown = useTransform(x, [-225, -150, 0], [4, 0, 0]);
   const rotateRaw = useTransform(x, [-250, 250], [-18, 18]);
   const rotate = useTransform(() => {
-    const offset = index === 0 ? 0 : index % 2 ? 4 : -4;
+    const offset = index === 0 ? 0 : index % 2 ? 3 : -3;
     return rotateRaw.get() + offset;
   });
 
   const handleDrag = () => {
-    console.log("y:" + y.get());
-    console.log("x:" + x.get());
     if (y < -100) {
       x.set(0);
     } else if (x > 100 || x < -100) {
@@ -87,9 +87,21 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
       transition={{ type: "spring", damping: 15, stiffness: 250 }}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      className={`origin-bottom rounded-lg hover:cursor-grab active:cursor-grabbing`}
+      className={`relative !origin-bottom rounded-lg hover:cursor-grab active:cursor-grabbing`}
     >
       <Card user={user} index={index} />
+      <motion.div
+        className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+        style={{ scale: scaleThumbsUp }}
+      >
+        <FaThumbsUp className="text-5xl text-accent1" />
+      </motion.div>
+      <motion.div
+        className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+        style={{ scale: scaleThumbsDown }}
+      >
+        <FaThumbsDown className="text-5xl text-accent3" />
+      </motion.div>
     </motion.div>
   );
 };
@@ -108,7 +120,6 @@ const Feed = () => {
         `${import.meta.env.VITE_BackendURL}/feed?page=${pageNumber}&limit=5`,
         { withCredentials: true },
       );
-      console.log(res.data.users);
       dispatch(addFeed(res?.data?.users));
     } catch (err) {
       console.log(err);
@@ -145,7 +156,17 @@ const Feed = () => {
               requestRef={requestRef}
             />
           ))}
-        <p ref={requestRef} className="text-xl">
+        <p
+          id="action"
+          ref={requestRef}
+          className={`text-xl font-bold ${
+            requestRef.current?.textContent === "Interested"
+              ? "text-green-500"
+              : requestRef.current?.textContent === "Ignore"
+                ? "text-red-500"
+                : "text-gray-500"
+          }`}
+        >
           {feed.length !== 0 && "Swipe"}
         </p>
         {feed.length === 0 && (

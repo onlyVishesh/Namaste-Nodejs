@@ -58,6 +58,7 @@
   background: var(--color-bg) !important;
   border: 0px solid black !important;
   color: var(--color-text) !important;
+  border-radius: 30px !important;
 
 }
 
@@ -65,6 +66,8 @@
 .sec-html {
   background: var(--color-bg) !important;
   border: 0px solid black !important;
+  border-radius: 30px !important;
+
 }
 
 .rc-md-editor {

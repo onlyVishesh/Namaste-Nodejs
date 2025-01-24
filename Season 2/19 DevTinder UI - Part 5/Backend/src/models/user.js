@@ -109,7 +109,7 @@ const userSchema = new Schema(
     },
     about: {
       type: String,
-      maxLength: [500, "Too many words"],
+      maxLength: [1200, "Too many words"],
       trim: true,
     },
     skills: {
@@ -121,22 +121,6 @@ const userSchema = new Schema(
         message:
           "Too many skills, make number of skills less than or equal to 15",
       },
-    },
-    dateOfBirth: {
-      type: Date,
-      // need to add minimum zero year old and max 150 years
-    },
-    age: {
-      type: Number,
-      get: function () {
-        if (!this.dateOfBirth) return null;
-        const diff = Date.now() - this.dateOfBirth.getTime();
-        return Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
-      },
-    },
-    gender: {
-      type: String,
-      enum: ["male", "female"],
     },
     role: {
       type: String,

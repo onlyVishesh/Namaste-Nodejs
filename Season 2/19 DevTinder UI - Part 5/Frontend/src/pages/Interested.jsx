@@ -23,7 +23,6 @@ const Interested = () => {
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        console.log(res.data.user);
         dispatch(addInterestedRequests(res.data.user));
         setTotalPages(res.data.pagination.totalPages);
       }

@@ -22,6 +22,14 @@ const Profile = () => {
   const [requestCount, setRequestCount] = useState(null);
   const [isBannerModelShow, setIsBannerModelShow] = useState(false);
   const [isAvatarModelShow, setIsAvatarModelShow] = useState(false);
+  const [tempBanner, setTempBanner] = useState(
+    profileData?.banner ||
+      "https://cdn.fstoppers.com/styles/full/s3/media/2020/12/21/nando-vertical-horizontal-11.jpg",
+  );
+  const [tempAvatar, setTempAvatar] = useState(
+    profileData?.avatar ||
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+  );
 
   const [skills, setSkills] = useState(null);
   const skillsCache = useSelector((store) => store.skills);
@@ -40,31 +48,6 @@ const Profile = () => {
   useEffect(() => {
     setProfileData(user);
   }, [user]);
-
-  const [tempBanner, setTempBanner] = useState(
-    profileData?.banner ||
-      "https://cdn.fstoppers.com/styles/full/s3/media/2020/12/21/nando-vertical-horizontal-11.jpg",
-  );
-  const [tempAvatar, setTempAvatar] = useState(
-    profileData?.avatar ||
-      "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-  );
-
-  useEffect(() => {
-    if (profileData?.dateOfBirth) {
-      const dob = new Date(profileData.dateOfBirth);
-      const ageDiff = Date.now() - dob.getTime();
-      const age = Math.floor(ageDiff / (365.25 * 24 * 60 * 60 * 1000));
-      setProfileData((prevData) => ({
-        ...prevData,
-        age,
-      }));
-    } else
-      setProfileData((prevData) => ({
-        ...prevData,
-        age: 0,
-      }));
-  }, [profileData?.dateOfBirth]);
 
   const updateProfile = async () => {
     try {
@@ -197,7 +180,7 @@ const Profile = () => {
 
     setProfileData({
       ...profileData,
-      skills: [...profileData.skills, capitalize(skill.trim())],
+      skills: [...profileData.skills, skill.trim()],
     });
 
     setInputSkillQuery("");
@@ -414,85 +397,6 @@ const Profile = () => {
                     >
                       {profileData?.username && "@" + profileData.username}
                     </p>
-                    <p className="flex items-center text-xl">
-                      <span className="flex items-center pr-2">
-                        {isEditProfile ? (
-                          <>
-                            <span className="pr-2">
-                              <input
-                                type="date"
-                                className="w-32 rounded-md !border-2 px-2 py-1 text-sm"
-                                defaultValue={
-                                  profileData?.dateOfBirth
-                                    ? new Date(profileData?.dateOfBirth)
-                                        ?.toISOString()
-                                        ?.split("T")[0]
-                                    : new Date().toISOString().split("T")[0]
-                                }
-                                onChange={(e) => {
-                                  setProfileData({
-                                    ...profileData,
-                                    dateOfBirth: e.target.value,
-                                  });
-                                }}
-                                max={new Date().toISOString().split("T")[0]}
-                              />
-                            </span>
-                            <span className="pl-2">
-                              <select
-                                className="rounded-md border px-2 py-1 text-[16px]"
-                                value={profileData?.gender || ""}
-                                onChange={(e) => {
-                                  if (e.target.value === "") return;
-                                  setProfileData({
-                                    ...profileData,
-                                    gender: e.target.value,
-                                  });
-                                }}
-                              >
-                                <option value="" disabled>
-                                  Select Gender
-                                </option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                              </select>
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            {profileData?.age && profileData?.gender ? (
-                              <>
-                                {profileData?.age > 0 && (
-                                  <span className="pr-2">
-                                    {profileData?.age}
-                                  </span>
-                                )}
-                                <span className="font-bold text-textMuted">
-                                  {" "}
-                                  |{" "}
-                                </span>
-                                {profileData?.gender && (
-                                  <span className="pl-2">
-                                    {capitalize(profileData?.gender)}
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                {profileData?.age > 0 && (
-                                  <span className="">{profileData?.age}</span>
-                                )}
-                                {profileData?.gender && (
-                                  <span className="">
-                                    {capitalize(profileData?.gender)}
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </>
-                        )}
-                      </span>
-                    </p>
                   </div>
 
                   <div className="block text-right">
@@ -530,42 +434,47 @@ const Profile = () => {
                 </div>
 
                 <div className="w-full">
-                  <h2 className="pb-2 text-2xl font-bold">Headline</h2>
                   {isEditProfile ? (
-                    <div className="w-full rounded-md bg-bg focus-within:border-2">
-                      <textarea
-                        className="w-full rounded-md px-2 py-1 focus:outline-none"
-                        value={profileData?.headline}
-                        rows="3"
-                        maxLength={220}
-                        onChange={(e) => {
-                          setProfileData({
-                            ...profileData,
-                            headline: e.target.value,
-                          });
-                        }}
-                      />
-                      <p
-                        className={`px-2 py-1 text-right text-sm ${
-                          profileData?.headline?.length > 200
-                            ? "text-error"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {profileData?.headline?.length
-                          ? 220 - profileData?.headline?.length
-                          : 220}{" "}
-                        char left
-                      </p>
-                    </div>
+                    <>
+                      <h2 className="pb-2 text-2xl font-bold">Headline</h2>
+                      <div className="w-full rounded-md bg-bg focus-within:border-2">
+                        <textarea
+                          className="w-full rounded-md px-2 py-1 focus:outline-none"
+                          value={profileData?.headline}
+                          rows="3"
+                          maxLength={220}
+                          onChange={(e) => {
+                            setProfileData({
+                              ...profileData,
+                              headline: e.target.value,
+                            });
+                          }}
+                        />
+                        <p
+                          className={`px-2 py-1 text-right text-sm ${
+                            profileData?.headline?.length > 200
+                              ? "text-error"
+                              : "text-textMuted"
+                          }`}
+                        >
+                          {profileData?.headline?.length
+                            ? 220 - profileData?.headline?.length
+                            : 220}{" "}
+                          char left
+                        </p>
+                      </div>
+                    </>
                   ) : (
-                    <p className="text-md lg:w-11/12">
-                      {profileData?.headline}
+                    <p className="text-md text-md -mt-2 rounded-md bg-bg px-2 py-1 lg:w-9/12">
+                      {profileData?.headline || "No headline"}
                     </p>
                   )}
                 </div>
                 <div className="flex gap-5">
-                  <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
+                  <Link
+                    to="/networks/followers"
+                    className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2 transition-all hover:scale-105"
+                  >
                     <p className="-mb-1 text-xl font-bold">
                       {requestCount?.following !== null &&
                       requestCount?.following !== undefined
@@ -573,9 +482,12 @@ const Profile = () => {
                         : "NA"}
                     </p>
 
-                    <p className="text-lg text-textMuted">Follow</p>
-                  </div>
-                  <div className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2">
+                    <p className="text-lg text-textMuted">Followers</p>
+                  </Link>
+                  <Link
+                    to="/networks/following"
+                    className="flex flex-col items-center justify-center rounded-md bg-bg px-5 py-2 transition-all hover:scale-105"
+                  >
                     <p className="-mb-1 text-xl font-bold">
                       {requestCount?.followers !== null &&
                       requestCount?.followers !== undefined
@@ -584,9 +496,9 @@ const Profile = () => {
                     </p>
 
                     <p className="text-lg text-textMuted">Following</p>
-                  </div>
+                  </Link>
                 </div>
-                <div className="relative mb-5 w-full">
+                <div className="relative mb-0 w-full">
                   <h2 className="pb-2 text-2xl font-bold">Skills</h2>
                   {isEditProfile ? (
                     <div
@@ -599,7 +511,7 @@ const Profile = () => {
                             key={skill}
                             className="flex items-center rounded-md bg-primary px-2 py-1 text-text transition-all duration-200 hover:scale-105"
                           >
-                            <span>{skill}</span>
+                            <span className="font-bold">{skill}</span>
                             <button
                               onClick={() => handleRemoveSkill(skill)}
                               className="ml-2 text-xs font-semibold transition-all hover:scale-110 hover:cursor-pointer"
@@ -671,15 +583,19 @@ const Profile = () => {
                   )}
                 </div>
                 <div className="relative mb-5 w-full">
-                  <h2 className="pb-2 text-2xl font-bold">About</h2>
                   {isEditProfile ? (
                     <>
+                      <h2 className="pb-2 text-2xl font-bold">
+                        About{" "}
+                        <span className="text-xl text-textMuted">
+                          (Markdown available)
+                        </span>
+                      </h2>
                       <div className="flex gap-3">
                         <button
                           className={`${writing ? "border-b-[1px] border-primary bg-bg" : ""} rounded-t-md px-2 py-1 transition-[background] duration-300`}
                           onClick={() => {
                             setWriting(true);
-                            console.log(writing);
                           }}
                         >
                           Write
@@ -688,7 +604,6 @@ const Profile = () => {
                           className={`${!writing ? "border-b-[1px] border-primary bg-bg" : ""} rounded-t-md px-2 py-1 transition-[background] duration-300`}
                           onClick={() => {
                             setWriting(false);
-                            console.log(writing);
                           }}
                         >
                           Preview
@@ -725,28 +640,31 @@ const Profile = () => {
 
                       <p
                         className={`absolute -bottom-6 w-full rounded-b-md bg-bg px-6 py-1 text-right text-sm ${
-                          profileData?.about?.length > 420
+                          profileData?.about?.length > 1100
                             ? "text-error"
                             : "text-gray-500"
                         }`}
                       >
                         {profileData?.about?.length
-                          ? 500 - profileData?.about?.length
-                          : 500}{" "}
+                          ? 1200 - profileData?.about?.length
+                          : 1200}{" "}
                         char left
                       </p>
                     </>
                   ) : (
-                    <MdEditor
-                      value={profileData.about || "No information provided."}
-                      view={{ menu: false, md: false, html: true }}
-                      className="rounded-md"
-                      renderHTML={(text) => mdParser.render(text)}
-                      style={{
-                        backgroundColor: "var(--color-bg)",
-                        border: "0px solid var(--color-bg)",
-                      }}
-                    />
+                    <>
+                      <h2 className="pb-2 text-2xl font-bold">About</h2>
+                      <MdEditor
+                        value={profileData.about || "No information provided."}
+                        view={{ menu: false, md: false, html: true }}
+                        renderHTML={(text) => mdParser.render(text)}
+                        style={{
+                          backgroundColor: "var(--color-bg)",
+                          border: "0px solid var(--color-bg)",
+                          borderRadius: "10px",
+                        }}
+                      />
+                    </>
                   )}
                 </div>
                 {isEditProfile && (

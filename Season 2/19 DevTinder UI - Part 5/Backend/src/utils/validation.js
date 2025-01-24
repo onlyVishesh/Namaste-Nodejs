@@ -93,7 +93,7 @@ const validateProfileData = (req) => {
   if (banner && !validator.isURL(banner)) {
     throw new Error("Invalid Banner URL");
   }
-  if (about && about.length > 500) {
+  if (about && about.length > 1200) {
     throw new Error("About contain too many words");
   }
   if (skills && skills.length > 15) {

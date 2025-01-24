@@ -15,7 +15,7 @@ const Card = ({ user, index = 0 }) => {
   const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/totalStatus",
+        import.meta.env.VITE_BackendURL + "/user/totalStatus/" + `${user._id ?  user._id : ""}`,
         { withCredentials: true },
       );
       if (res.data.success === false) {
@@ -80,7 +80,7 @@ const Card = ({ user, index = 0 }) => {
             : undefined,
       }}
     >
-      <div className="bg-primary/20 absolute -top-12 left-1/2 z-10 size-48 -translate-x-1/2 overflow-hidden rounded-full bg-opacity-20 bg-clip-padding shadow-sm shadow-cardBg backdrop-blur-lg backdrop-filter transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
+      <div className="bg-primary/20 absolute -top-12 left-1/2 z-10 size-48 -translate-x-1/2 overflow-hidden rounded-full transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
         <img
           draggable="false"
           src={

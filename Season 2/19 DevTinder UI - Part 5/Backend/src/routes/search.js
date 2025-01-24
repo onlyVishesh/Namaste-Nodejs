@@ -15,7 +15,6 @@ searchRouter.get("/search", userAuth, async (req, res) => {
         .json({ error: "Unauthorized. Please login again." });
     }
     const { query } = req.query;
-    console.log(query);
     if (!query) {
       return res.status(400).json({ error: "Query parameter is required." });
     }
