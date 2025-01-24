@@ -1,7 +1,7 @@
 import axios from "axios";
 import MarkdownIt from "markdown-it";
 import { useEffect, useRef, useState } from "react";
-import { IoMdSettings } from "react-icons/io";
+import { IoMdCloseCircle, IoMdSettings } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import MdEditor from "react-markdown-editor-lite";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,29 +13,29 @@ import { abbreviateNumber, capitalize } from "../utils/constants";
 import { addUser } from "../utils/userSlice";
 // import style manually
 import "react-markdown-editor-lite/lib/index.css";
+import { cacheResults } from "../utils/skillsSlice";
 
 const Profile = () => {
-  const [showSettingMenu, setShowSettingMenu] = useState(false);
-  const [isEditProfile, setIsEditProfile] = useState(false);
-  const [isBannerModelShow, setIsBannerModelShow] = useState(false);
-  const [isAvatarModelShow, setIsAvatarModelShow] = useState(false);
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const [profileData, setProfileData] = useState(null);
   const [requestCount, setRequestCount] = useState(null);
+  const [isBannerModelShow, setIsBannerModelShow] = useState(false);
+  const [isAvatarModelShow, setIsAvatarModelShow] = useState(false);
+
+  const [skills, setSkills] = useState(null);
+  const skillsCache = useSelector((store) => store.skills);
+  const [suggestions, setSuggestions] = useState([]);
+  const [inputSkillQuery, setInputSkillQuery] = useState("");
+  const skillRef = useRef(null);
+
   const mdParser = new MarkdownIt();
   const [writing, setWriting] = useState(true);
 
-  // This function can convert File object to a datauri string
-  function onImageUpload(file) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (data) => {
-        resolve(data.target.result);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
+  const [showSettingMenu, setShowSettingMenu] = useState(false);
+  const [isEditProfile, setIsEditProfile] = useState(false);
+  const settingRef = useRef(null);
+  const settingMenu = useRef(null);
 
   useEffect(() => {
     setProfileData(user);
@@ -49,9 +49,6 @@ const Profile = () => {
     profileData?.avatar ||
       "https://cdn-icons-png.flaticon.com/512/149/149071.png",
   );
-
-  const settingRef = useRef(null);
-  const settingMenu = useRef(null);
 
   useEffect(() => {
     if (profileData?.dateOfBirth) {
@@ -155,6 +152,103 @@ const Profile = () => {
     };
   }, [showSettingMenu]);
 
+  const getSkillSuggestions = async (query) => {
+    try {
+      const res = await axios.get(
+        `https://skilllookup.onrender.com/api/skills?query=${query}&page=1&limit=5`,
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+        return;
+      }
+      setSkills(res.data.skills);
+      dispatch(cacheResults({ [query]: res.data.skills }));
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+  const handleInputChange = (e) => {
+    setInputSkillQuery(e.target.value);
+
+    const filteredSuggestions = skills?.filter(
+      (skill) =>
+        skill?.toLowerCase()?.includes(e.target.value.trim()?.toLowerCase()) &&
+        !profileData?.skills?.includes(skill),
+    );
+    setSuggestions(filteredSuggestions);
+  };
+
+  // Handle when user selects a suggestion
+  const handleSkillSelect = (skill) => {
+    if (profileData?.skills?.includes(skill) || skill === "") {
+      return;
+    }
+
+    if (profileData?.skills?.length === 15) {
+      return;
+    }
+
+    setProfileData({
+      ...profileData,
+      skills: [...profileData.skills, capitalize(skill.trim())],
+    });
+
+    setInputSkillQuery("");
+    setSuggestions([]);
+  };
+
+  const handleRemoveSkill = (skill) => {
+    setProfileData({
+      ...profileData,
+      skills: profileData.skills.filter((s) => s !== skill),
+    });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (skillRef.current && !skillRef.current.contains(event.target)) {
+        setSuggestions([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!inputSkillQuery) return;
+    const timer = setTimeout(() => {
+      if (skillsCache[inputSkillQuery]) {
+        setSuggestions(skillsCache[inputSkillQuery]);
+      } else {
+        getSkillSuggestions(inputSkillQuery);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [inputSkillQuery]);
+
+  // This function can convert File object to a datauri string
+  function onImageUpload(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (data) => {
+        resolve(data.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   const handleSave = () => {
     setIsEditProfile(false);
     updateProfile();
@@ -237,7 +331,7 @@ const Profile = () => {
             </button>
           </div>
         </Model>
-        <div className="mx-auto w-full py-5 sm:w-5/6 [&_input]:border-2 [&_input]:border-border [&_input]:bg-bgSecondary [&_select]:border-2 [&_select]:border-border [&_select]:bg-bgSecondary [&_textarea]:border-2 [&_textarea]:border-border [&_textarea]:bg-bgSecondary">
+        <div className="mx-auto w-full py-5 sm:w-5/6 [&_input]:border-0 [&_input]:bg-bg [&_select]:border-2 [&_select]:border-border [&_select]:bg-bg [&_textarea]:bg-bg">
           <div className="relative rounded-xl bg-bgSecondary">
             {isEditProfile && (
               <MdEdit
@@ -281,37 +375,25 @@ const Profile = () => {
                       {isEditProfile ? (
                         <div className="flex flex-wrap gap-3 xs:gap-5">
                           <input
-                            className="text-md xs:w-42 w-32 rounded-md border px-2 sm:w-48"
-                            value={`${profileData?.firstName}`}
+                            className="text-md xs:w-42 w-32 rounded-md border px-2 py-1 sm:w-48"
+                            value={`${capitalize(profileData?.firstName)}`}
                             maxLength={14}
                             minLength={3}
                             onChange={(e) => {
                               setProfileData({
                                 ...profileData,
-                                firstName: e.target.value,
-                              });
-                            }}
-                            onBlur={() => {
-                              setProfileData({
-                                ...profileData,
-                                firstName: capitalize(profileData?.firstName),
+                                firstName: capitalize(e.target.value),
                               });
                             }}
                           />
                           <input
-                            className="text-md xs:w-42 w-32 rounded-md border px-2 sm:w-48"
-                            value={`${profileData?.lastName || ""}`}
+                            className="text-md xs:w-42 w-32 rounded-md border px-2 py-1 sm:w-48"
+                            value={`${capitalize(profileData?.lastName)}`}
                             maxLength={25}
                             onChange={(e) => {
                               setProfileData({
                                 ...profileData,
-                                lastName: e.target.value,
-                              });
-                            }}
-                            onBlur={() => {
-                              setProfileData({
-                                ...profileData,
-                                lastName: capitalize(profileData?.lastName),
+                                lastName: capitalize(e.target.value),
                               });
                             }}
                           />
@@ -327,17 +409,19 @@ const Profile = () => {
                       )}
                     </p>
 
-                    <p className="text-xl font-semibold text-textMuted">
+                    <p
+                      className={`text-xl font-semibold text-textMuted ${isEditProfile && "my-1"}`}
+                    >
                       {profileData?.username && "@" + profileData.username}
                     </p>
-                    <p className="flex items-center text-center text-xl">
-                      <span className="pr-2">
+                    <p className="flex items-center text-xl">
+                      <span className="flex items-center pr-2">
                         {isEditProfile ? (
                           <>
                             <span className="pr-2">
                               <input
                                 type="date"
-                                className="w-32 rounded-md border px-2 text-sm"
+                                className="w-32 rounded-md !border-2 px-2 py-1 text-sm"
                                 defaultValue={
                                   profileData?.dateOfBirth
                                     ? new Date(profileData?.dateOfBirth)
@@ -356,7 +440,7 @@ const Profile = () => {
                             </span>
                             <span className="pl-2">
                               <select
-                                className="rounded-md border px-2 text-[18px]"
+                                className="rounded-md border px-2 py-1 text-[16px]"
                                 value={profileData?.gender || ""}
                                 onChange={(e) => {
                                   if (e.target.value === "") return;
@@ -445,11 +529,12 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="relative w-full">
+                <div className="w-full">
+                  <h2 className="pb-2 text-2xl font-bold">Headline</h2>
                   {isEditProfile ? (
-                    <>
+                    <div className="w-full rounded-md bg-bg focus-within:border-2">
                       <textarea
-                        className="mt-5 w-full rounded-md border px-2 py-1"
+                        className="w-full rounded-md px-2 py-1 focus:outline-none"
                         value={profileData?.headline}
                         rows="3"
                         maxLength={220}
@@ -461,7 +546,7 @@ const Profile = () => {
                         }}
                       />
                       <p
-                        className={`absolute bottom-3 right-2 text-sm ${
+                        className={`px-2 py-1 text-right text-sm ${
                           profileData?.headline?.length > 200
                             ? "text-error"
                             : "text-gray-500"
@@ -472,7 +557,7 @@ const Profile = () => {
                           : 220}{" "}
                         char left
                       </p>
-                    </>
+                    </div>
                   ) : (
                     <p className="text-md lg:w-11/12">
                       {profileData?.headline}
@@ -501,66 +586,71 @@ const Profile = () => {
                     <p className="text-lg text-textMuted">Following</p>
                   </div>
                 </div>
-                <div className="relative w-full">
+                <div className="relative mb-5 w-full">
                   <h2 className="pb-2 text-2xl font-bold">Skills</h2>
                   {isEditProfile ? (
-                    <>
-                      <input
-                        className="w-full rounded-md border px-2 py-2"
-                        value={profileData?.skills?.join(", ")}
-                        onChange={(e) => {
-                          setProfileData({
-                            ...profileData,
-                            skills: e.target.value
-                              .split(",")
-                              .map((skill) => skill.trim()),
-                          });
-                        }}
-                        onBlur={(e) => {
-                          const skills = e.target.value
-                            .split(",")
-                            .map((skill) => skill.trim())
-                            .filter((skill) => skill !== ""); // Remove empty skills
-
-                          if (skills.length <= 15) {
-                            setProfileData({
-                              ...profileData,
-                              skills: [...new Set(skills)], // Ensure unique skills
-                            });
-                          } else {
-                            setProfileData({
-                              ...profileData,
-                              skills: [...new Set(skills)].slice(0, 15), // Limit to 15 unique skills
-                            });
-                          }
-                        }}
-                      />
-
-                      <p
-                        className={`absolute bottom-6 right-2 text-sm ${
-                          profileData?.skills?.length > 3
-                            ? "text-error"
-                            : "text-gray-500"
-                        }`}
+                    <div
+                      className="group w-full rounded-md bg-bg focus-within:border-2"
+                      ref={skillRef}
+                    >
+                      <div className="flex flex-wrap gap-3 px-4 py-2">
+                        {profileData?.skills?.map((skill) => (
+                          <div
+                            key={skill}
+                            className="flex items-center rounded-md bg-primary px-2 py-1 text-text transition-all duration-200 hover:scale-105"
+                          >
+                            <span>{skill}</span>
+                            <button
+                              onClick={() => handleRemoveSkill(skill)}
+                              className="ml-2 text-xs font-semibold transition-all hover:scale-110 hover:cursor-pointer"
+                            >
+                              <IoMdCloseCircle className="size-5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="relative">
+                        <input
+                          className="w-full rounded-md px-2 py-2 focus:outline-none"
+                          value={inputSkillQuery}
+                          onChange={handleInputChange}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSkillSelect(inputSkillQuery);
+                            }
+                          }}
+                          placeholder="Start typing to show suggestions"
+                        />
+                      </div>
+                      <div
+                        className={`items-center justify-between px-2 py-1 text-textMuted ${suggestions?.length === 0 ? "group-focus-within:flex" : ""}`}
                       >
-                        {profileData?.skills?.length >= 15
-                          ? "0 Skill"
-                          : profileData?.skills?.length >= 14
-                            ? "1 Skill"
-                            : 15 - profileData?.skills?.length + " Skills"}{" "}
-                        left
-                      </p>
+                        {suggestions?.length === 0 && (
+                          <div className="hidden text-sm group-focus-within:block">
+                            Keep writing for suggestion or enter to add Skill
+                          </div>
+                        )}
+                        <p className="text-right text-sm">
+                          {profileData?.skills?.length > 15
+                            ? "You can only add up to 15 skills."
+                            : `${15 - profileData?.skills?.length} skills left`}
+                        </p>
+                      </div>
 
-                      {profileData?.skills?.length >= 15 ? (
-                        <p className="mt-1 text-sm text-red-500">
-                          You can only add up to 15 skills.
-                        </p>
-                      ) : (
-                        <p className="mt-1 text-sm text-red-500">
-                          Enter Comma separated Value
-                        </p>
+                      {suggestions?.length > 0 && (
+                        <div className="z-10 mt-1 w-full rounded-b-md bg-cardBg">
+                          {suggestions?.map((skill) => (
+                            <div
+                              key={skill}
+                              className="cursor-pointer px-2 py-1 hover:bg-hover"
+                              onClick={() => handleSkillSelect(skill)}
+                            >
+                              {skill}
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </>
+                    </div>
                   ) : (
                     <ul className="flex flex-wrap gap-3 duration-200 [&_li]:rounded-md [&_li]:bg-bg [&_li]:px-5 [&_li]:py-2 [&_li]:shadow-sm [&_li]:shadow-shadow [&_li]:transition-all [&_li]:hover:cursor-pointer">
                       {profileData?.skills?.length > 0 ? (
@@ -580,7 +670,7 @@ const Profile = () => {
                     </ul>
                   )}
                 </div>
-                <div className="relative w-full mb-5">
+                <div className="relative mb-5 w-full">
                   <h2 className="pb-2 text-2xl font-bold">About</h2>
                   {isEditProfile ? (
                     <>
@@ -634,7 +724,7 @@ const Profile = () => {
                       )}
 
                       <p
-                        className={`absolute bg-bg w-full -bottom-6 rounded-b-md text-right px-6 py-1 text-sm ${
+                        className={`absolute -bottom-6 w-full rounded-b-md bg-bg px-6 py-1 text-right text-sm ${
                           profileData?.about?.length > 420
                             ? "text-error"
                             : "text-gray-500"

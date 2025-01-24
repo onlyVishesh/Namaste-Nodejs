@@ -7,6 +7,7 @@ import ignoredRequestsReducer from "./ignoredRequestsSlice";
 import interestedRequestsReducer from "./interestedRequestsSlice";
 import rejectedReducer from "./rejectedRequestsSlice";
 import requestCountReducer from "./requestCountSlice";
+import skillsReducer from "./skillsSlice";
 import userReducer from "./userSlice";
 
 const appStore = configureStore({
@@ -20,6 +21,7 @@ const appStore = configureStore({
     following: followingReducer,
     rejected: rejectedReducer,
     ignoredRequests: ignoredRequestsReducer,
+    skills: skillsReducer,
   },
 });
 
