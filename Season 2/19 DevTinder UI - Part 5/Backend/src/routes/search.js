@@ -35,16 +35,7 @@ searchRouter.get("/search", userAuth, async (req, res) => {
         { skills: { $regex: query, $options: "i" } },
       ],
     })
-      .select([
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .select(process.env.ALLOWED_FIELDS.split(","))
       //* adding paging
       .skip((page - 1) * limit)
       .limit(limit);

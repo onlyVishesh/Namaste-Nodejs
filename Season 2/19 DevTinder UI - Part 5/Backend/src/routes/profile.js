@@ -280,16 +280,7 @@ profileRouter.get(
           : parseInt(req.query.limit) || 10;
 
       const list = await User.find({ role: role })
-        .select([
-          "firstName",
-          "lastName",
-          "username",
-          "avatar",
-          "about",
-          "skills",
-          "gender",
-          "status",
-        ])
+        .select(process.env.ALLOWED_FIELDS.split(","))
         .skip((page - 1) * limit)
         .limit(limit);
 
@@ -556,16 +547,7 @@ profileRouter.get(
           : parseInt(req.query.limit) || 10;
 
       const list = await User.find({ role: role })
-        .select([
-          "firstName",
-          "lastName",
-          "username",
-          "avatar",
-          "about",
-          "skills",
-          "gender",
-          "status",
-        ])
+        .select(process.env.ALLOWED_FIELDS.split(","))
         .skip((page - 1) * limit)
         .limit(limit);
 
@@ -649,30 +631,12 @@ profileRouter.get(
           : parseInt(req.query.limit) || 10;
       if (status === "all") {
         list = await User.find()
-          .select([
-            "firstName",
-            "lastName",
-            "username",
-            "avatar",
-            "about",
-            "skills",
-            "gender",
-            "status",
-          ])
+          .select(process.env.ALLOWED_FIELDS.split(","))
           .skip((page - 1) * limit)
           .limit(limit);
       } else {
         list = await User.find({ status })
-          .select([
-            "firstName",
-            "lastName",
-            "username",
-            "avatar",
-            "about",
-            "skills",
-            "gender",
-            "status",
-          ])
+          .select(process.env.ALLOWED_FIELDS.split(","))
           .skip((page - 1) * limit)
           .limit(limit);
       }

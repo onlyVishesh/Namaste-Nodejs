@@ -9,6 +9,8 @@ import { addUser } from "../utils/userSlice";
 import Footer from "./Footer";
 import NavBar from "./NavBar";
 
+const FOOTER_CONTAINING_LINKS = ["/", "/team", "/faqs", "/support"]
+
 const BodyContainer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -56,7 +58,7 @@ const BodyContainer = () => {
       <div className="container mx-auto mt-20 max-h-fit min-h-[calc(100vh-5rem)]">
         <Outlet />
       </div>
-      {location.pathname === "/" && <Footer />}
+      {FOOTER_CONTAINING_LINKS.includes(location.pathname) && <Footer />}
     </>
   );
 };

@@ -141,16 +141,7 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         },
       ],
     })
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -197,16 +188,7 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
       $or: [{ status: "interested" }],
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -333,16 +315,7 @@ requestRouter.get("/request/followers", userAuth, async (req, res) => {
       ],
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -390,16 +363,7 @@ requestRouter.get("/request/accepted", userAuth, async (req, res) => {
       status: "accepted",
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -447,16 +411,7 @@ requestRouter.get("/request/rejected", userAuth, async (req, res) => {
       status: "rejected",
     })
       .sort({ createdAt: -1 }) // Sort by time (most recent first)
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -503,16 +458,7 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
       fromUserId: loggedInUser._id,
       status: "ignored",
     })
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -970,16 +916,7 @@ requestRouter.get("/request/connections", userAuth, async (req, res) => {
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
     })
-      .populate("fromUserId toUserId", [
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-      ])
+      .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
 

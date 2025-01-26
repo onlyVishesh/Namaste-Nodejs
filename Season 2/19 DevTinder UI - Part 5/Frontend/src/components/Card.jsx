@@ -15,7 +15,9 @@ const Card = ({ user, index = 0 }) => {
   const getRequestCount = async () => {
     try {
       const res = await axios.get(
-        import.meta.env.VITE_BackendURL + "/user/totalStatus/" + `${user._id ?  user._id : ""}`,
+        import.meta.env.VITE_BackendURL +
+          "/user/totalStatus/" +
+          `${user._id ? user._id : ""}`,
         { withCredentials: true },
       );
       if (res.data.success === false) {
@@ -36,6 +38,7 @@ const Card = ({ user, index = 0 }) => {
 
   useEffect(() => {
     getRequestCount();
+    console.log(user);
   }, []);
 
   const scrollRef = useRef(null);
@@ -71,7 +74,7 @@ const Card = ({ user, index = 0 }) => {
 
   return (
     <div
-      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-24 lg:h-[450px] lg:w-[380px] lg:hover:h-[500px] xl:mt-0 xl:h-[600px] xl:w-[500px] xl:hover:h-[650px]"
+      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-14 lg:h-[470px] lg:w-[380px] lg:hover:h-[520px] xl:mt-0 xl:h-[600px] xl:w-[500px] xl:hover:h-[650px]"
       ref={cardRef}
       style={{
         boxShadow:
@@ -80,6 +83,14 @@ const Card = ({ user, index = 0 }) => {
             : undefined,
       }}
     >
+      <div className="absolute mb-5 w-full overflow-hidden transition-all duration-700">
+        <img
+          src={user?.banner}
+          draggable="false"
+          alt="banner"
+          className="h-40 w-full overflow-hidden rounded-lg object-cover transition-[height] duration-[600ms] group-hover:h-[200px] md:h-56 md:group-hover:h-[275px] lg:h-40 lg:group-hover:h-[200px] xl:h-60 xl:group-hover:h-[300px]"
+        />
+      </div>
       <div className="bg-primary/20 absolute -top-12 left-1/2 z-10 size-48 -translate-x-1/2 overflow-hidden rounded-full transition-all duration-700 group-hover:size-64 2xs:size-48 2xs:group-hover:size-64 md:size-64 md:group-hover:size-72 lg:size-48 lg:group-hover:size-64 xl:size-64 xl:group-hover:size-80">
         <img
           draggable="false"
@@ -91,15 +102,6 @@ const Card = ({ user, index = 0 }) => {
           className="absolute left-0 top-0 size-full object-cover drop-shadow-lg"
         />
       </div>
-      <div className="absolute mb-5 w-full overflow-hidden transition-all duration-700">
-        <img
-          src={user?.banner}
-          draggable="false"
-          alt="banner"
-          className="h-40 w-full overflow-hidden rounded-lg object-cover transition-[height] duration-[600ms] group-hover:h-[200px] md:h-56 md:group-hover:h-[275px] lg:h-44 lg:group-hover:h-[225px] xl:h-60 xl:group-hover:h-[300px]"
-        />
-      </div>
-
       <div className="mx-auto flex h-[85%] w-10/12 flex-col items-center justify-end gap-1 xl:h-[87%]">
         <h2 className="line-clamp-1 text-center text-2xl font-bold md:text-3xl">
           {user?.lastName?.length > 14
@@ -176,7 +178,7 @@ const Card = ({ user, index = 0 }) => {
                   ? abbreviateNumber(requestCount?.following)
                   : "NA"}
               </p>
-              <p className="text-lg text-textMuted">Follow</p>
+              <p className="text-lg text-textMuted">Followers</p>
             </div>
             <div className="flex flex-col items-center justify-center">
               <p className="-mb-2 text-xl font-bold">
@@ -197,7 +199,7 @@ const Card = ({ user, index = 0 }) => {
           </button>
         }
         <Link
-          to={"/user/profile/" + user.username}
+          to={"/profile/" + user.username}
           className="rounded-md bg-primary px-4 py-2 text-text hover:bg-hover"
         >
           View Profile

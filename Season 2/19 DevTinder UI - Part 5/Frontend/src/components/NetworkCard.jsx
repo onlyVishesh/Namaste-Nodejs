@@ -62,35 +62,6 @@ const NetworkCard = ({ type, request }) => {
     }
   };
 
-  const setRequestIgnored = async () => {
-    try {
-      const res = await axios.patch(
-        import.meta.env.VITE_BackendURL +
-          "/request/review/ignored/" +
-          request._id,
-        {},
-        { withCredentials: true },
-      );
-      if (res.data.success === false) {
-        toast.error(res.data.message || "An error occurred");
-      }
-      if (res.data.success === true) {
-        dispatch(removeInterestedRequest(request._id));
-        dispatch(fetchRequestCount());
-        toast.success(res.data.message);
-      }
-    } catch (err) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-      console.error(err.message);
-    }
-  };
-
   const removeConnection = async () => {
     try {
       const res = await axios.patch(
@@ -381,7 +352,7 @@ const NetworkCard = ({ type, request }) => {
     <div className="flex w-full items-center justify-between md:px-4">
       <Link
         className="flex items-center gap-3 rounded-md px-2"
-        to={`/user/profile/${
+        to={`/profile/${
           request.fromUserId.username === loggedInUser.username
             ? request.toUserId.username
             : request.fromUserId.username
@@ -407,10 +378,10 @@ const NetworkCard = ({ type, request }) => {
           </h3>
           <p className="line-clamp-1 text-sm">
             {request.fromUserId.username === loggedInUser.username
-              ? request.toUserId?.about || "No information provided."
-              : request.fromUserId?.about || "No information provided."}
+              ? request.toUserId?.headline || "No information provided."
+              : request.fromUserId?.headline || "No information provided."}
           </p>
-          <p className="text-xs">
+          <p className="text-xs text-nowrap">
             {renderTimeStamp[type]}{" "}
             {request.status === "accepted" || request.status === "rejected"
               ? timeSince(new Date(request.updatedAt))

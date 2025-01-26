@@ -37,9 +37,13 @@ const Ignored = () => {
   };
 
   useEffect(() => {
-    dispatch(clearIgnoredRequests());
     getIgnoredRequest(page);
   }, [page]);
+
+  useEffect(() => {
+    dispatch(clearIgnoredRequests());
+    setPage(1);
+  }, []);
 
   return (
     <div className="rounded-md bg-bgSecondary">

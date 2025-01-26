@@ -37,9 +37,13 @@ const Connections = () => {
   };
 
   useEffect(() => {
-    dispatch(clearConnectionRequests());
     getConnectionRequest(page);
   }, [page]);
+
+  useEffect(() => {
+    dispatch(clearConnectionRequests());
+    setPage(1);
+  }, []);
 
   return (
     <div className="rounded-md bg-bgSecondary">

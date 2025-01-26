@@ -260,23 +260,12 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         : parseInt(req.query.limit) < 1
         ? 1
         : parseInt(req.query.limit) || 10;
-
     //* finding profile that are not in hiddenUserProfiles and are active
     const userProfiles = await User.find({
       _id: { $nin: Array.from(hiddenUserProfiles) },
       status: "active",
     })
-      .select([
-        "firstName",
-        "lastName",
-        "username",
-        "avatar",
-        "about",
-        "skills",
-        "gender",
-        "status",
-        "banner",
-      ])
+      .select(process.env.ALLOWED_FIELDS.split(","))
       //* adding paging
       .skip((page - 1) * limit)
       .limit(limit);

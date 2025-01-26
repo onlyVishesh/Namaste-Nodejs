@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner, FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 import Card from "../components/Card";
 import { addFeed, removeRequest } from "../utils/feedSlice";
 
@@ -27,6 +28,56 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
     const offset = index === 0 ? 0 : index % 2 ? 3 : -3;
     return rotateRaw.get() + offset;
   });
+  const setRequestInterested = async () => {
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_BackendURL +
+          "/request/send/interested/" +
+          user._id,
+        {},
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      if (res.data.success === true) {
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+  const setRequestIgnored = async () => {
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_BackendURL + "/request/send/ignored/" + user._id,
+        {},
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      if (res.data.success === true) {
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
 
   const handleDrag = () => {
     if (y < -100) {
@@ -47,13 +98,14 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
 
   const handleDragEnd = () => {
     if (x.get() > 200) {
+      setRequestInterested();
       console.log("right");
       dispatch(removeRequest(user._id));
     } else if (x.get() < -200) {
+      setRequestIgnored();
       console.log("left");
       dispatch(removeRequest(user._id));
     } else if (y.get() < -250) {
-      console.log("up");
       dispatch(removeRequest(user._id));
     } else {
       x.set(0);
@@ -131,12 +183,12 @@ const Feed = () => {
   }, [page]);
 
   useEffect(() => {
-    if (feed?.length <= 1) {
+    if (feed?.length < 3) {
       setPage((prevPage) => prevPage + 1);
     }
   }, [feed]);
 
-  if (feed.length === 0 && page < 3)
+  if (feed.length === 0 && page < 2)
     return (
       <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden">
         <FaSpinner className="size-1/12 animate-spin" />
@@ -171,7 +223,15 @@ const Feed = () => {
         </p>
         {feed.length === 0 && (
           <div className="text-center text-2xl font-bold">
-            You Have swiped all the users. Try again later...
+            You Have <strong>swiped</strong> all the users.{" "}
+            <button
+              onClick={() => {
+                window.navigation.reload();
+              }}
+              className="text-primary"
+            >
+              Try again later...
+            </button>
           </div>
         )}
       </div>

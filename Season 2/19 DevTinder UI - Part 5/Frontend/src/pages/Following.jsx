@@ -37,9 +37,13 @@ const Following = () => {
   };
 
   useEffect(() => {
-    dispatch(clearFollowingRequests());
     getFollowingRequest(page);
   }, [page]);
+
+  useEffect(() => {
+    dispatch(clearFollowingRequests());
+    setPage(1);
+  }, []);
 
   return (
     <div className="rounded-md bg-bgSecondary">

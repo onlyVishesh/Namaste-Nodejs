@@ -37,9 +37,13 @@ const Rejected = () => {
   };
 
   useEffect(() => {
-    dispatch(clearRejectedRequests());
     getRejectedRequest(page);
   }, [page]);
+
+  useEffect(() => {
+    dispatch(clearRejectedRequests());
+    setPage(1);
+  }, []);
 
   return (
     <div className="rounded-md bg-bgSecondary">

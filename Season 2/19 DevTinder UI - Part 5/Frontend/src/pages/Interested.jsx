@@ -4,7 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import NetworkCard from "../components/NetworkCard";
-import { addInterestedRequests, clearInterestedRequests } from "../utils/interestedRequestsSlice";
+import {
+  addInterestedRequests,
+  clearInterestedRequests,
+} from "../utils/interestedRequestsSlice";
 
 const Interested = () => {
   const interestedRequests = useSelector((store) => store.interestedRequests);
@@ -34,9 +37,13 @@ const Interested = () => {
   };
 
   useEffect(() => {
-    dispatch(clearInterestedRequests());
     getInterestedRequest(page);
   }, [page]);
+
+  useEffect(() => {
+    dispatch(clearInterestedRequests());
+    setPage(1);
+  }, []);
 
   return (
     <div className="rounded-md bg-bgSecondary">

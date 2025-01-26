@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
 import Connections from "./pages/Connections";
 import Error from "./pages/Error";
+import Faqs from "./pages/Faqs";
 import Feed from "./pages/Feed";
 import Followers from "./pages/Followers";
 import Following from "./pages/Following";
@@ -16,7 +17,9 @@ import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
 import Rejected from "./pages/Rejected";
 import Signup from "./pages/Signup";
+import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
+import Support from "./pages/Support";
 import appStore from "./utils/appStore";
 
 const App = () => {
@@ -47,10 +50,10 @@ const App = () => {
                 <Route path="/networks/rejected" element={<Rejected />} />
               </Route>
               <Route path="/profile" element={<Profile />}></Route>
-              <Route
-                path="/user/profile/:userId"
-                element={<UserProfile />}
-              ></Route>
+              <Route path="/profile/:userId" element={<UserProfile />}></Route>
+              <Route path="/team" element={<Team />}></Route>
+              <Route path="/faqs" element={<Faqs />}></Route>
+              <Route path="/support" element={<Support />}></Route>
               <Route path="*" element={<Error />}></Route>
             </Route>
           </Routes>

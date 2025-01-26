@@ -37,9 +37,13 @@ const Followers = () => {
   };
 
   useEffect(() => {
-    dispatch(clearFollowerRequests());
     getFollowerRequest(page);
-  }, [page]);
+  }, [page]); 
+  
+  useEffect(() => {
+    dispatch(clearFollowerRequests());
+    setPage(1);
+  }, []); 
 
   return (
     <div className="rounded-md bg-bgSecondary">
@@ -50,11 +54,11 @@ const Followers = () => {
       <div className="flex flex-col divide-y divide-textMuted">
         {followers.length === 0 ? (
           <div className="py-5 text-center">
-            No one follow you. Try to{" "}
+            No one follows you. Try to{" "}
             <Link to="/feed" className="font-bold text-primary underline">
               Explore
             </Link>{" "}
-            profiles
+            profiles.
           </div>
         ) : (
           followers.map((request) => (
