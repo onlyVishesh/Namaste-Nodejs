@@ -9,7 +9,7 @@ import { addUser } from "../utils/userSlice";
 import Footer from "./Footer";
 import NavBar from "./NavBar";
 
-const FOOTER_CONTAINING_LINKS = ["/", "/team", "/faqs", "/support"]
+const FOOTER_CONTAINING_LINKS = ["/", "/team", "/faqs", "/support"];
 
 const BodyContainer = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const BodyContainer = () => {
   const user = useSelector((store) => store.user);
 
   const fetchUser = async () => {
-    if (user.length !== 0) return;
+    if (user !== null) return;
     try {
       const res = await axios.get(
         import.meta.env.VITE_BackendURL + "/profile/view",

@@ -194,13 +194,13 @@ const Card = ({ user, index = 0 }) => {
       </div>
       <div className="absolute bottom-5 left-1/2 mx-auto flex w-[90%] -translate-x-1/2 items-center justify-center gap-10 xl:bottom-3">
         {
-          <button className="rounded-md bg-primary px-4 py-2 text-text hover:bg-hover md:hidden">
+          <button className="transform rounded-lg bg-primary px-4 py-3 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover md:hidden">
             Expand
           </button>
         }
         <Link
           to={"/profile/" + user.username}
-          className="rounded-md bg-primary px-4 py-2 text-text hover:bg-hover"
+          className="transform rounded-lg bg-primary px-4 py-3 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover"
         >
           View Profile
         </Link>

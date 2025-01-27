@@ -1,4 +1,5 @@
 import { FileUser, Mail, MapPinHouse } from "lucide-react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SocialLinks from "./SocialLinks";
@@ -10,10 +11,15 @@ const FOOTER_SECTIONS = {
     { Network: "/networks" },
     { Profile: "/profile" },
   ],
-  "Helpful Links": [{ FAQs: "/faqs" }, { Support: "/support" }],
+  "Helpful Links": [
+    { "Community in Numbers": "/#community" },
+    { FAQs: "/#faqs" },
+    { Support: "/#support" },
+  ],
 };
 
 const Footer = () => {
+  const user = useSelector((store) => store.user);
   return (
     <footer className="bg-bgSecondary">
       <div className="container mx-auto px-4 pb-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
@@ -34,33 +40,31 @@ const Footer = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 lg:col-span-2">
-            {Object.keys(FOOTER_SECTIONS).map((section) => {
-              return (
-                <div className="text-center sm:text-left" key={section}>
-                  <p className="text-lg font-bold">{section}</p>
-
-                  <nav className="mt-4">
-                    <ul className="space-y-4 text-sm">
-                      {FOOTER_SECTIONS[section].map((link) => {
-                        return (
-                          <li key={Object.values(link)}>
-                            <Link
-                              className="transition hover:text-textMuted"
-                              to={Object.values(link)[0]}
-                              onClick={() => {
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              {Object.keys(link)}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </nav>
-                </div>
-              );
-            })}
+            {Object.keys(FOOTER_SECTIONS).map((section) => (
+              <div className="text-center sm:text-left" key={section}>
+                <p className="text-lg font-bold">{section}</p>
+                <nav className="mt-4">
+                  <ul className="space-y-4 text-sm">
+                    {FOOTER_SECTIONS[section].map((link) => (
+                      <li key={Object.values(link)[0]}>
+                        <a
+                          className="transition hover:text-textMuted"
+                          href={
+                            Object.values(link)[0] === "/feed"
+                              ? user
+                                ? "/feed"
+                                : "/#feed"
+                              : Object.values(link)[0]
+                          }
+                        >
+                          {Object.keys(link)}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </div>
+            ))}
 
             <div className="text-center sm:text-left">
               <p className="text-lg font-bold">Contact Us</p>
@@ -71,7 +75,6 @@ const Footer = () => {
                     href="mailto:devroot@gmail.com"
                   >
                     <Mail className="size-6 group-hover:text-textMuted" />
-
                     <span className="transition group-hover:text-textMuted">
                       devroot@gmail.com
                     </span>
@@ -81,10 +84,7 @@ const Footer = () => {
                 <li>
                   <Link
                     className="group flex items-center justify-center gap-1.5 sm:justify-start"
-                    to="/form"
-                    onClick={() => {
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
+                    to="/contact-form"
                   >
                     <FileUser className="size-6 group-hover:text-textMuted" />
                     <span className="transition group-hover:text-textMuted">
@@ -95,7 +95,6 @@ const Footer = () => {
 
                 <li className="group flex items-start justify-center gap-1.5 sm:justify-start">
                   <MapPinHouse className="size-6 group-hover:text-textMuted" />
-
                   <address className="-mt-0.5 not-italic transition hover:cursor-pointer group-hover:text-textMuted">
                     Ghaziabad, Uttar Pradesh, India
                   </address>
@@ -109,26 +108,20 @@ const Footer = () => {
           <div className="text-center sm:flex sm:justify-between sm:text-left">
             <p className="space-x-2 text-sm text-gray-400">
               <span className="block sm:inline">All rights reserved.</span>
-              <Link
+              <a
                 className="inline-block text-hover underline transition hover:text-hover hover:opacity-75"
-                to="/"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                href="#terms"
               >
                 Terms & Conditions
-              </Link>
+              </a>
 
               <span>&middot;</span>
-              <Link
+              <a
                 className="inline-block text-hover underline transition hover:text-hover hover:opacity-75"
-                to="/"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                href="#privacy"
               >
                 Privacy Policy
-              </Link>
+              </a>
             </p>
 
             <p className="mt-4 text-sm text-gray-500 sm:order-first sm:mt-0">

@@ -96,7 +96,7 @@ userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
   }
 });
 
-userRouter.get("/user/totalStatus/:userId", userAuth, async (req, res) => {
+userRouter.get("/user/totalStatus/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 

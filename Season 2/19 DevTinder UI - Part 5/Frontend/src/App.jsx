@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
 import Connections from "./pages/Connections";
+import ContactForm from "./pages/ContactForm";
 import Error from "./pages/Error";
 import Faqs from "./pages/Faqs";
 import Feed from "./pages/Feed";
@@ -19,7 +20,6 @@ import Rejected from "./pages/Rejected";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
-import Support from "./pages/Support";
 import appStore from "./utils/appStore";
 
 const App = () => {
@@ -53,7 +53,7 @@ const App = () => {
               <Route path="/profile/:userId" element={<UserProfile />}></Route>
               <Route path="/team" element={<Team />}></Route>
               <Route path="/faqs" element={<Faqs />}></Route>
-              <Route path="/support" element={<Support />}></Route>
+              <Route path="/contact-form" element={<ContactForm />}></Route>
               <Route path="*" element={<Error />}></Route>
             </Route>
           </Routes>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { motion } from "framer-motion";
-import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
+import { House, Menu, UserRoundPen, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
@@ -349,7 +349,7 @@ const NavBar = () => {
                 <div className="mb-4 flex flex-col justify-center gap-2 text-center font-medium md:mb-0 md:-translate-y-5 md:flex-row">
                   <NavLink to="/login">
                     <button
-                      className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80"
+                      className="transform rounded-xl bg-primary px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                         setShowNavbar(false);
@@ -360,7 +360,7 @@ const NavBar = () => {
                   </NavLink>
                   <NavLink to="/signup">
                     <button
-                      className="rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-2 text-white transition-opacity duration-100 hover:opacity-80"
+                      className="transform rounded-xl bg-primary px-4 py-2 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover"
                       onClick={() => {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                         setShowNavbar(false);

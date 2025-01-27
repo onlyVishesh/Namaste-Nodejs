@@ -23,6 +23,11 @@ const userAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
+    res.cookie("token", "", {
+      expires: new Date(0),
+      httpOnly: true, // Ensure it's not accessible via JavaScript
+      path: "/",
+    });
     return res.status(500).json({ success: false, error: err.message });
   }
 };

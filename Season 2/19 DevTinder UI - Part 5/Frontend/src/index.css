@@ -54,6 +54,14 @@
   --color-light-gray: #e5e7eb; /* Lighter Gray (use for backgrounds or light text) */
 }
 
+* {
+  font-family: Roboto;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+
 .rc-md-editor .editor-container .sec-md .input {
   background: var(--color-bg) !important;
   border: 0px solid black !important;
