@@ -11,11 +11,13 @@ const { userRole } = require("../middlewares/role");
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
-    res
-      .status(200)
-      .json({ message: "Profile Data Fetched", user: loggedInUser });
+    res.status(200).json({
+      success: true,
+      message: "Profile Data Fetched",
+      user: loggedInUser,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -51,7 +53,7 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
     const { password } = req.body;
     const isPasswordValid = await loggedInUser.validatePassword(password);
@@ -68,7 +70,7 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
       const { deletedCount } = await User.deleteOne({ _id: loggedInUser._id });
 
       if (deletedCount === 1) {
-        res.status(200).json({
+        res.status(200).json({success: true,
           message: `Account with username : ${loggedInUser.username} and email : ${loggedInUser.email} having total ${noOfConnectionDeleted} connection requests has been deleted`,
         });
       } else {
@@ -78,7 +80,7 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
       throw new Error("Password is incorrect");
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({success: false, error: err.message });
   }
 });
 
@@ -91,7 +93,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({ error: "Unauthorized. Please login again." });
+        .json({success: false, error: "Unauthorized. Please login again." });
     }
 
     const { status, password } = req.body;
@@ -101,12 +103,12 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
     if (!isPasswordValid) {
       return res
         .status(401)
-        .json({ error: "Invalid password. Please try again." });
+        .json({success: false, error: "Invalid password. Please try again." });
     }
 
     //* Handle if `status` is banned
     if (loggedInUser.status === "banned") {
-      return res.status(403).json({
+      return res.status(403).json({success: false,
         message: `${loggedInUser.firstName}, your account has been banned. Contact admin for more details.`,
       });
     }
@@ -129,7 +131,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
         status === "active"
           ? "Your account is already active."
           : "Your account is already deactivated.";
-      return res.status(200).json({ message });
+      return res.status(200).json({success: true, message });
     }
 
     //* Update the loggedInUser's status
@@ -139,7 +141,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
       status === "active"
         ? "Your account has been reactivated."
         : "Your account has been deactivated.";
-    return res.status(200).json({ message });
+    return res.status(200).json({success: true, message });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

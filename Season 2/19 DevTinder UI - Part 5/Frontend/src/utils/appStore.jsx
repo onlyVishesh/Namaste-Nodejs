@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
 import connectionsReducer from "./connectionsSlice";
 import feedReducer from "./feedSlice";
 import followersReducer from "./followersSlice";
@@ -13,6 +14,7 @@ import userReducer from "./userSlice";
 const appStore = configureStore({
   reducer: {
     user: userReducer,
+    auth: authReducer,
     feed: feedReducer,
     requestCount: requestCountReducer,
     interestedRequests: interestedRequestsReducer,

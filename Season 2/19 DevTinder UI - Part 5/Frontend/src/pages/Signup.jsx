@@ -2,8 +2,10 @@ import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { login } from "../utils/authSlice";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -20,6 +22,7 @@ const Signup = () => {
     lastName: "",
     password: "",
   });
+  const dispatch = useDispatch();
 
   const validateInputs = () => {
     const newErrors = {
@@ -92,6 +95,7 @@ const Signup = () => {
         toast.error(res.data.message || "An error occurred");
       } else {
         toast.success(res.data.message || "Signup successful!");
+        dispatch(login());
         navigate("/profile");
         window.location.reload();
       }

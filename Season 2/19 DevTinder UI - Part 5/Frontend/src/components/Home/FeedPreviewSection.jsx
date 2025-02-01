@@ -130,7 +130,7 @@ const Card = ({ user, index = 0 }) => {
 
   return (
     <div
-      className="group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-14 lg:h-[470px] lg:w-[380px] lg:hover:h-[520px] xl:mt-0 xl:h-[600px] xl:w-[500px] xl:hover:h-[650px]"
+      className="scale-90 group relative mt-20 h-[450px] w-[380px] select-none rounded-2xl bg-bgSecondary transition-all duration-700 hover:h-[500px] 2xs:hover:h-[500px] sm:mt-0 sm:h-[450px] sm:w-[400px] md:h-[550px] md:w-[500px] md:hover:h-[600px] lg:mt-14 lg:h-[470px] lg:w-[380px] lg:hover:h-[520px] xl:mt-0 xl:h-[600px] xl:w-[500px] xl:hover:h-[650px]"
       ref={cardRef}
       style={{
         boxShadow:

@@ -1,11 +1,12 @@
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaUserCheck } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { addUser } from "../utils/userSlice";
+import { login } from "../utils/authSlice";
 
 const Login = () => {
   const [userId, setUserId] = useState("");
@@ -65,6 +66,7 @@ const Login = () => {
       } else {
         toast.success(res.data.message || "Logged In successful!");
         dispatch(addUser(res.data.user));
+        dispatch(login())
         return navigate("/feed");
       }
     } catch (err) {
@@ -85,7 +87,7 @@ const Login = () => {
   return (
     <div className="flex min-h-fit justify-center">
       <div className="flex-2 m-10 flex justify-center rounded-lg bg-bgSecondary shadow-md shadow-shadow">
-        <div className="w-full p-6 sm:p-16">
+        <div className="min-w-[500px] p-6 sm:p-12">
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-extrabold xl:text-3xl">
               Welcome Back

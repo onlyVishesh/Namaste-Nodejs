@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import logo from "../assets/logo.png";
+import { logout } from "../utils/authSlice";
 import { removeUser } from "../utils/userSlice";
 
 const TOGGLE_CLASSES =
@@ -21,11 +22,9 @@ const NAVBAR_LINKS = {
 };
 
 const HAMBURGER_SECTIONS = {
-  "Company History": "history",
-  "Meet the Team": "team",
-  Careers: "careers",
-  FAQs: "faqs",
-  Support: "support",
+  Home: "/",
+  "Meet the Team": "/team",
+  "Contact Form": "/contact-form",
 };
 
 const NavBar = () => {
@@ -69,6 +68,7 @@ const NavBar = () => {
       } else {
         toast.success(res?.data?.message || "Logout successful!");
         dispatch(removeUser());
+        dispatch(logout());
         return navigate("/");
       }
     } catch (err) {
@@ -80,7 +80,7 @@ const NavBar = () => {
         toast.error("An unexpected error occurred.");
       }
       console.error(err?.message);
-      return navigate("/home");
+      return navigate("/");
     }
   };
 
@@ -212,12 +212,6 @@ const NavBar = () => {
                   >
                     Profile
                   </NavLink>
-                  <NavLink
-                    to="/setting"
-                    className="hover:cursor-pointer hover:text-hover"
-                  >
-                    Setting
-                  </NavLink>
                   <li>
                     <button
                       className="hover:cursor-pointer hover:text-hover"
@@ -298,12 +292,6 @@ const NavBar = () => {
                       >
                         Profile
                       </NavLink>
-                      <NavLink
-                        to="/setting"
-                        className="hover:cursor-pointer hover:text-hover"
-                      >
-                        Setting
-                      </NavLink>
                       <li>
                         <button
                           className="hover:cursor-pointer hover:text-hover"
@@ -325,7 +313,7 @@ const NavBar = () => {
                     return (
                       <li key={link}>
                         <NavLink
-                          to={"/" + HAMBURGER_SECTIONS[link]}
+                          to={HAMBURGER_SECTIONS[link]}
                           onClick={() => {
                             window.scrollTo({ top: 0, behavior: "smooth" });
                             setShowNavbar(false);

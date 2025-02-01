@@ -19,7 +19,6 @@ const FOOTER_SECTIONS = {
 };
 
 const Footer = () => {
-  const user = useSelector((store) => store.user);
   return (
     <footer className="bg-bgSecondary">
       <div className="container mx-auto px-4 pb-4 pt-6 sm:px-6 lg:px-8 lg:pt-10">
@@ -45,22 +44,27 @@ const Footer = () => {
                 <p className="text-lg font-bold">{section}</p>
                 <nav className="mt-4">
                   <ul className="space-y-4 text-sm">
-                    {FOOTER_SECTIONS[section].map((link) => (
-                      <li key={Object.values(link)[0]}>
-                        <a
-                          className="transition hover:text-textMuted"
-                          href={
-                            Object.values(link)[0] === "/feed"
-                              ? user
-                                ? "/feed"
-                                : "/#feed"
-                              : Object.values(link)[0]
-                          }
-                        >
-                          {Object.keys(link)}
-                        </a>
-                      </li>
-                    ))}
+                    {FOOTER_SECTIONS[section].map((link) => {
+                      return Object.values(link)[0].includes("#") ? (
+                        <li key={Object.values(link)[0]}>
+                          <a
+                            className="transition hover:text-textMuted"
+                            href={Object.values(link)[0]}
+                          >
+                            {Object.keys(link)}
+                          </a>
+                        </li>
+                      ) : (
+                        <li key={Object.values(link)[0]}>
+                          <Link
+                            className="transition hover:text-textMuted"
+                            to={Object.values(link)[0]}
+                          >
+                            {Object.keys(link)}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </nav>
               </div>

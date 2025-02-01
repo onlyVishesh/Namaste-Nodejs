@@ -6,7 +6,6 @@ import BodyContainer from "./components/BodyContainer";
 import Connections from "./pages/Connections";
 import ContactForm from "./pages/ContactForm";
 import Error from "./pages/Error";
-import Faqs from "./pages/Faqs";
 import Feed from "./pages/Feed";
 import Followers from "./pages/Followers";
 import Following from "./pages/Following";
@@ -21,6 +20,7 @@ import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
 import appStore from "./utils/appStore";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 const App = () => {
   // eslint-disable-next-line no-undef
@@ -29,6 +29,7 @@ const App = () => {
   useEffect(() => {
     document.body.className = isLocal ? "debug-screens" : "";
   }, [isLocal]);
+  
 
   return (
     <Provider store={appStore}>
@@ -37,11 +38,19 @@ const App = () => {
         <BrowserRouter basename="/">
           <Routes>
             <Route path="/" element={<BodyContainer />}>
-              <Route path="/" element={<Home />}></Route>
-              <Route path="/login" element={<Login />}></Route>
-              <Route path="/signup" element={<Signup />}></Route>
-              <Route path="/feed" element={<Feed />}></Route>
-              <Route path="/networks" element={<Networks />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/feed"
+                element={<ProtectedRoute element={<Feed />} />}
+              />
+              <Route
+                path="/networks"
+                element={<ProtectedRoute element={<Networks />} />}
+              >
                 <Route path="/networks" element={<Interested />} />
                 <Route path="/networks/followers" element={<Followers />} />
                 <Route path="/networks/following" element={<Following />} />
@@ -49,12 +58,16 @@ const App = () => {
                 <Route path="/networks/ignored" element={<Ignored />} />
                 <Route path="/networks/rejected" element={<Rejected />} />
               </Route>
-              <Route path="/profile" element={<Profile />}></Route>
-              <Route path="/profile/:userId" element={<UserProfile />}></Route>
-              <Route path="/team" element={<Team />}></Route>
-              <Route path="/faqs" element={<Faqs />}></Route>
-              <Route path="/contact-form" element={<ContactForm />}></Route>
-              <Route path="*" element={<Error />}></Route>
+              <Route
+                path="/profile"
+                element={<ProtectedRoute element={<Profile />} />}
+              />
+              <Route path="/profile/:userId" element={<UserProfile />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/contact-form" element={<ContactForm />} />
+
+              {/* Error Page */}
+              <Route path="*" element={<Error />} />
             </Route>
           </Routes>
         </BrowserRouter>

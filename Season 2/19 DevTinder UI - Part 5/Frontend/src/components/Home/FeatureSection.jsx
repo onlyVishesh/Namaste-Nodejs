@@ -4,7 +4,7 @@ import { RiBookShelfFill } from "react-icons/ri";
 
 const FeatureSection = () => {
   return (
-    <section className="bg-bgSecondary px-8 py-20">
+    <section className="rounded-xl bg-bgSecondary px-8 py-20">
       <div className="mb-4 md:mb-12">
         <h2 className="mb-2 text-center text-2xl font-bold sm:text-3xl md:text-4xl">
           Connect with the Right Developers

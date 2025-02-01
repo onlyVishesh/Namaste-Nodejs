@@ -4,7 +4,7 @@ import { TiGroup } from "react-icons/ti";
 
 const WorkStepsSection = () => {
   return (
-    <section className="bg-bgSecondary px-8 py-20" id="support">
+    <section className="rounded-xl bg-bgSecondary px-8 py-20" id="support">
       <div className="mb-4 md:mb-12">
         <h2 className="mb-2 text-center text-2xl font-bold sm:text-3xl md:text-4xl">
           How DevRoot Works
