@@ -141,6 +141,7 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
         },
       ],
     })
+      .sort({ updatedAt: -1 })
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -187,7 +188,7 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
       toUserId: loggedInUser._id,
       $or: [{ status: "interested" }],
     })
-      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .sort({ updatedAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -314,7 +315,7 @@ requestRouter.get("/request/followers", userAuth, async (req, res) => {
         },
       ],
     })
-      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .sort({ updatedAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -362,7 +363,7 @@ requestRouter.get("/request/accepted", userAuth, async (req, res) => {
       $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }],
       status: "accepted",
     })
-      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .sort({ updatedAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -410,7 +411,7 @@ requestRouter.get("/request/rejected", userAuth, async (req, res) => {
       toUserId: loggedInUser,
       status: "rejected",
     })
-      .sort({ createdAt: -1 }) // Sort by time (most recent first)
+      .sort({ updatedAt: -1 }) // Sort by time (most recent first)
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -458,6 +459,7 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
       fromUserId: loggedInUser._id,
       status: "ignored",
     })
+      .sort({ updatedAt: -1 })
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -916,6 +918,7 @@ requestRouter.get("/request/connections", userAuth, async (req, res) => {
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
     })
+      .sort({ updatedAt: -1 })
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
