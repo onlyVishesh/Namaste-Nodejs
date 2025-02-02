@@ -1,27 +1,46 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const ignoredRequestsSlice = createSlice({
-  name: "ignoredRequests",
-  initialState: [],
+  name: "ignored",
+  initialState: {
+    data: [],
+    totalPages: 1,
+    currentPage: 1,
+    totalRequest: 0,
+  },
   reducers: {
     addIgnoredRequests: (state, action) => {
       const newRequests = action.payload.filter(
-        (request) => !state.some((item) => item._id === request._id),
+        (request) => !state.data.some((item) => item._id === request._id),
       );
-      state.push(...newRequests);
+      state.data.push(...newRequests);
+    },
+    setTotalPages: (state, action) => {
+      state.totalPages = action.payload;
+    },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setTotalRequest: (state, action) => {
+      state.totalRequest = action.payload;
     },
     removeIgnoredRequest: (state, action) => {
-      const idToRemove = action.payload;
-      return state.filter((request) => request._id !== idToRemove);
+      state.data = state.data.filter(
+        (request) => request._id !== action.payload,
+      );
     },
-    clearIgnoredRequests: () => {
-      return [];
+    clearIgnoredRequests: (state) => {
+      state.data = [];
+      state.currentPage = 1;
     },
   },
 });
 
 export const {
   addIgnoredRequests,
+  setTotalPages,
+  setCurrentPage,
+  setTotalRequest,
   removeIgnoredRequest,
   clearIgnoredRequests,
 } = ignoredRequestsSlice.actions;

@@ -1,12 +1,18 @@
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaUserCheck } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { addUser } from "../utils/userSlice";
 import { login } from "../utils/authSlice";
+import { clearConnectionRequests } from "../utils/connectionsSlice";
+import { clearFollowerRequests } from "../utils/followersSlice";
+import { clearFollowingRequests } from "../utils/followingSlice";
+import { clearIgnoredRequests } from "../utils/ignoredRequestsSlice";
+import { clearInterestedRequests } from "../utils/interestedRequestsSlice";
+import { clearRejectedRequests } from "../utils/rejectedRequestsSlice";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [userId, setUserId] = useState("");
@@ -66,7 +72,14 @@ const Login = () => {
       } else {
         toast.success(res.data.message || "Logged In successful!");
         dispatch(addUser(res.data.user));
-        dispatch(login())
+        dispatch(clearInterestedRequests());
+        dispatch(clearConnectionRequests());
+        dispatch(clearFollowerRequests());
+        dispatch(clearFollowingRequests());
+        dispatch(clearIgnoredRequests());
+        dispatch(clearRejectedRequests());
+        dispatch(login());
+
         return navigate("/feed");
       }
     } catch (err) {

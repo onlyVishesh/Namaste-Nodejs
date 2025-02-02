@@ -3,31 +3,41 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import NetworkCard from "../components/NetworkCard";
 import {
-  addFollowingRequests,
-  clearFollowingRequests,
-} from "../utils/followingSlice";
+  addRejectedRequests,
+  setCurrentPage,
+  setTotalPages,
+  setTotalRequest,
+} from "../../utils/rejectedRequestsSlice";
+import NetworkCard from "../NetworkCard";
 
-const Following = () => {
-  const followingRequests = useSelector((store) => store.following);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+const Rejected = () => {
   const dispatch = useDispatch();
+  const rejectedState = useSelector((store) => store.rejected);
+  const {
+    data: rejected,
+    totalPages,
+    currentPage,
+    totalRequest,
+  } = rejectedState;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getFollowingRequest = async (currentPage) => {
+  const getRejectedRequest = async (page) => {
+    if (isLoading) return;
     setIsLoading(true);
+
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BackendURL}/request/send?page=${currentPage}&limit=10`,
+        `${import.meta.env.VITE_BackendURL}/request/rejected?page=${page}&limit=10`,
         { withCredentials: true },
       );
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       } else {
-        dispatch(addFollowingRequests(res.data.user));
-        setTotalPages(res.data.pagination.totalPages);
+        dispatch(addRejectedRequests(res.data.user));
+        dispatch(setTotalPages(res.data.pagination.totalPages));
+        dispatch(setCurrentPage(page));
+        dispatch(setTotalRequest(res.data.pagination.total));
       }
     } catch (err) {
       toast.error(err.response?.data?.error || "Something went wrong!");
@@ -37,39 +47,42 @@ const Following = () => {
   };
 
   useEffect(() => {
-    getFollowingRequest(page);
-  }, [page]);
+    if (rejected.length === 0) {
+      getRejectedRequest(1);
+    }
+  }, [dispatch, rejected.length]);
 
-  useEffect(() => {
-    dispatch(clearFollowingRequests());
-    setPage(1);
-  }, []);
+  const loadMoreRejected = () => {
+    if (currentPage < totalPages) {
+      getRejectedRequest(currentPage + 1);
+    }
+  };
 
   return (
     <div className="rounded-md bg-bgSecondary">
       <h2 className="px-4 py-2 text-2xl font-bold">
-        Following ({followingRequests.length})
+        Rejected ({totalRequest})
       </h2>
       <hr className="border-textMuted" />
       <div className="flex flex-col divide-y divide-textMuted">
-        {followingRequests.length === 0 ? (
+        {rejected.length === 0 ? (
           <div className="py-5 text-center">
-            You haven&apos;t follow any one. Try to{" "}
+            You haven&apos;t rejected any request. Try to{" "}
             <Link to="/feed" className="font-bold text-primary underline">
               Explore
             </Link>{" "}
             profiles
           </div>
         ) : (
-          followingRequests.map((request) => (
-            <NetworkCard type="following" request={request} key={request._id} />
+          rejected.map((request) => (
+            <NetworkCard type="rejected" request={request} key={request._id} />
           ))
         )}
       </div>
-      {page < totalPages && (
+      {currentPage < totalPages && (
         <div className="py-4 text-center">
           <button
-            onClick={() => setPage((prev) => prev + 1)}
+            onClick={loadMoreRejected}
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-hover"
             disabled={isLoading}
           >
@@ -81,4 +94,4 @@ const Following = () => {
   );
 };
 
-export default Following;
+export default Rejected;

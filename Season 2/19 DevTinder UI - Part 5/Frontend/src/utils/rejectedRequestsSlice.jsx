@@ -1,27 +1,46 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const rejectedRequestsSlice = createSlice({
-  name: "rejectedRequests",
-  initialState: [],
+  name: "rejected",
+  initialState: {
+    data: [],
+    totalPages: 1,
+    currentPage: 1,
+    totalRequest: 0,
+  },
   reducers: {
     addRejectedRequests: (state, action) => {
       const newRequests = action.payload.filter(
-        (request) => !state.some((item) => item._id === request._id),
+        (request) => !state.data.some((item) => item._id === request._id),
       );
-      state.push(...newRequests);
+      state.data.push(...newRequests);
+    },
+    setTotalPages: (state, action) => {
+      state.totalPages = action.payload;
+    },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setTotalRequest: (state, action) => {
+      state.totalRequest = action.payload;
     },
     removeRejectedRequest: (state, action) => {
-      const idToRemove = action.payload;
-      return state.filter((request) => request._id !== idToRemove);
+      state.data = state.data.filter(
+        (request) => request._id !== action.payload,
+      );
     },
-    clearRejectedRequests: () => {
-      return [];
+    clearRejectedRequests: (state) => {
+      state.data = [];
+      state.currentPage = 1;
     },
   },
 });
 
 export const {
   addRejectedRequests,
+  setTotalPages,
+  setCurrentPage,
+  setTotalRequest,
   removeRejectedRequest,
   clearRejectedRequests,
 } = rejectedRequestsSlice.actions;

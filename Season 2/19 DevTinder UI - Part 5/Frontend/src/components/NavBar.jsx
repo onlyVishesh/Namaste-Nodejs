@@ -9,6 +9,12 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import logo from "../assets/logo.png";
 import { logout } from "../utils/authSlice";
+import { clearConnectionRequests } from "../utils/connectionsSlice";
+import { clearFollowerRequests } from "../utils/followersSlice";
+import { clearFollowingRequests } from "../utils/followingSlice";
+import { clearIgnoredRequests } from "../utils/ignoredRequestsSlice";
+import { clearInterestedRequests } from "../utils/interestedRequestsSlice";
+import { clearRejectedRequests } from "../utils/rejectedRequestsSlice";
 import { removeUser } from "../utils/userSlice";
 
 const TOGGLE_CLASSES =
@@ -67,6 +73,12 @@ const NavBar = () => {
         toast.error(res?.data?.message || "An error occurred");
       } else {
         toast.success(res?.data?.message || "Logout successful!");
+        dispatch(clearInterestedRequests());
+        dispatch(clearConnectionRequests());
+        dispatch(clearFollowerRequests());
+        dispatch(clearFollowingRequests());
+        dispatch(clearIgnoredRequests());
+        dispatch(clearRejectedRequests());
         dispatch(removeUser());
         dispatch(logout());
         return navigate("/");

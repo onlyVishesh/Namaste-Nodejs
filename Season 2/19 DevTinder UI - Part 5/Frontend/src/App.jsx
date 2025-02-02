@@ -3,19 +3,19 @@ import { Provider } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
-import Connections from "./pages/Connections";
+import Connections from "./components/networks/Connections";
+import Followers from "./components/networks/Followers";
+import Following from "./components/networks/Following";
+import Ignored from "./components/networks/Ignored";
+import Interested from "./components/networks/Interested";
+import Rejected from "./components/networks/Rejected";
 import ContactForm from "./pages/ContactForm";
 import Error from "./pages/Error";
 import Feed from "./pages/Feed";
-import Followers from "./pages/Followers";
-import Following from "./pages/Following";
 import Home from "./pages/Home";
-import Ignored from "./pages/Ignored";
-import Interested from "./pages/Interested";
 import Login from "./pages/Login";
 import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
-import Rejected from "./pages/Rejected";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
@@ -29,7 +29,6 @@ const App = () => {
   useEffect(() => {
     document.body.className = isLocal ? "debug-screens" : "";
   }, [isLocal]);
-  
 
   return (
     <Provider store={appStore}>

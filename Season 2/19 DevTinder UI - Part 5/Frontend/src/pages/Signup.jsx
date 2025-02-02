@@ -6,6 +6,13 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { login } from "../utils/authSlice";
+import { clearConnectionRequests } from "../utils/connectionsSlice";
+import { clearFollowerRequests } from "../utils/followersSlice";
+import { clearFollowingRequests } from "../utils/followingSlice";
+import { clearIgnoredRequests } from "../utils/ignoredRequestsSlice";
+import { clearInterestedRequests } from "../utils/interestedRequestsSlice";
+import { clearRejectedRequests } from "../utils/rejectedRequestsSlice";
+import { addUser } from "../utils/userSlice";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState("");
@@ -96,6 +103,13 @@ const Signup = () => {
       } else {
         toast.success(res.data.message || "Signup successful!");
         dispatch(login());
+        dispatch(addUser(res.data.user));
+        dispatch(clearInterestedRequests());
+        dispatch(clearConnectionRequests());
+        dispatch(clearFollowerRequests());
+        dispatch(clearFollowingRequests());
+        dispatch(clearIgnoredRequests());
+        dispatch(clearRejectedRequests());
         navigate("/profile");
         window.location.reload();
       }
