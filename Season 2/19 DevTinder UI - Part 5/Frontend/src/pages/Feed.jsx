@@ -162,19 +162,25 @@ const Feed = () => {
   const dispatch = useDispatch();
   const feed = useSelector((store) => store.feed);
   const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Using useRef to store the swipe status
   const requestRef = useRef(null);
 
   const getFeed = async (pageNumber) => {
+    setIsLoading(true);
+
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_BackendURL}/feed?page=${pageNumber}&limit=5`,
         { withCredentials: true },
       );
       dispatch(addFeed(res?.data?.users));
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -188,7 +194,7 @@ const Feed = () => {
     }
   }, [feed]);
 
-  if (feed.length === 0 && page < 2)
+  if (isLoading)
     return (
       <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden">
         <FaSpinner className="size-1/12 animate-spin" />
