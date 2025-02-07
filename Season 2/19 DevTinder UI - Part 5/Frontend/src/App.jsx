@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import { Provider } from "react-redux";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
 import Connections from "./components/networks/Connections";
 import Followers from "./components/networks/Followers";
@@ -19,37 +20,61 @@ import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
-import appStore from "./utils/appStore";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import { addUser, removeUser } from "./utils/userSlice";
+import { FaSpinner } from "react-icons/fa";
+import AdminRoute from "./utils/AdminRoutes";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const App = () => {
-  // eslint-disable-next-line no-undef
-  const isLocal = process.env.NODE_ENV === "development";
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true); // Track loading state
 
   useEffect(() => {
-    document.body.className = isLocal ? "debug-screens" : "";
-  }, [isLocal]);
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(
+          import.meta.env.VITE_BackendURL + "/profile/view",
+          { withCredentials: true },
+        );
+
+        if (res.data.success) {
+          dispatch(addUser(res.data.user));
+        } else {
+          dispatch(removeUser(null));
+        }
+      } catch (err) {
+        dispatch(removeUser(null));
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    fetchUser();
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-bg text-text">
+        <FaSpinner className="size-1/12 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <Provider store={appStore}>
-      <div className="main-body h-full w-full bg-bg text-text">
-        <Toaster richColors />
-        <BrowserRouter basename="/">
-          <Routes>
-            <Route path="/" element={<BodyContainer />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+    <div className="main-body h-full w-full bg-bg text-text">
+      <Toaster richColors />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<BodyContainer />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-              {/* Protected Routes */}
-              <Route
-                path="/feed"
-                element={<ProtectedRoute element={<Feed />} />}
-              />
-              <Route
-                path="/networks"
-                element={<ProtectedRoute element={<Networks />} />}
-              >
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute loading={loading} />}>
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/networks" element={<Networks />}>
                 <Route path="/networks" element={<Interested />} />
                 <Route path="/networks/followers" element={<Followers />} />
                 <Route path="/networks/following" element={<Following />} />
@@ -57,21 +82,19 @@ const App = () => {
                 <Route path="/networks/ignored" element={<Ignored />} />
                 <Route path="/networks/rejected" element={<Rejected />} />
               </Route>
-              <Route
-                path="/profile"
-                element={<ProtectedRoute element={<Profile />} />}
-              />
-              <Route path="/profile/:userId" element={<UserProfile />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/contact-form" element={<ContactForm />} />
-
-              {/* Error Page */}
-              <Route path="*" element={<Error />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </Provider>
+            <Route element={<AdminRoute loading={loading} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Route>
+            <Route path="/profile/:userId" element={<UserProfile />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/contact-form" element={<ContactForm />} />
+            <Route path="*" element={<Error />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 };
 

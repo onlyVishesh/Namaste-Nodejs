@@ -1,6 +1,6 @@
 import axios from "axios";
 import { motion } from "framer-motion";
-import { House, Menu, UserRoundPen, Users } from "lucide-react";
+import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
@@ -17,24 +17,24 @@ import { clearInterestedRequests } from "../utils/interestedRequestsSlice";
 import { clearRejectedRequests } from "../utils/rejectedRequestsSlice";
 import { removeUser } from "../utils/userSlice";
 
-const TOGGLE_CLASSES =
-  "text-sm font-medium flex items-center gap-2 px-3 md:pl-3 md:pr-3.5 py-3 md:py-1.5 transition-colors relative z-10";
+ const TOGGLE_CLASSES =
+   "text-sm font-medium flex items-center gap-2 px-3 md:pl-3 md:pr-3.5 py-3 md:py-1.5 transition-colors relative z-10";
 
-const NAVBAR_LINKS = {
-  home: <House />,
-  networks: <Users />,
-  profile: <UserRoundPen />,
-  // admin: <LockKeyhole />,
-};
-
-const HAMBURGER_SECTIONS = {
-  Home: "/",
-  "Meet the Team": "/team",
-  "Contact Form": "/contact-form",
-};
 
 const NavBar = () => {
-  // Retrieve theme from localStorage or default to "dark"
+ 
+  const NAVBAR_LINKS = {
+    home: <House />,
+    networks: <Users />,
+    profile: <UserRoundPen />,
+  };
+
+  const HAMBURGER_SECTIONS = {
+    Home: "/",
+    "Meet the Team": "/team",
+    "Contact Form": "/contact-form",
+  };
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
@@ -48,6 +48,10 @@ const NavBar = () => {
   const profileMenuRef2 = useRef(null);
 
   const user = useSelector((store) => store.user);
+
+  if (user?.role === "admin") {
+    NAVBAR_LINKS["admin"] = <LockKeyhole />;
+  }
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

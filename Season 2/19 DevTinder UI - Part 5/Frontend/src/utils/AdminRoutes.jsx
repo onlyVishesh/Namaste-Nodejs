@@ -1,8 +1,9 @@
 import { FaSpinner } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
-const ProtectedRoute = ({ loading }) => {
+const AdminRoute = ({ loading }) => {
   const user = useSelector((store) => store.user);
   const location = useLocation();
 
@@ -18,7 +19,12 @@ const ProtectedRoute = ({ loading }) => {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
+  if (user.role !== "admin") {
+    toast.error("You are not admin/moderator")
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default AdminRoute;
