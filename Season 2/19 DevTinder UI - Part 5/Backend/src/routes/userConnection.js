@@ -3,6 +3,7 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 const { default: mongoose } = require("mongoose");
+const { userRole } = require("../middlewares/role");
 const userRouter = express.Router();
 
 userRouter.get("/user/totalStatus", userAuth, async (req, res) => {
@@ -313,5 +314,111 @@ userRouter.delete(
     }
   }
 );
+
+userRouter.get(
+  "/user/new/:duration",
+  userAuth,
+  userRole("admin"),
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { duration } = req.params;
+
+      if (!loggedInUser) {
+        return res
+          .status(401)
+          .json({ success: false, error: "Unauthorized. Please login again." });
+      }
+
+      let startDate, endDate;
+      switch (duration) {
+        case "day":
+          startDate = new Date(new Date().setDate(new Date().getDate() - 1));
+          endDate = new Date();
+          break;
+        case "week":
+          startDate = new Date(new Date().setDate(new Date().getDate() - 7));
+          endDate = new Date();
+          break;
+        case "month":
+          startDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+          endDate = new Date();
+          break;
+        case "year":
+          startDate = new Date(
+            new Date().setFullYear(new Date().getFullYear() - 1)
+          );
+          endDate = new Date();
+          break;
+        default:
+          return res
+            .status(400)
+            .json({ success: false, error: "Invalid duration provided." });
+      }
+
+      const userCount = await User.countDocuments({
+        createdAt: { $gte: startDate, $lt: endDate },
+      });
+
+      let lastStartDate, lastEndDate;
+      switch (duration) {
+        case "day":
+          lastStartDate = new Date(new Date().setDate(startDate.getDate() - 1)); 
+          lastEndDate = startDate; 
+          break;
+        case "week":
+          lastStartDate = new Date(new Date().setDate(startDate.getDate() - 7));
+          lastEndDate = startDate;
+          break;
+        case "month":
+          lastStartDate = new Date(
+            new Date().setMonth(startDate.getMonth() - 1)
+          );
+          lastEndDate = startDate; 
+          break;
+        case "year":
+          lastStartDate = new Date(
+            new Date().setFullYear(startDate.getFullYear() - 1)
+          ); 
+          lastEndDate = startDate;
+          break;
+        default:
+          break;
+      }
+
+      const lastUserCount = await User.countDocuments({
+        createdAt: { $gte: lastStartDate, $lt: lastEndDate },
+      });
+
+      let percentageChange = 0;
+      if (lastUserCount !== 0) {
+        percentageChange = ((userCount - lastUserCount) / lastUserCount) * 100;
+      }
+
+      let changeSymbol = "";
+      if (percentageChange > 0) {
+        changeSymbol = "+";
+      } else if (percentageChange < 0) {
+        changeSymbol = "-";
+      }
+
+      percentageChange = Math.abs(Math.round(percentageChange * 100) / 100);
+
+      res.status(200).json({
+        success: true,
+        message: "User statistics fetched successfully",
+        stats: {
+          current: userCount,
+          last: lastUserCount,
+          percentageChange: percentageChange       
+          },
+      });
+    } catch (err) {
+      console.error("Error fetching user statistics:", err);
+      return res.status(500).json({ success: false, error: "Server Error" });
+    }
+  }
+);
+
 
 module.exports = userRouter;

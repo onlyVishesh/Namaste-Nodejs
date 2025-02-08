@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
 import Connections from "./components/networks/Connections";
 import Followers from "./components/networks/Followers";
@@ -11,6 +12,7 @@ import Ignored from "./components/networks/Ignored";
 import Interested from "./components/networks/Interested";
 import Rejected from "./components/networks/Rejected";
 import ContactForm from "./pages/ContactForm";
+import Dashboard from "./pages/Dashboard";
 import Error from "./pages/Error";
 import Feed from "./pages/Feed";
 import Home from "./pages/Home";
@@ -20,11 +22,9 @@ import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
+import AdminRoute from "./utils/AdminRoutes";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import { addUser, removeUser } from "./utils/userSlice";
-import { FaSpinner } from "react-icons/fa";
-import AdminRoute from "./utils/AdminRoutes";
-import AdminDashboard from "./pages/AdminDashboard";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const App = () => {
       } catch (err) {
         dispatch(removeUser(null));
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -85,7 +85,7 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
             </Route>
             <Route element={<AdminRoute loading={loading} />}>
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<Dashboard />} />
             </Route>
             <Route path="/profile/:userId" element={<UserProfile />} />
             <Route path="/team" element={<Team />} />

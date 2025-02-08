@@ -995,22 +995,22 @@ requestRouter.patch(
   }
 );
 
-//* To get the count of all status
 requestRouter.get(
-  "/moderator/requests/totalRequests/:status",
+  "/request/:status/:duration/",
   userAuth,
-  userRole("admin", "moderator"),
+  userRole("admin"),
   async (req, res) => {
     try {
       const loggedInUser = req.user;
+      const { duration } = req.params;
+      const { status } = req.params;
+
       if (!loggedInUser) {
         return res
           .status(401)
-          .json({ error: "Unauthorized. Please login again." });
+          .json({ success: false, error: "Unauthorized. Please login again." });
       }
 
-      const { status } = req.params;
-      //* Ensure `status` is valid
       if (
         !["all", "interested", "ignored", "accepted", "rejected"].includes(
           status
@@ -1018,15 +1018,109 @@ requestRouter.get(
       ) {
         return res.status(400).json({ error: "Invalid status." });
       }
-      //* finding all the connection with interested status
-      let totalRequest;
-      if (status === "all")
-        totalRequest = await ConnectionRequest.countDocuments();
-      else totalRequest = await ConnectionRequest.countDocuments({ status });
 
-      res.status(200).json({ message: "Data retrieved", totalRequest });
+      let startDate, endDate;
+      switch (duration) {
+        case "day":
+          startDate = new Date(new Date().setDate(new Date().getDate() - 1));
+          endDate = new Date();
+          break;
+        case "week":
+          startDate = new Date(new Date().setDate(new Date().getDate() - 7));
+          endDate = new Date();
+          break;
+        case "month":
+          startDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+          endDate = new Date();
+          break;
+        case "year":
+          startDate = new Date(
+            new Date().setFullYear(new Date().getFullYear() - 1)
+          );
+          endDate = new Date();
+          break;
+        default:
+          return res
+            .status(400)
+            .json({ success: false, error: "Invalid duration provided." });
+      }
+
+      let lastStartDate, lastEndDate;
+      switch (duration) {
+        case "day":
+          lastStartDate = new Date(new Date().setDate(startDate.getDate() - 1));
+          lastEndDate = startDate;
+          break;
+        case "week":
+          lastStartDate = new Date(new Date().setDate(startDate.getDate() - 7));
+          lastEndDate = startDate;
+          break;
+        case "month":
+          lastStartDate = new Date(
+            new Date().setMonth(startDate.getMonth() - 1)
+          );
+          lastEndDate = startDate;
+          break;
+        case "year":
+          lastStartDate = new Date(
+            new Date().setFullYear(startDate.getFullYear() - 1)
+          );
+          lastEndDate = startDate;
+          break;
+        default:
+          break;
+      }
+
+      let requestCount; 
+      let lastRequestCount;
+
+      if (status === "all") {
+        requestCount = await ConnectionRequest.countDocuments({
+          createdAt: { $gte: startDate, $lt: endDate },
+        });
+
+        lastRequestCount = await ConnectionRequest.countDocuments({
+          createdAt: { $gte: lastStartDate, $lt: lastEndDate },
+        });
+      } else {
+        requestCount = await ConnectionRequest.countDocuments({
+          createdAt: { $gte: startDate, $lt: endDate },
+          status,
+        });
+
+        lastRequestCount = await ConnectionRequest.countDocuments({
+          createdAt: { $gte: lastStartDate, $lt: lastEndDate },
+          status,
+        });
+      }
+
+      let percentageChange = 0;
+      if (lastRequestCount !== 0) {
+        percentageChange =
+          ((requestCount - lastRequestCount) / lastRequestCount) * 100;
+      }
+
+      let changeSymbol = "";
+      if (percentageChange > 0) {
+        changeSymbol = "+";
+      } else if (percentageChange < 0) {
+        changeSymbol = "-";
+      }
+
+      percentageChange = Math.abs(Math.round(percentageChange * 100) / 100);
+
+      res.status(200).json({
+        success: true,
+        message: "Request statistics fetched successfully",
+        stats: {
+          current: requestCount,
+          last: lastRequestCount,
+          percentageChange: percentageChange,
+        },
+      });
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      console.error("Error fetching request statistics:", err);
+      return res.status(500).json({ success: false, error: "Server Error" });
     }
   }
 );
