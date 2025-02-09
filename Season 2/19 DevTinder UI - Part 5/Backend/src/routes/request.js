@@ -1161,34 +1161,24 @@ requestRouter.get(
       let requests;
       if (status === "all")
         requests = await ConnectionRequest.find()
-          .populate("fromUserId toUserId", [
-            "firstName",
-            "lastName",
-            "username",
-            "avatar",
-            "about",
-            "skills",
-            "gender",
-            "status",
-          ])
+          .populate(
+            "fromUserId toUserId",
+            process.env.ALLOWED_FIELDS.split(",")
+          )
           .skip((page - 1) * limit)
-          .limit(limit);
+          .limit(limit)
+          .sort({ updatedAt: -1 });
       else {
         requests = await ConnectionRequest.find({
           status,
         })
-          .populate("fromUserId toUserId", [
-            "firstName",
-            "lastName",
-            "username",
-            "avatar",
-            "about",
-            "skills",
-            "gender",
-            "status",
-          ])
+          .populate(
+            "fromUserId toUserId",
+            process.env.ALLOWED_FIELDS.split(",")
+          )
           .skip((page - 1) * limit)
-          .limit(limit);
+          .limit(limit)
+          .sort({ updatedAt: -1 });
       }
 
       res.status(200).json({ message: "Data retrieved", requests });
@@ -1235,16 +1225,7 @@ requestRouter.get(
       const userRequests = await ConnectionRequest.find({
         $or: [{ fromUserId: userId }, { toUserId: userId }],
       })
-        .populate("fromUserId toUserId", [
-          "firstName",
-          "lastName",
-          "username",
-          "avatar",
-          "about",
-          "skills",
-          "gender",
-          "status",
-        ])
+        .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
         .skip((page - 1) * limit)
         .limit(limit);
 
