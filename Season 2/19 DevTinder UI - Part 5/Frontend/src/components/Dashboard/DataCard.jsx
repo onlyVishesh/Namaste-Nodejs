@@ -27,11 +27,11 @@ const DataCard = ({ heading, type, data }) => {
   }, [duration, data]);
 
   return (
-    <div className="w-72 rounded-lg bg-cardBg p-6 shadow-lg transition-shadow duration-300 hover:shadow-xl">
+    <div className="w-64 rounded-lg bg-cardBg p-6 shadow-lg transition-shadow duration-300 hover:shadow-xl">
       <h3 className="text-xl font-semibold text-textMuted">{heading}</h3>
 
       {isLoading ? (
-        <div className="mt-4 h-8 w-full animate-pulse bg-textMuted rounded-md"></div>
+        <div className="mt-4 h-8 w-full animate-pulse rounded-md bg-textMuted"></div>
       ) : (
         <div className="mt-4 flex items-end gap-2">
           <p className="text-3xl font-bold">
@@ -52,15 +52,18 @@ const DataCard = ({ heading, type, data }) => {
       )}
 
       {/* Comparison Text */}
-      <p className="mt-2 text-sm text-textMuted ">Compared to last {duration}</p>
+      <p className="mt-2 text-sm text-textMuted">Compared to last {duration}</p>
 
       {/* Duration Buttons */}
       <div className="mt-4 flex justify-between gap-2">
         {["day", "week", "month", "year"].map((dur) => (
           <button
             key={dur}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${duration === dur ? "bg-blue-500 text-white shadow-md" : "bg-bgSecondary text-text hover:bg-gray-200"}`}
-            onClick={() => setDuration(dur)}
+            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${duration === dur ? "bg-blue-500 shadow-md" : "bg-bgSecondary text-text hover:bg-bg"}`}
+            onClick={(e) => {
+              e.preventDefault();
+              setDuration(dur);
+            }}
           >
             {dur === "day" && "1D"}
             {dur === "week" && "1W"}

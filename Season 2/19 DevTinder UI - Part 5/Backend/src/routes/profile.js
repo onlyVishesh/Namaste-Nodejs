@@ -70,7 +70,8 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
       const { deletedCount } = await User.deleteOne({ _id: loggedInUser._id });
 
       if (deletedCount === 1) {
-        res.status(200).json({success: true,
+        res.status(200).json({
+          success: true,
           message: `Account with username : ${loggedInUser.username} and email : ${loggedInUser.email} having total ${noOfConnectionDeleted} connection requests has been deleted`,
         });
       } else {
@@ -80,7 +81,7 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
       throw new Error("Password is incorrect");
     }
   } catch (err) {
-    res.status(500).json({success: false, error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -93,7 +94,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
     if (!loggedInUser) {
       return res
         .status(401)
-        .json({success: false, error: "Unauthorized. Please login again." });
+        .json({ success: false, error: "Unauthorized. Please login again." });
     }
 
     const { status, password } = req.body;
@@ -103,12 +104,13 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
     if (!isPasswordValid) {
       return res
         .status(401)
-        .json({success: false, error: "Invalid password. Please try again." });
+        .json({ success: false, error: "Invalid password. Please try again." });
     }
 
     //* Handle if `status` is banned
     if (loggedInUser.status === "banned") {
-      return res.status(403).json({success: false,
+      return res.status(403).json({
+        success: false,
         message: `${loggedInUser.firstName}, your account has been banned. Contact admin for more details.`,
       });
     }
@@ -131,7 +133,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
         status === "active"
           ? "Your account is already active."
           : "Your account is already deactivated.";
-      return res.status(200).json({success: true, message });
+      return res.status(200).json({ success: true, message });
     }
 
     //* Update the loggedInUser's status
@@ -141,7 +143,7 @@ profileRouter.patch("/profile/changeStatus", userAuth, async (req, res) => {
       status === "active"
         ? "Your account has been reactivated."
         : "Your account has been deactivated.";
-    return res.status(200).json({success: true, message });
+    return res.status(200).json({ success: true, message });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -610,18 +612,21 @@ profileRouter.get(
     try {
       const loggedInUser = req.user;
       if (!loggedInUser) {
-        return res
-          .status(401)
-          .json({ error: "Unauthorized. Please login again." });
+        return res.status(401).json({
+          success: false,
+          error: "Unauthorized. Please login again.",
+        });
       }
 
       const { status } = req.params;
       const allowedStatus = ["all", "active", "deactivated", "banned"];
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({
+          success: false,
           error: `Invalid status : ${status}`,
         });
       }
+
       let list;
       const page =
         parseInt(req.query.page) < 1 ? 1 : parseInt(req.query.page) || 1;
@@ -631,27 +636,38 @@ profileRouter.get(
           : parseInt(req.query.limit) < 1
           ? 1
           : parseInt(req.query.limit) || 10;
+
+      // Determine sorting order (default to descending by createdAt)
+      const sortBy = req.query.sortBy || "createdAt";
+      const sortOrder = req.query.sortOrder || "desc";
+      const sortOptions = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+
+      // Query users based on status and apply sorting
       if (status === "all") {
         list = await User.find()
           .select(process.env.ALLOWED_FIELDS.split(","))
+          .sort(sortOptions)
           .skip((page - 1) * limit)
           .limit(limit);
       } else {
         list = await User.find({ status })
           .select(process.env.ALLOWED_FIELDS.split(","))
+          .sort(sortOptions)
           .skip((page - 1) * limit)
           .limit(limit);
       }
 
       res.status(200).json({
-        message: `Data retrieved`,
-        list,
+        success: true,
+        message: "Data retrieved",
+        users: list,
       });
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ success: false, error: err.message });
     }
   }
 );
+
 
 //* To change status active and deactivated
 profileRouter.patch(

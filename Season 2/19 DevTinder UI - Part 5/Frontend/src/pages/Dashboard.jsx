@@ -12,18 +12,6 @@ const Dashboard = () => {
         <Link to="/admin/requests">
           <DataCard heading={"Requests"} type="request" data="all" />
         </Link>
-        <Link to="/admin/interested">
-          <DataCard heading={"Interested"} type="request" data="interested" />
-        </Link>
-        <Link to="/admin/connected">
-          <DataCard heading={"Connected"} type="request" data="accepted" />
-        </Link>
-        <Link to="/admin/rejected">
-          <DataCard heading={"Rejected"} type="request" data="rejected" />
-        </Link>
-        <Link to="/admin/ignored">
-          <DataCard heading={"Ignored"} type="request" data="ignored" />
-        </Link>
       </div>
     </div>
   );

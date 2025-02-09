@@ -5,6 +5,13 @@ import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import BodyContainer from "./components/BodyContainer";
+import Requests from "./components/Dashboard/Requests";
+import AcceptedRequests from "./components/Dashboard/requests/AcceptedRequests";
+import AllRequests from "./components/Dashboard/requests/AllRequests";
+import IgnoredRequests from "./components/Dashboard/requests/IgnoredRequests";
+import InterestedRequests from "./components/Dashboard/requests/InterestedRequests";
+import RejectedRequests from "./components/Dashboard/requests/RejectedRequests";
+import Users from "./components/Dashboard/Users";
 import Connections from "./components/networks/Connections";
 import Followers from "./components/networks/Followers";
 import Following from "./components/networks/Following";
@@ -85,7 +92,27 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
             </Route>
             <Route element={<AdminRoute loading={loading} />}>
-              <Route path="/admin" element={<Dashboard />} />
+              <Route path="/admin" element={<Dashboard />}></Route>
+              <Route path="/admin/users" element={<Users />} />
+              <Route path="/admin/requests" element={<Requests />}>
+                <Route path="/admin/requests" element={<AllRequests />} />
+                <Route
+                  path="/admin/requests/interested"
+                  element={<InterestedRequests />}
+                />
+                <Route
+                  path="/admin/requests/accepted"
+                  element={<AcceptedRequests />}
+                />
+                <Route
+                  path="/admin/requests/rejected"
+                  element={<RejectedRequests />}
+                />
+                <Route
+                  path="/admin/requests/ignored"
+                  element={<IgnoredRequests />}
+                />
+              </Route>
             </Route>
             <Route path="/profile/:userId" element={<UserProfile />} />
             <Route path="/team" element={<Team />} />
