@@ -15,14 +15,14 @@ import { clearFollowingRequests } from "../utils/followingSlice";
 import { clearIgnoredRequests } from "../utils/ignoredRequestsSlice";
 import { clearInterestedRequests } from "../utils/interestedRequestsSlice";
 import { clearRejectedRequests } from "../utils/rejectedRequestsSlice";
+import { cacheResults } from "../utils/searchSlice";
 import { removeUser } from "../utils/userSlice";
+import ProfileSearchCard from "./ProfileSearchCard";
 
- const TOGGLE_CLASSES =
-   "text-sm font-medium flex items-center gap-2 px-3 md:pl-3 md:pr-3.5 py-3 md:py-1.5 transition-colors relative z-10";
-
+const TOGGLE_CLASSES =
+  "text-sm font-medium flex items-center gap-2 px-3 md:pl-3 md:pr-3.5 py-3 md:py-1.5 transition-colors relative z-10";
 
 const NavBar = () => {
- 
   const NAVBAR_LINKS = {
     home: <House />,
     networks: <Users />,
@@ -46,6 +46,11 @@ const NavBar = () => {
   const profileMenuRef1 = useRef(null);
   const profileRef2 = useRef(null);
   const profileMenuRef2 = useRef(null);
+  const [search, setSearch] = useState(null);
+  const searchCache = useSelector((store) => store.search);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [inputSearchQuery, setInputSearchQuery] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const user = useSelector((store) => store.user);
 
@@ -175,10 +180,63 @@ const NavBar = () => {
     };
   }, [showProfileMenu1, showProfileMenu2]);
 
+  const getSearchSuggestions = async (query) => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL +
+          `/search/?query=${query}&page=1&limit=5`,
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+        return;
+      }
+      setSearch(res.data.result);
+      dispatch(cacheResults({ [query]: res.data.result }));
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
+  const handleInputChange = (e) => {
+    setInputSearchQuery(e.target.value);
+    setSearchSuggestions(search);
+  };
+
+  useEffect(() => {
+    if (!inputSearchQuery) return;
+    const timer = setTimeout(() => {
+      if (searchCache[inputSearchQuery]) {
+        setSearchSuggestions(searchCache[inputSearchQuery]);
+      } else {
+        getSearchSuggestions(inputSearchQuery);
+      }
+      console.log(searchSuggestions);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [inputSearchQuery]);
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      setIsFocused(false);
+    }, 100);
+  };
+
   const newLocal = "z-50 fixed top-0 h-auto w-full bg-bgSecondary";
   return (
     <nav className={newLocal} ref={menuRef}>
-      <div className="container mx-auto flex h-full items-center justify-between px-4">
+      <div className="mx-0 flex h-full items-center justify-between px-4 sm:container sm:mx-auto">
         <div className="flex items-center gap-2 md:gap-4">
           <NavLink
             to={"/"}
@@ -194,9 +252,45 @@ const NavBar = () => {
               <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-black" />
               <input
                 type="text"
-                className="w-28 rounded-xl border-2 border-border p-1 pl-10 text-black 2xs:w-48"
+                className="w-48 rounded-xl border-2 border-border p-1 pl-10 text-black 2xs:w-52 md:w-52 lg:w-64"
                 placeholder="Search"
+                value={inputSearchQuery}
+                onChange={handleInputChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    console.log(inputSearchQuery);
+                  }
+                }}
               />
+              <div
+                className={`absolute items-center justify-between px-2 py-1 text-textMuted ${searchSuggestions?.length === 0 ? "group-focus-within:flex" : ""}`}
+              >
+                {isFocused && searchSuggestions?.length === 0 && (
+                  <div className="hidden text-sm group-focus-within:block">
+                    No Suggestion Available
+                  </div>
+                )}
+              </div>
+              {isFocused && searchSuggestions?.length > 0 && (
+                <div className="absolute z-10 mt-1 flex w-full flex-col gap-2 rounded-md rounded-b-md bg-cardBg">
+                  {searchSuggestions?.map((search) => (
+                    <div
+                      key={search._id}
+                      className="cursor-pointer px-2 py-1 hover:bg-hover"
+                    >
+                      <ProfileSearchCard
+                        userData={search}
+                        onClick={() => {
+                          setInputSearchQuery("");
+                          setSearchSuggestions([]);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

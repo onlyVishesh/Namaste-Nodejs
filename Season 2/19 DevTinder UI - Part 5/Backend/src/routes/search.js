@@ -33,15 +33,17 @@ searchRouter.get("/search", userAuth, async (req, res) => {
         { firstName: { $regex: query, $options: "i" } },
         { lastName: { $regex: query, $options: "i" } },
         { skills: { $regex: query, $options: "i" } },
+        { headline: { $regex: query, $options: "i" } },
+        { about: { $regex: query, $options: "i" } },
       ],
     })
       .select(process.env.ALLOWED_FIELDS.split(","))
       //* adding paging
       .skip((page - 1) * limit)
       .limit(limit);
-    res.status(200).json({ message: "successful", result });
+    res.status(200).json({ sucres: true, message: "successful", result });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ sucres: true, error: err.message });
   }
 });
 
