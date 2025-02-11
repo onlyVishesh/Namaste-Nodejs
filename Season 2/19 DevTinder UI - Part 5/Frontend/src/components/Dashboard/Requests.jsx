@@ -4,8 +4,8 @@ import DataCard from "./DataCard";
 const Requests = () => {
   return (
     <div className="">
-      <h2 className="mb-5 pt-5 text-3xl font-bold">Requests</h2>
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <h2 className="mb-5 pt-5 text-3xl font-bold text-center">Requests</h2>
+      <div className="grid grid-cols-1 place-items-center gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         <Link to="/admin/requests">
           <DataCard heading={"All"} type="request" data="all" />
         </Link>

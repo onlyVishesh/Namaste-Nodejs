@@ -58,7 +58,7 @@ const Users = () => {
 
   return (
     <div>
-      <h2 className="mb-5 pt-5 text-3xl font-bold">Users</h2>
+      <h2 className="mb-5 pt-5 text-3xl font-bold text-center">Users</h2>
       <div className="my-4 flex gap-2">
         {["all", "active", "deactivated", "banned"].map((currentStatus) => (
           <button

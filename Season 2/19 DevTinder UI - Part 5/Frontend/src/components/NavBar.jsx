@@ -260,7 +260,9 @@ const NavBar = () => {
                 onBlur={handleBlur}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    console.log(inputSearchQuery);
+                    navigate("/search?query=" + inputSearchQuery);
+                     setInputSearchQuery("");
+                     setSearchSuggestions([]);
                   }
                 }}
               />

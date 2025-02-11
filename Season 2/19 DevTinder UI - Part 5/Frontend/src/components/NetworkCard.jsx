@@ -227,6 +227,7 @@ const NetworkCard = ({ type, request }) => {
     following: "Following",
     ignored: "Ignored",
     rejected: "Rejected",
+    none:"View Profile"
   };
 
   const renderButtons = {

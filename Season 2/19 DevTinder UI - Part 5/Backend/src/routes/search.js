@@ -27,6 +27,17 @@ searchRouter.get("/search", userAuth, async (req, res) => {
         ? 1
         : parseInt(req.query.limit) || 10;
 
+    const resultCount = await User.countDocuments({
+      $or: [
+        { username: { $regex: query, $options: "i" } },
+        { firstName: { $regex: query, $options: "i" } },
+        { lastName: { $regex: query, $options: "i" } },
+        { skills: { $regex: query, $options: "i" } },
+        { headline: { $regex: query, $options: "i" } },
+        { about: { $regex: query, $options: "i" } },
+      ],
+    });
+
     const result = await User.find({
       $or: [
         { username: { $regex: query, $options: "i" } },
@@ -41,7 +52,16 @@ searchRouter.get("/search", userAuth, async (req, res) => {
       //* adding paging
       .skip((page - 1) * limit)
       .limit(limit);
-    res.status(200).json({ sucres: true, message: "successful", result });
+    res.status(200).json({
+      sucres: true,
+      message: "successful",
+      result,
+      pagination: {
+        currentPage: Number(page),
+        resultCount,
+        totalPages: Math.ceil(resultCount / limit),
+      },
+    });
   } catch (err) {
     res.status(500).json({ sucres: true, error: err.message });
   }

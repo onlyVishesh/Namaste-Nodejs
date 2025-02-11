@@ -37,7 +37,7 @@ const RequestDataCard = ({ request }) => {
   };
 
   return (
-    <div className="relative w-2/3">
+    <div className="relative w-full sm:w-2/3">
       <div className="flex flex-col items-center justify-between">
         {/* From User */}
         <div className="flex w-full items-center justify-between gap-3 rounded-t-lg bg-cardBg px-4">
@@ -53,7 +53,7 @@ const RequestDataCard = ({ request }) => {
             </div>
 
             <div className="w-5/12 sm:w-7/12 md:w-8/12">
-              <h3 className="text-nowrap text-xl font-extrabold sm:text-xl">
+              <h3 className="text-nowrap text-md font-extrabold sm:text-xl">
                 {formattedName(
                   request.fromUserId.firstName,
                   request.fromUserId.lastName,
@@ -69,7 +69,7 @@ const RequestDataCard = ({ request }) => {
           </div>
           <Link
             to={`/profile/${request.fromUserId.username}`}
-            className="transform text-nowrap rounded-lg bg-primary px-4 py-3 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover"
+            className="transform text-nowrap rounded-lg bg-primary sm:px-4 sm:py-3 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover px-2 py-1 "
           >
             View Profile
           </Link>
@@ -94,7 +94,7 @@ const RequestDataCard = ({ request }) => {
             </div>
 
             <div className="w-5/12 sm:w-7/12 md:w-8/12">
-              <h3 className="text-nowrap text-xl font-extrabold sm:text-xl">
+              <h3 className="text-nowrap text-md font-extrabold sm:text-xl">
                 {formattedName(
                   request.toUserId.firstName,
                   request.toUserId.lastName,
@@ -110,7 +110,7 @@ const RequestDataCard = ({ request }) => {
           </div>
           <Link
             to={`/profile/${request.toUserId.username}`}
-            className="transform text-nowrap rounded-lg bg-primary px-4 py-3 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover"
+            className="transform text-nowrap rounded-lg bg-primary px-2 py-1 font-semibold text-white shadow-md transition duration-300 hover:scale-105 hover:bg-hover sm:px-4 sm:py-3"
           >
             View Profile
           </Link>

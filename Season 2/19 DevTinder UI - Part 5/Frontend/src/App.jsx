@@ -26,6 +26,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Networks from "./pages/Networks";
 import Profile from "./pages/Profile";
+import Search from "./pages/Search";
 import Signup from "./pages/Signup";
 import Team from "./pages/Team";
 import UserProfile from "./pages/UserProfile";
@@ -90,6 +91,10 @@ const App = () => {
                 <Route path="/networks/rejected" element={<Rejected />} />
               </Route>
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:userId" element={<UserProfile />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/contact-form" element={<ContactForm />} />
             </Route>
             <Route element={<AdminRoute loading={loading} />}>
               <Route path="/admin" element={<Dashboard />}></Route>
@@ -114,9 +119,6 @@ const App = () => {
                 />
               </Route>
             </Route>
-            <Route path="/profile/:userId" element={<UserProfile />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/contact-form" element={<ContactForm />} />
             <Route path="*" element={<Error />} />
           </Route>
         </Routes>
