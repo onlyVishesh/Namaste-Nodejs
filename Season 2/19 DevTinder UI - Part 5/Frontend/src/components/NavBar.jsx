@@ -261,8 +261,8 @@ const NavBar = () => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     navigate("/search?query=" + inputSearchQuery);
-                     setInputSearchQuery("");
-                     setSearchSuggestions([]);
+                    setInputSearchQuery("");
+                    setSearchSuggestions([]);
                   }
                 }}
               />
@@ -276,7 +276,7 @@ const NavBar = () => {
                 )}
               </div>
               {isFocused && searchSuggestions?.length > 0 && (
-                <div className="absolute z-10 mt-1 flex w-full flex-col gap-2 rounded-md rounded-b-md bg-cardBg">
+                <div className="absolute z-10 mt-1 flex w-full flex-col justify-start gap-2 rounded-md rounded-b-md bg-cardBg">
                   {searchSuggestions?.map((search) => (
                     <div
                       key={search._id}

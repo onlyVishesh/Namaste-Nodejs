@@ -4,6 +4,10 @@
 
 ## Table of Contents
 
+admin 
+search + full text search
+
+
 ---
 
 If you found this summary helpful, **please ⭐ star the repository** to show your support! 😊

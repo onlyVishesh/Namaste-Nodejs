@@ -7,10 +7,6 @@ const ProfileSearchCard = ({ userData, onClick }) => {
   return (
     <Link to={"/profile/" + userData?.username} onClick={onClick}>
       <div className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-hover">
-        <div className="flex size-4">
-          <FaSearch className="hidden size-4 text-text sm:flex" />
-        </div>
-
         <img
           src={userData?.avatar}
           alt={userData?.firstName}
