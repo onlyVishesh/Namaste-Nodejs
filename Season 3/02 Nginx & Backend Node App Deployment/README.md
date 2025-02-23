@@ -9,6 +9,31 @@
 
 ## 📑 Table of Contents
 
+- [📌 Quick Links](#-quick-links)
+- [📑 Table of Contents](#-table-of-contents)
+- [🎯 Overview](#-overview)
+  - [Key Components:](#key-components)
+- [✅ Deployment Steps](#-deployment-steps)
+  - [1. Backend Setup on EC2](#1-backend-setup-on-ec2)
+  - [2. MongoDB Atlas Configuration](#2-mongodb-atlas-configuration)
+  - [3. Process Management with PM2](#3-process-management-with-pm2)
+  - [4. Nginx Reverse Proxy Setup](#4-nginx-reverse-proxy-setup)
+  - [5. Security Configuration](#5-security-configuration)
+- [🛠️ Command Reference](#️-command-reference)
+  - [SSH Connection](#ssh-connection)
+  - [Backend Management](#backend-management)
+  - [Nginx Management](#nginx-management)
+- [🔍 Deployment Verification](#-deployment-verification)
+  - [1. Backend Health Check](#1-backend-health-check)
+  - [2. Nginx Verification](#2-nginx-verification)
+- [🎯 Next Steps](#-next-steps)
+  - [Security Enhancements](#security-enhancements)
+  - [Performance Optimization](#performance-optimization)
+  - [Monitoring](#monitoring)
+- [❗ Troubleshooting](#-troubleshooting)
+  - [Common Issues](#common-issues)
+- [🔥 Conclusion](#-conclusion)
+
 ## 🎯 Overview
 
 This guide outlines the process of deploying the DevRoot backend on AWS EC2 and configuring Nginx as a reverse proxy.
