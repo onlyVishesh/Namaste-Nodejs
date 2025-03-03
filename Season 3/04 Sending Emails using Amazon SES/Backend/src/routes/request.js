@@ -6,6 +6,11 @@ const User = require("../models/user");
 const { userRole } = require("../middlewares/role");
 const requestRouter = express.Router();
 
+const sendEmail = require("../utils/sendEmail");
+const {
+  InterestedMailTemplate,
+} = require("../templates/InterestedMailTemplate");
+
 //* To send interested or ignored request to user profile
 requestRouter.post(
   "/request/send/:status/:toUserId",
@@ -23,8 +28,9 @@ requestRouter.post(
       const { status, toUserId } = req.params;
 
       //* Checking if toUserId exist in user database
+      let isToUserExist;
       if (mongoose.Types.ObjectId.isValid(toUserId)) {
-        const isToUserExist = await User.findById(toUserId);
+        isToUserExist = await User.findById(toUserId);
         if (!isToUserExist) {
           return res
             .status(400)
@@ -76,7 +82,25 @@ requestRouter.post(
       await connectionRequest.save();
 
       if (status === "interested") {
-        res
+        const fromUser = loggedInUser.firstName || "Someone";
+        const fromUsername = loggedInUser.username;
+        const toUser = isToUserExist.firstName || "Dev";
+        const toAddress = isToUserExist.email;
+        const subject = "🔥 New Interest on DevRoot!";
+
+        const htmlTemplate = InterestedMailTemplate(
+          fromUser,
+          fromUsername,
+          toUser
+        );
+
+        const emailRes = await sendEmail.run(
+          "okVishesh360@gmail.com",
+          subject,
+          htmlTemplate
+        );
+        console.log("Email Sent:", emailRes);
+        return res
           .status(200)
           .json({ success: true, message: "Connection request Send" });
       } else if (status === "ignored") {
@@ -1071,7 +1095,7 @@ requestRouter.get(
           break;
       }
 
-      let requestCount; 
+      let requestCount;
       let lastRequestCount;
 
       if (status === "all") {
