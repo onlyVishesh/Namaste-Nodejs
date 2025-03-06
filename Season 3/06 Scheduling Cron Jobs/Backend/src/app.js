@@ -4,6 +4,7 @@ const { connectDB } = require("./config/database");
 const app = express();
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
+require("./utils/cronjob")
 
 //* Middleware to parse incoming JSON requests and cookies
 app.use(cors({ origin: process.env.FrontendURL, credentials: true }));
