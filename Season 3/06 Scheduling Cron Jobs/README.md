@@ -1,5 +1,6 @@
-# 🚀 Namaste Node.js - 06: Scheduling Cron Jobs
-
+<h1 style="text-align: center; display: flex; justify-content: space-between;">
+  🚀 <span>Namaste Node.js - 06 Scheduling Cron Jobs</span> 🚀
+</h1>
 Welcome to the sixth part of the Namaste Node.js series! In this module, you'll learn how to automate tasks in your Node.js backend using cron jobs. We'll use `node-cron` to schedule weekly email reminders for users, and leverage `date-fns` for date calculations.
 
 ---
@@ -13,21 +14,20 @@ Welcome to the sixth part of the Namaste Node.js series! In this module, you'll 
 
 ## 📋 Table of Contents
 
-- [🚀 Namaste Node.js - 06: Scheduling Cron Jobs](#-namaste-nodejs---06-scheduling-cron-jobs)
-  - [📌 Quick Links](#-quick-links)
-  - [📋 Table of Contents](#-table-of-contents)
-  - [📝 What is a Cron Job?](#-what-is-a-cron-job)
-  - [📦 What is `node-cron`?](#-what-is-node-cron)
-  - [📅 What is `date-fns`?](#-what-is-date-fns)
-  - [🗂️ Project Structure](#️-project-structure)
-  - [🛠️ How to Schedule Cron Jobs in Node.js](#️-how-to-schedule-cron-jobs-in-nodejs)
-    - [1. Install Dependencies](#1-install-dependencies)
-    - [2. Create a Cron Schedule](#2-create-a-cron-schedule)
-    - [3. Use `date-fns` for Date Calculations](#3-use-date-fns-for-date-calculations)
-    - [4. Example: Weekly Email Reminder Cron Job](#4-example-weekly-email-reminder-cron-job)
-  - [📧 Email Template](#-email-template)
-  - [💡 Tips](#-tips)
-  - [⭐ If you found this guide helpful, please star the repository](#-if-you-found-this-guide-helpful-please-star-the-repository)
+- [� Quick Links](#-quick-links)
+- [📋 Table of Contents](#-table-of-contents)
+- [📝 What is a Cron Job?](#-what-is-a-cron-job)
+- [📦 What is `node-cron`?](#-what-is-node-cron)
+- [📅 What is `date-fns`?](#-what-is-date-fns)
+- [🗂️ Project Structure](#️-project-structure)
+- [🛠️ How to Schedule Cron Jobs in Node.js](#️-how-to-schedule-cron-jobs-in-nodejs)
+  - [1. Install Dependencies](#1-install-dependencies)
+  - [2. Create a Cron Schedule](#2-create-a-cron-schedule)
+  - [3. Use `date-fns` for Date Calculations](#3-use-date-fns-for-date-calculations)
+  - [4. Example: Weekly Email Reminder Cron Job](#4-example-weekly-email-reminder-cron-job)
+- [📧 Email Template](#-email-template)
+- [💡 Tips](#-tips)
+- [⭐ If you found this guide helpful, please star the repository](#-if-you-found-this-guide-helpful-please-star-the-repository)
 
 ## 📝 What is a Cron Job?
 
