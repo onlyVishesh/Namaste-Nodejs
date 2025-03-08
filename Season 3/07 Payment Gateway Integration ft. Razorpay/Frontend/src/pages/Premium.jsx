@@ -3,19 +3,46 @@ import { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
 
-const PricingCard = ({ title, price, features, isPopular = false }) => {
-  const handlePayment = async (title) => {
+const PricingCard = ({
+  membershipType,
+  price,
+  features,
+  isPopular = false,
+}) => {
+  const handlePayment = async (membershipType) => {
     try {
       const res = await axios.post(
         import.meta.env.VITE_BackendURL + "/payment/createOrder",
-        { title, price },
+        {
+          membershipType,
+          //! Do not pass price in the frontend as it could be alter
+          // price,
+        },
         { withCredentials: true },
       );
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
       }
       if (res.data.success === true) {
+        const { orderId, amount, currency, notes } = res.data.order;
+        const { keyId } = res.data;
+        const options = {
+          key: keyId, // Replace with your Razorpay key_id
+          amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+          currency,
+          name: "DevRoot",
+          description: "Connect to other Developer",
+          order_id: orderId, // This is the order_id created in the backend
+          prefill: {
+            name: notes.firstName + " " + notes.LastName,
+          },
+          theme: {
+            color: "#3b82f6",
+          },
+        };
 
+        const rzp = new window.Razorpay(options);
+        rzp.open();
         toast.success(res.data.message);
       }
     } catch (err) {
@@ -29,6 +56,7 @@ const PricingCard = ({ title, price, features, isPopular = false }) => {
       console.error(err.message);
     }
   };
+
   return (
     <div
       className={`relative flex flex-col rounded-xl p-8 transition-all duration-300 hover:shadow-xl ${isPopular ? "to-card-bg border-t-4 border-primary bg-gradient-to-b from-primary" : "bg-bgSecondary"} hover:scale-105 hover:cursor-pointer`}
@@ -38,13 +66,15 @@ const PricingCard = ({ title, price, features, isPopular = false }) => {
           MOST POPULAR
         </div>
       )}
-      <h3 className="text-center text-2xl font-bold text-text">{title}</h3>
+      <h3 className="text-center text-2xl font-bold text-text">
+        {membershipType}
+      </h3>
       <div className="my-6 text-center">
         <span className="text-5xl font-bold text-text">₹{price}</span>
         <span className="text-textMuted">/month</span>
       </div>
       <ul className="mb-8 space-y-3">
-        {features.map((feature, index) => (
+        {features?.map((feature, index) => (
           <li key={index} className="flex items-start">
             <svg
               className="mt-1 h-5 w-5 shrink-0 text-accent1"
@@ -66,7 +96,7 @@ const PricingCard = ({ title, price, features, isPopular = false }) => {
       </ul>
       <button
         className={`mt-auto w-full rounded-lg py-3 font-medium transition-colors duration-200 ${isPopular ? "hover:bg-primary/90 bg-primary text-text" : "hover:bg-primary/5 border border-primary text-primary"} hover:scale-105`}
-        onClick={() => handlePayment(title)}
+        onClick={() => handlePayment(membershipType)}
       >
         Get Started
       </button>
@@ -122,7 +152,7 @@ const Premium = () => {
           {plansData?.map((plan, index) => (
             <PricingCard
               key={index}
-              title={plan.title}
+              membershipType={plan.membershipType}
               price={plan.price}
               features={plan.features}
               isPopular={plan.isPopular || false}

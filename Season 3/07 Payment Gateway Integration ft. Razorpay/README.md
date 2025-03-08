@@ -26,6 +26,34 @@
       ```
 
    5. Create the `/payment/createOrder` endpoint to create an order using the initialize function, as shown in [`payment.js`](./Backend/src/routes/payment.js).
-   6. Add this API to the payment button
+   6. Save the payment details in the payments collection
+   7. Add this API to the payment button
+   8. modify the api to take input like membershipType on the frontend and price according to the memberShip in the backend
+   9. open razorpay dialog box by adding razorpay script in the frontend index.html and into the payment.js
+
+   ```jsx
+   const options = {
+     key: "YOUR_KEY_ID", // Replace with your Razorpay key_id
+     amount: "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+     currency: "INR",
+     name: "Acme Corp",
+     description: "Test Transaction",
+     order_id: "order_IluGWxBm9U8zJ8", // This is the order_id created in the backend
+     callback_url: "http://localhost:3000/payment-success", // Your success URL
+     prefill: {
+       name: "Gaurav Kumar",
+       email: "gaurav.kumar@example.com",
+       contact: "9999999999",
+     },
+     theme: {
+       color: "#F37254",
+     },
+   };
+
+   const rzp = new window.Razorpay(options);
+   rzp.open();
+   ```
+
+   10. now there will be testing payment dialog box open in your payment page
 
 ## ⭐ If you found this guide helpful, please star the repository
