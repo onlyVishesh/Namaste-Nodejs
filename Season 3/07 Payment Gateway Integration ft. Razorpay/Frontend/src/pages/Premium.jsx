@@ -1,8 +1,34 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
+import { toast } from "sonner";
 
 const PricingCard = ({ title, price, features, isPopular = false }) => {
+  const handlePayment = async (title) => {
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_BackendURL + "/payment/createOrder",
+        { title, price },
+        { withCredentials: true },
+      );
+      if (res.data.success === false) {
+        toast.error(res.data.message || "An error occurred");
+      }
+      if (res.data.success === true) {
+
+        toast.success(res.data.message);
+      }
+    } catch (err) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went wrong!");
+      } else if (err.request) {
+        toast.error("No response from the server. Please try again.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
+      console.error(err.message);
+    }
+  };
   return (
     <div
       className={`relative flex flex-col rounded-xl p-8 transition-all duration-300 hover:shadow-xl ${isPopular ? "to-card-bg border-t-4 border-primary bg-gradient-to-b from-primary" : "bg-bgSecondary"} hover:scale-105 hover:cursor-pointer`}
@@ -40,6 +66,7 @@ const PricingCard = ({ title, price, features, isPopular = false }) => {
       </ul>
       <button
         className={`mt-auto w-full rounded-lg py-3 font-medium transition-colors duration-200 ${isPopular ? "hover:bg-primary/90 bg-primary text-text" : "hover:bg-primary/5 border border-primary text-primary"} hover:scale-105`}
+        onClick={() => handlePayment(title)}
       >
         Get Started
       </button>
