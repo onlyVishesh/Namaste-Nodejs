@@ -10,5 +10,9 @@
 ---
 
 ## 📋 Table of Contents
+1. create a premium page
+2. create a api `/payment/plans` to get the data form the backend about the plans 
+
 
 ## ⭐ If you found this guide helpful, please star the repository
+ 

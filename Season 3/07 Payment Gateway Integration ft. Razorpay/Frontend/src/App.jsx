@@ -25,6 +25,7 @@ import Feed from "./pages/Feed";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Networks from "./pages/Networks";
+import Premium from "./pages/Premium";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Signup from "./pages/Signup";
@@ -95,6 +96,7 @@ const App = () => {
               <Route path="/search" element={<Search />} />
               <Route path="/team" element={<Team />} />
               <Route path="/contact-form" element={<ContactForm />} />
+              <Route path="/premium" element={<Premium />} />
             </Route>
             <Route element={<AdminRoute loading={loading} />}>
               <Route path="/admin" element={<Dashboard />}></Route>

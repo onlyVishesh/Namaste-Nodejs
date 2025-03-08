@@ -4,6 +4,7 @@ import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { MdOutlineWorkspacePremium } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ const NavBar = () => {
     home: <House />,
     networks: <Users />,
     profile: <UserRoundPen />,
+    Premium: <MdOutlineWorkspacePremium />,
   };
 
   const HAMBURGER_SECTIONS = {
