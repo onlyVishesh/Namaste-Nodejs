@@ -4,6 +4,10 @@ const { userAuth } = require("../middlewares/auth");
 
 const razorpayInstance = require("../utils/razorpay");
 const Payment = require("../models/payment");
+const {
+  validateWebhookSignature,
+} = require("razorpay/dist/utils/razorpay-utils");
+const User = require("../models/user");
 
 const PLANS = [
   {
@@ -95,6 +99,49 @@ paymentRoute.post("/payment/createOrder", userAuth, async (req, res) => {
       order: savePayment,
       keyId: process.env.RAZORPAY_KEY_ID,
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+paymentRoute.post("/payment/webhook", async (req, res) => {
+  try {
+    const webhookSignature = req.get["X-Razorpay-Signature"];
+    const isWebhookValid = validateWebhookSignature(
+      JSON.stringify(req.body),
+      webhookSignature,
+      process.env.RAZORPAY_WEBHOOK_SECRET
+    );
+
+    if (!isWebhookValid) {
+      return req
+        .status(400)
+        .json({ success: false, error: "WebHook signature is not valid" });
+    }
+
+    // update the payment status in db
+
+    const paymentDetails = req.body.payload.payment.entity;
+
+    const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
+    payment.status = paymentDetails.status;
+    await payment.save();
+
+    // update user membership 
+    const user = await User.findOne({ _id: payment.userId });
+    user.isPremium = true;
+    user.membershipType = payment.notes.plan;
+    await user.save();
+
+    if (req.body.event == "payment.captured") {
+    }
+    if (req.body.event == "payment.failed") {
+    }
+
+    // return success response 200 else webhook call again and again
+    res
+      .status(200)
+      .json({ success: true, message: "Webhook received successfully" });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

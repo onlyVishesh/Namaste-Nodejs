@@ -70,7 +70,7 @@ const paymentSchema = new Schema(
         type: String,
       },
       plan: {
-        type: String,
+        type: ["Starter", "Professional", "Enterprise"],
       },
     },
   },

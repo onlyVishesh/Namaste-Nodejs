@@ -56,4 +56,67 @@
 
    10. now there will be testing payment dialog box open in your payment page
 
+4. Create WebHook
+
+   1. reference - https://razorpay.com/docs/webhooks/setup-edit-payments/
+   2. Added url `https://dev-root.xyz/api/payment/webhook`
+   3. Add a secret, select Active Events and click on create
+   4. Add secret to `.env`
+
+   ```bash
+   RAZORPAY_WEBHOOK_SECRET = <YOUR_WEBHOOK_SECRET>
+   ```
+
+   5. create a API to check and validate payment status reference - https://razorpay.com/docs/payments/server-integration/nodejs/integration-steps/#15-verify-payment-signature,https://razorpay.com/docs/webhooks/validate-test/
+   6. In `/payment/webhook` add
+
+   ```jsx
+   const {
+     validateWebhookSignature,
+   } = require("razorpay/dist/utils/razorpay-utils");
+   paymentRoute.post("/payment/webhook", async (req, res) => {
+     try {
+       const webhookSignature = req.get["X-Razorpay-Signature"];
+       const isWebhookValid = validateWebhookSignature(
+         JSON.stringify(req.body),
+         webhookSignature,
+         process.env.RAZORPAY_WEBHOOK_SECRET
+       );
+
+       if (!isWebhookValid) {
+         return req
+           .status(400)
+           .json({ success: false, error: "WebHook signature is not valid" });
+       }
+
+       const paymentDetails = req.body.payload.payment.entity;
+
+       const payment = await Payment.findOne({
+         orderId: paymentDetails.order_id,
+       });
+
+       if (req.body.event == "payment.captured") {
+         // update the payment status in db
+         // update user membership
+       }
+       if (req.body.event == "payment.failed") {
+         //show error page
+       }
+
+       // return success response 200 else webhook call again and again
+       res
+         .status(200)
+         .json({ success: true, message: "Webhook received successfully" });
+     } catch (err) {
+       res.status(500).json({ success: false, error: err.message });
+     }
+   });
+   ```
+
+   7. payload reference - https://razorpay.com/docs/webhooks/payloads/payments/
+
 ## ⭐ If you found this guide helpful, please star the repository
+
+```
+
+```

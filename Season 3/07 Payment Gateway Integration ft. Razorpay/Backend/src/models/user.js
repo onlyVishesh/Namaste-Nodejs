@@ -132,6 +132,15 @@ const userSchema = new Schema(
       enum: ["active", "deactivated", "banned"],
       default: "active",
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+      enum: ["free", "Starter", "Professional", "Enterprise"],
+      default: "free",
+    },
   },
   { timestamps: true }
 );
@@ -159,7 +168,6 @@ userSchema.methods.validatePassword = async function (password) {
   const isPasswordValid = await bcrypt.compare(password, this.password);
   return isPasswordValid;
 };
-
 
 //* Exporting the model
 const User = mongoose.model("User", userSchema);
