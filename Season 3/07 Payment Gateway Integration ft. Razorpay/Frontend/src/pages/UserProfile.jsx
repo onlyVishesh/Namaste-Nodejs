@@ -3,6 +3,7 @@ import axios from "axios";
 import MarkdownIt from "markdown-it";
 import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
+import { MdOutlineWorkspacePremium } from "react-icons/md";
 import MdEditor from "react-markdown-editor-lite";
 import "react-markdown-editor-lite/lib/index.css";
 import { useSelector } from "react-redux";
@@ -30,6 +31,7 @@ const UserProfile = () => {
       );
       if (res.data.success === false) {
         setProfileData(res?.data?.user);
+
         toast.error(res.data.message || "An error occurred");
         return navigate("/feed");
       }
@@ -129,7 +131,7 @@ const UserProfile = () => {
               <div className="my-10 flex flex-col gap-5 pt-24 lg:ml-64 lg:w-[65%] lg:pt-0">
                 <div className={`flex justify-between`}>
                   <div>
-                    <p className="text-2xl font-extrabold sm:text-3xl">
+                    <p className="flex items-center gap-2 text-2xl font-extrabold sm:text-3xl">
                       {profileData?.lastName?.length > 14
                         ? capitalize(profileData?.firstName) +
                           " " +
@@ -137,6 +139,9 @@ const UserProfile = () => {
                         : capitalize(profileData?.firstName) +
                           " " +
                           capitalize(profileData?.lastName)}
+                      {profileData.isPremium && (
+                        <MdOutlineWorkspacePremium className="text-yellow-500" />
+                      )}
                     </p>
 
                     <p className="text-xl font-semibold text-textMuted">

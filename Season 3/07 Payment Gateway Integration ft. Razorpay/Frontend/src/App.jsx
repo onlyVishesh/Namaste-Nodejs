@@ -38,27 +38,26 @@ import { addUser, removeUser } from "./utils/userSlice";
 const App = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true); // Track loading state
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL + "/profile/view",
+        { withCredentials: true },
+      );
+
+      if (res.data.success) {
+        dispatch(addUser(res.data.user));
+      } else {
+        dispatch(removeUser(null));
+      }
+    } catch (err) {
+      dispatch(removeUser(null));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get(
-          import.meta.env.VITE_BackendURL + "/profile/view",
-          { withCredentials: true },
-        );
-
-        if (res.data.success) {
-          dispatch(addUser(res.data.user));
-        } else {
-          dispatch(removeUser(null));
-        }
-      } catch (err) {
-        dispatch(removeUser(null));
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUser();
   }, [dispatch]);
 

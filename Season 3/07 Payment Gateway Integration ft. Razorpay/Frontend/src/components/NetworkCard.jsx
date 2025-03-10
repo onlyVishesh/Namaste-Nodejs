@@ -3,6 +3,7 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
+import { MdOutlineWorkspacePremium } from "react-icons/md";
 import { RiDeleteBin7Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -227,7 +228,7 @@ const NetworkCard = ({ type, request }) => {
     following: "Following",
     ignored: "Ignored",
     rejected: "Rejected",
-    none:"View Profile"
+    none: "View Profile",
   };
 
   const renderButtons = {
@@ -374,15 +375,21 @@ const NetworkCard = ({ type, request }) => {
         </div>
 
         <div className="w-5/12 sm:w-7/12 md:w-8/12">
-          <h3 className="text-nowrap text-xl font-extrabold sm:text-xl">
+          <h3 className="flex items-center gap-2 whitespace-nowrap text-xl font-extrabold sm:text-xl">
             {formattedName()}
+            {request.isPremium && (
+              <span className="flex items-center">
+                <MdOutlineWorkspacePremium className="h-6 w-6 text-yellow-500 sm:h-7 sm:w-7" />
+              </span>
+            )}
           </h3>
+
           <p className="line-clamp-1 text-sm">
             {request.fromUserId.username === loggedInUser.username
               ? request.toUserId?.headline || "No information provided."
               : request.fromUserId?.headline || "No information provided."}
           </p>
-          <p className="text-xs text-nowrap">
+          <p className="text-nowrap text-xs">
             {renderTimeStamp[type]}{" "}
             {request.status === "accepted" || request.status === "rejected"
               ? timeSince(new Date(request.updatedAt))

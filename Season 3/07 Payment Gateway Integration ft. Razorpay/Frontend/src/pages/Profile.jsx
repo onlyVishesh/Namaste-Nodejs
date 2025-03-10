@@ -2,7 +2,7 @@ import axios from "axios";
 import MarkdownIt from "markdown-it";
 import { useEffect, useRef, useState } from "react";
 import { IoMdCloseCircle, IoMdSettings } from "react-icons/io";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdOutlineWorkspacePremium } from "react-icons/md";
 import MdEditor from "react-markdown-editor-lite";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -359,7 +359,7 @@ const Profile = () => {
                         <div className="flex flex-wrap gap-3 xs:gap-5">
                           <input
                             className="text-md xs:w-42 w-32 rounded-md border px-2 py-1 sm:w-48"
-                            value={`${capitalize(profileData?.firstName)}`}
+                            value={capitalize(profileData?.firstName)}
                             maxLength={14}
                             minLength={3}
                             onChange={(e) => {
@@ -371,7 +371,7 @@ const Profile = () => {
                           />
                           <input
                             className="text-md xs:w-42 w-32 rounded-md border px-2 py-1 sm:w-48"
-                            value={`${capitalize(profileData?.lastName)}`}
+                            value={capitalize(profileData?.lastName)}
                             maxLength={25}
                             onChange={(e) => {
                               setProfileData({
@@ -381,14 +381,19 @@ const Profile = () => {
                             }}
                           />
                         </div>
-                      ) : profileData?.lastName?.length > 14 ? (
-                        capitalize(profileData?.firstName) +
-                        " " +
-                        capitalize(profileData?.lastName.slice(0, 14) + "...")
                       ) : (
-                        capitalize(profileData?.firstName) +
-                        " " +
-                        capitalize(profileData?.lastName)
+                        <span className="flex items-center gap-2">
+                          {profileData?.lastName?.length > 14
+                            ? `${capitalize(profileData?.firstName)} ${capitalize(
+                                profileData?.lastName.slice(0, 14),
+                              )}...`
+                            : `${capitalize(profileData?.firstName)} ${capitalize(
+                                profileData?.lastName,
+                              )}`}
+                          {user.isPremium && (
+                            <MdOutlineWorkspacePremium className="text-yellow-500" />
+                          )}
+                        </span>
                       )}
                     </p>
 

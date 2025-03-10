@@ -1,51 +1,130 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaSpinner } from "react-icons/fa";
+import { FaCrown, FaSpinner } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { addUser, removeUser } from "../utils/userSlice";
+
+const PremiumUserView = () => {
+  const dispatch = useDispatch();
+
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL + "/profile/view",
+        { withCredentials: true },
+      );
+
+      if (res.data.success) {
+        dispatch(addUser(res.data.user));
+      } else {
+        dispatch(removeUser(null));
+      }
+    } catch (err) {
+      dispatch(removeUser(null));
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, [dispatch]);
+
+  return (
+    <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-6 py-16 text-center">
+      <div className="rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 p-6">
+        <FaCrown className="h-16 w-16 text-white" />
+      </div>
+      <h1 className="text-4xl font-bold text-text">
+        You&apos;re a Premium Member!
+      </h1>
+      <p className="max-w-2xl text-lg text-textMuted">
+        Thank you for subscribing to our premium service. You now have access to
+        all exclusive features.
+      </p>
+      <div className="mt-6 flex gap-4">
+        <button className="hover:bg-primary/90 rounded-lg bg-primary px-6 py-3 font-medium text-white">
+          Explore Features
+        </button>
+        <button className="hover:bg-primary/5 rounded-lg border border-primary px-6 py-3 font-medium text-primary">
+          Manage Subscription
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const PricingCard = ({
   membershipType,
   price,
   features,
   isPopular = false,
+  setIsUserPremium,
 }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const verifyPremiumUser = async () => {
+    try {
+      const res = await axios.get(
+        import.meta.env.VITE_BackendURL + "/payment/verify",
+        { withCredentials: true },
+      );
+      if (res.data.isPremium === true) {
+        setIsUserPremium(true);
+        toast.success("Premium membership activated successfully!");
+      }
+    } catch (err) {
+      console.error(err.message);
+      toast.error("Failed to verify premium status");
+    }
+  };
+
   const handlePayment = async (membershipType) => {
+    setIsProcessing(true);
     try {
       const res = await axios.post(
         import.meta.env.VITE_BackendURL + "/payment/createOrder",
         {
           membershipType,
-          //! Do not pass price in the frontend as it could be alter
-          // price,
         },
         { withCredentials: true },
       );
+
       if (res.data.success === false) {
         toast.error(res.data.message || "An error occurred");
+        return;
       }
-      if (res.data.success === true) {
-        const { orderId, amount, currency, notes } = res.data.order;
-        const { keyId } = res.data;
-        const options = {
-          key: keyId, // Replace with your Razorpay key_id
-          amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-          currency,
-          name: "DevRoot",
-          description: "Connect to other Developer",
-          order_id: orderId, // This is the order_id created in the backend
-          prefill: {
-            name: notes.firstName + " " + notes.LastName,
-          },
-          theme: {
-            color: "#3b82f6",
-          },
-        };
 
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-        toast.success(res.data.message);
-      }
+      const { orderId, amount, currency, notes } = res.data.order;
+      const { keyId } = res.data;
+
+      const options = {
+        key: keyId,
+        amount,
+        currency,
+        name: "DevRoot",
+        description: "Connect to other Developer",
+        order_id: orderId,
+        prefill: {
+          name: notes.firstName + " " + notes.LastName,
+          email: notes.email,
+        },
+        theme: {
+          color: "#3b82f6",
+        },
+        handler: function (response) {
+          verifyPremiumUser();
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (err) {
+      setIsProcessing(false);
       if (err.response) {
         toast.error(err.response.data.error || "Something went wrong!");
       } else if (err.request) {
@@ -59,7 +138,7 @@ const PricingCard = ({
 
   return (
     <div
-      className={`relative flex flex-col rounded-xl p-8 transition-all duration-300 hover:shadow-xl ${isPopular ? "to-card-bg border-t-4 border-primary bg-gradient-to-b from-primary" : "bg-bgSecondary"} hover:scale-105 hover:cursor-pointer`}
+      className={`relative flex flex-col rounded-xl p-8 transition-all duration-300 hover:shadow-xl ${isPopular ? "to-card-bg border-t-4 border-primary bg-gradient-to-b from-primary" : "bg-bgSecondary"} hover:scale-[1.02] hover:cursor-pointer`}
     >
       {isPopular && (
         <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-accent1 px-10 py-3 text-sm font-semibold text-text shadow-md [clip-path:polygon(10%_10%,90%_10%,100%_50%,100%_50%,90%_90%,10%_90%,0_50%,0_50%)]">
@@ -95,10 +174,18 @@ const PricingCard = ({
         ))}
       </ul>
       <button
-        className={`mt-auto w-full rounded-lg py-3 font-medium transition-colors duration-200 ${isPopular ? "hover:bg-primary/90 bg-primary text-text" : "hover:bg-primary/5 border border-primary text-primary"} hover:scale-105`}
+        className={`mt-auto flex items-center justify-center rounded-lg py-3 font-medium transition-colors duration-200 ${isPopular ? "hover:bg-primary/90 bg-primary text-white" : "hover:bg-primary/5 border border-primary text-primary"} hover:scale-[1.02]`}
         onClick={() => handlePayment(membershipType)}
+        disabled={isProcessing}
       >
-        Get Started
+        {isProcessing ? (
+          <>
+            <FaSpinner className="mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          "Get Started"
+        )}
       </button>
     </div>
   );
@@ -106,20 +193,26 @@ const PricingCard = ({
 
 const Premium = () => {
   const [plansData, setPlansData] = useState(null);
+  const [isUserPremium, setIsUserPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const getPlansData = async () => {
     setIsLoading(true);
-
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BackendURL}/payment/plans`,
-        { withCredentials: true },
-      );
-      setPlansData(res.data.plansData);
-      setIsLoading(false);
+      const [plansRes, premiumRes] = await Promise.all([
+        axios.get(`${import.meta.env.VITE_BackendURL}/payment/plans`, {
+          withCredentials: true,
+        }),
+        axios.get(`${import.meta.env.VITE_BackendURL}/payment/verify`, {
+          withCredentials: true,
+        }),
+      ]);
+
+      setPlansData(plansRes.data.plansData);
+      setIsUserPremium(premiumRes.data.isPremium === true);
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      toast.error("Failed to load plans data");
     } finally {
       setIsLoading(false);
     }
@@ -129,15 +222,20 @@ const Premium = () => {
     getPlansData();
   }, []);
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden">
-        <FaSpinner className="size-1/12 animate-spin" />
+        <FaSpinner className="size-1/12 animate-spin text-primary" />
       </div>
     );
+  }
+
+  if (isUserPremium) {
+    return <PremiumUserView />;
+  }
 
   return (
-    <div className="py-16 sm:py-24">
+    <div className=" bg-bg py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-text sm:text-4xl">
@@ -156,12 +254,13 @@ const Premium = () => {
               price={plan.price}
               features={plan.features}
               isPopular={plan.isPopular || false}
+              setIsUserPremium={setIsUserPremium}
             />
           ))}
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-gray-500">
+          <p className="text-textMuted">
             Need something custom?{" "}
             <a
               href="/contact-form"

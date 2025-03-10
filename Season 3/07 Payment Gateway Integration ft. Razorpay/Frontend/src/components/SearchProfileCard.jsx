@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { MdOutlineWorkspacePremium } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { abbreviateNumber, capitalize } from "../utils/constants";
@@ -59,8 +60,11 @@ const SearchProfileCard = ({ user }) => {
 
         {/* User Info */}
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-text">
-            {formattedName(user.firstName, user.lastName)}
+          <h3 className="flex items-center gap-2 text-lg font-bold text-text">
+            {formattedName(user.firstName, user.lastName)}{" "}
+            {user.isPremium && (
+              <MdOutlineWorkspacePremium className="h-6 w-6 text-yellow-500 sm:h-7 sm:w-7" />
+            )}
           </h3>
           <p className="line-clamp-1 text-sm dark:text-textMuted">
             {user.headline || "No information provided."}
@@ -68,7 +72,7 @@ const SearchProfileCard = ({ user }) => {
         </div>
 
         {/* Followers and Following Count */}
-        <div className="gap-4 hidden xs:flex">
+        <div className="hidden gap-4 xs:flex">
           <div className="flex flex-col items-center justify-center rounded-md bg-bg px-3 py-2">
             <p className="text-lg font-bold text-text">
               {requestCount?.followers !== null &&

@@ -55,7 +55,15 @@ const paymentSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["created", "paid", "failed"],
+      enum: [
+        "created",
+        "paid",
+        "failed",
+        "authorized",
+        "captured",
+        "started",
+        "resolved",
+      ],
       default: "created",
     },
     receipt: {

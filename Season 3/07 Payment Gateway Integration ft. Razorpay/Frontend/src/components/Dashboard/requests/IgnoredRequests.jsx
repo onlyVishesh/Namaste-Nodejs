@@ -16,7 +16,6 @@ const IgnoredRequests = () => {
         { withCredentials: true },
       );
       setRequests((prevRequests) => [...prevRequests, ...res.data.requests]);
-      console.log(requests);
       setHasMore(res.data.requests.length > 0);
     } catch (err) {
       console.error("Failed to fetch requests:", err);

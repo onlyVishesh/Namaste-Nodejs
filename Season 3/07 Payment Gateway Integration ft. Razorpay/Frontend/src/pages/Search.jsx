@@ -29,7 +29,6 @@ const Search = () => {
         return;
       } else {
         const result = res.data.result;
-        console.log(result);
 
         if (result.length === 0) {
           setHasMore(false);

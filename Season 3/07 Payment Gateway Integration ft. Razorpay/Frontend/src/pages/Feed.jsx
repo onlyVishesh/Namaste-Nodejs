@@ -99,11 +99,9 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
   const handleDragEnd = () => {
     if (x.get() > 200) {
       setRequestInterested();
-      console.log("right");
       dispatch(removeRequest(user._id));
     } else if (x.get() < -200) {
       setRequestIgnored();
-      console.log("left");
       dispatch(removeRequest(user._id));
     } else if (y.get() < -250) {
       dispatch(removeRequest(user._id));

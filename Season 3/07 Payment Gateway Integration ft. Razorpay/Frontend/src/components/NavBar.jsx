@@ -28,7 +28,9 @@ const NavBar = () => {
     home: <House />,
     networks: <Users />,
     profile: <UserRoundPen />,
-    Premium: <MdOutlineWorkspacePremium />,
+    Premium: (
+      <MdOutlineWorkspacePremium className="h-5 w-5 sm:h-6 sm:w-7" />
+    ),
   };
 
   const HAMBURGER_SECTIONS = {
@@ -219,7 +221,6 @@ const NavBar = () => {
       } else {
         getSearchSuggestions(inputSearchQuery);
       }
-      console.log(searchSuggestions);
     }, 400);
 
     return () => clearTimeout(timer);

@@ -106,7 +106,8 @@ paymentRoute.post("/payment/createOrder", userAuth, async (req, res) => {
 
 paymentRoute.post("/payment/webhook", async (req, res) => {
   try {
-    const webhookSignature = req.get["X-Razorpay-Signature"];
+    const webhookSignature = req.get("X-Razorpay-Signature");
+
     const isWebhookValid = validateWebhookSignature(
       JSON.stringify(req.body),
       webhookSignature,
@@ -119,31 +120,69 @@ paymentRoute.post("/payment/webhook", async (req, res) => {
         .json({ success: false, error: "WebHook signature is not valid" });
     }
 
-    // update the payment status in db
-
+    // Update my payment Status in DB
     const paymentDetails = req.body.payload.payment.entity;
 
     const payment = await Payment.findOne({ orderId: paymentDetails.order_id });
+    if (!payment) {
+      console.warn("Payment not found");
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
     payment.status = paymentDetails.status;
     await payment.save();
 
-    // update user membership 
+    if (!payment.userId) {
+      console.warn("Payment has no userId");
+      return res.status(400).json({ error: "Payment has no userId" });
+    }
+
     const user = await User.findOne({ _id: payment.userId });
+    if (!user) {
+      console.warn("User not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
     user.isPremium = true;
-    user.membershipType = payment.notes.plan;
+    const membershipType = payment.notes.plan;
+    user.membershipType = Array.isArray(membershipType)
+      ? membershipType[0]
+      : membershipType;
     await user.save();
 
-    if (req.body.event == "payment.captured") {
-    }
-    if (req.body.event == "payment.failed") {
-    }
+    await user.save();
+
+    // if (req.body.event == "payment.captured") {
+    // }
+    // if (req.body.event == "payment.failed") {
+    // }
 
     // return success response 200 else webhook call again and again
-    res
+    return res
       .status(200)
       .json({ success: true, message: "Webhook received successfully" });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+paymentRoute.get("/payment/verify", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    if (user.isPremium) {
+      return res.status(200).json({
+        success: true,
+        message: "user is Premium",
+        isPremium: true,
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "user is not Premium",
+      isPremium: false,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 

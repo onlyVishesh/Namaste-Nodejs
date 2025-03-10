@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { MdArrowBack, MdArrowForward } from "react-icons/md";
+import {
+  MdArrowBack,
+  MdArrowForward,
+  MdOutlineWorkspacePremium,
+} from "react-icons/md";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { abbreviateNumber, capitalize } from "../utils/constants";
@@ -103,12 +107,15 @@ const Card = ({ user, index = 0 }) => {
         />
       </div>
       <div className="mx-auto flex h-[85%] w-10/12 flex-col items-center justify-end gap-1 xl:h-[87%]">
-        <h2 className="line-clamp-1 text-center text-2xl font-bold md:text-3xl">
+        <h2 className="line-clamp-1 flex items-center gap-2 text-center text-2xl font-bold md:text-3xl">
           {user?.lastName?.length > 14
             ? user?.firstName +
               " " +
               capitalize(user?.lastName.slice(0, 14) + "...")
             : capitalize(user?.firstName) + " " + capitalize(user?.lastName)}
+          {user.isPremium && (
+            <MdOutlineWorkspacePremium className="text-yellow-500" />
+          )}
         </h2>
         <p className="-mt-1 line-clamp-1 font-normal text-textMuted md:text-lg">
           @{user.username}
