@@ -254,9 +254,18 @@ const NetworkCard = ({ type, request }) => {
     ),
     connection: (
       <>
-        <button className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white">
-          Message
-        </button>
+        <Link
+          to={`/chat/${
+            request.fromUserId.username === loggedInUser.username
+              ? request.toUserId.username
+              : request.fromUserId.username
+          }`}
+        >
+          <button className="rounded-full border-2 border-primary px-2 py-1 font-semibold text-primary hover:bg-hover hover:text-white">
+            Chat
+          </button>
+        </Link>
+
         <div className="relative">
           <BsThreeDots
             ref={menuRef}

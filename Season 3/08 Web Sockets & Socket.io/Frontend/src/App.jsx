@@ -18,6 +18,7 @@ import Following from "./components/networks/Following";
 import Ignored from "./components/networks/Ignored";
 import Interested from "./components/networks/Interested";
 import Rejected from "./components/networks/Rejected";
+import Chat from "./pages/Chat";
 import ContactForm from "./pages/ContactForm";
 import Dashboard from "./pages/Dashboard";
 import Error from "./pages/Error";
@@ -96,6 +97,8 @@ const App = () => {
               <Route path="/team" element={<Team />} />
               <Route path="/contact-form" element={<ContactForm />} />
               <Route path="/premium" element={<Premium />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/chat/:userId" element={<Chat />} />
             </Route>
             <Route element={<AdminRoute loading={loading} />}>
               <Route path="/admin" element={<Dashboard />}></Route>
