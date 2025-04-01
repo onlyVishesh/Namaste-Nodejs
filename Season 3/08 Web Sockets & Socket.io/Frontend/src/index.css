@@ -61,13 +61,11 @@ html {
   scroll-behavior: smooth;
 }
 
-
 .rc-md-editor .editor-container .sec-md .input {
   background: var(--color-bg) !important;
   border: 0px solid black !important;
   color: var(--color-text) !important;
   border-radius: 30px !important;
-
 }
 
 .sec-md,
@@ -75,7 +73,6 @@ html {
   background: var(--color-bg) !important;
   border: 0px solid black !important;
   border-radius: 30px !important;
-
 }
 
 .rc-md-editor {
@@ -85,4 +82,29 @@ html {
 
 .custom-html-style {
   color: var(--color-text) !important;
+}
+
+.sender-bubble::before {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: -10px;
+  width: 0;
+  height: 0;
+  border-top-right-radius: 5px;
+
+  border-right: 20px solid transparent;
+  border-top: 20px solid theme("colors.primary");
+}
+
+.receiver-bubble::before {
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: -10px;
+  width: 0;
+  height: 0;
+  border-top-left-radius: 5px;
+  border-left: 20px solid transparent;
+  border-top: 20px solid theme("colors.bgSecondary");
 }

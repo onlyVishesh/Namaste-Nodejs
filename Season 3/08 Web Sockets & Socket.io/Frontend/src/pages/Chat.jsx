@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { FiMessageSquare, FiSearch, FiSend } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { createSocketConnection } from "../utils/socket";
 
 // Mock chat data
-const mockChats = [
+const chats = [
   {
     userId: "vishesh1",
-    name: "Vishesh",
+    name: "Vishesh 1",
     avatar: "https://randomuser.me/api/portraits/men/1.jpg",
     lastMessage: "Hey, how are you doing?",
     time: "10:30 AM",
@@ -32,7 +34,7 @@ const mockChats = [
 ];
 
 // Mock messages for each chat
-const mockMessages = {
+let messages = {
   vishesh1: [
     {
       userId: "vishesh1",
@@ -95,8 +97,43 @@ const ChatHistory = ({
   message,
   setMessage,
   handleSendMessage,
+  userId,
 }) => {
   const navigate = useNavigate();
+  const loggedInUser = useSelector((store) => store.user);
+  const loggedInUsername = loggedInUser?.username;
+  const [chatMessages, setChatMessages] = useState(messages);
+
+  useEffect(() => {
+    const socket = createSocketConnection();
+    socket.emit("joinChat", { loggedInUsername, userId });
+
+    const handleNewMessage = ({ newMessage }) => {
+      // Only add if not already in messages (prevent duplicates)
+      setChatMessages((prev) => {
+        const exists = prev.some(
+          (msg) =>
+            msg.userId === newMessage.userId &&
+            msg.text === newMessage.text &&
+            msg.time === newMessage.time,
+        );
+        return exists ? prev : [...prev, newMessage];
+      });
+    };
+  
+
+    socket.on("messageReceived", handleNewMessage);
+
+    return () => {
+      socket.off("messageReceived", handleNewMessage);
+      socket.disconnect();
+    };
+  }, [loggedInUser, userId]);
+
+  // Update local messages when prop changes
+  useEffect(() => {
+    setChatMessages(messages);
+  }, [messages]);
 
   return (
     <>
@@ -125,23 +162,31 @@ const ChatHistory = ({
       <div className="flex h-[calc(100vh-12rem)] flex-col justify-between">
         {/* Messages area */}
         <div className="flex flex-1 flex-col justify-end overflow-y-auto bg-cardBg p-4">
-          {messages?.map((msg) => (
-            <div
-              key={msg.userId}
-              className={`mb-4 flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
-            >
+          {chatMessages?.map((msg) => {
+            const isSender = msg.sender === loggedInUsername;
+
+            return (
               <div
-                className={`max-w-xs rounded-lg px-4 py-2 sm:max-w-md lg:max-w-xl ${msg.sender === "me" ? "bg-primary text-text" : "border border-border bg-bgSecondary text-text"}`}
+                key={`${msg.userId}-${msg.time}`}
+                className={`mb-4 flex ${isSender ? "justify-end" : "justify-start"}`}
               >
-                <p>{msg.text}</p>
-                <p
-                  className={`mt-1 text-xs ${msg.sender === "me" ? "text-primaryTint" : "text-textMuted"}`}
+                <div
+                  className={`relative max-w-xs rounded-lg px-4 py-2 text-sm sm:max-w-md lg:max-w-xl ${
+                    isSender
+                      ? "sender-bubble bg-primary text-text"
+                      : "receiver-bubble bg-bgSecondary text-text"
+                  } `}
                 >
-                  {msg.time}
-                </p>
+                  <p>{msg.text}</p>
+                  <p
+                    className={`mt-1 text-xs ${isSender ? "text-primaryTint" : "text-textMuted"}`}
+                  >
+                    {msg.time}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Message input */}
@@ -175,12 +220,14 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
+  const loggedInUser = useSelector((store) => store.user);
+  const loggedInUsername = loggedInUser?.username;
 
   useEffect(() => {
     if (userId) {
       // In a real app, you would fetch messages for this user
-      setMessages(mockMessages[userId] || []);
-      setSelectedChat(mockChats.find((chat) => chat.userId === userId));
+      setMessages(messages[userId] || []);
+      setSelectedChat(chats.find((chat) => chat.userId === userId));
     }
   }, [userId]);
 
@@ -188,20 +235,22 @@ const Chat = () => {
     if (message.trim() === "") return;
 
     const newMessage = {
-      userId: messages.length + 1,
-      sender: "me",
+      userId,
+      sender: loggedInUser?.username,
       text: message,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
+    const socket = createSocketConnection();
 
-    setMessages([...messages, newMessage]);
+    socket.emit("sendMessage", { loggedInUsername, userId, newMessage });
+
     setMessage("");
   };
 
-  const filteredChats = mockChats.filter((chat) =>
+  const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -270,6 +319,7 @@ const Chat = () => {
               message={message}
               setMessage={setMessage}
               handleSendMessage={handleSendMessage}
+              userId={userId}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center rounded-l-md rounded-r-md bg-cardBg lg:rounded-l-none">
