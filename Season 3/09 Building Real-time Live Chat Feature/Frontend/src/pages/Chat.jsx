@@ -19,7 +19,7 @@ const chats = [
     userId: "vishesh2",
     name: "Vishesh 2",
     avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-    lastMessage: "Meeting atvishesh3 PM",
+    lastMessage: "Meeting at 3 PM",
     time: "Yesterday",
     unread: 0,
   },
@@ -33,58 +33,58 @@ const chats = [
   },
 ];
 
-// Mock messages for each chat
-let messages = {
+// Renamed mock messages to avoid shadowing
+const mockMessages = {
   vishesh1: [
     {
       userId: "vishesh1",
-      sender: "them",
+      sender: "vishesh1",
       text: "Hey there!",
       time: "10:00 AM",
     },
     {
-      userId: "vishesh2",
-      sender: "me",
+      userId: "vishesh1",
+      sender: "vishesh2",
       text: "Hi! How are you?",
       time: "10:05 AM",
     },
     {
-      userId: "vishesh3",
-      sender: "them",
-      text: "Hey, how are you doing? Hey, how are you doing? Hey, how are you doing? Hey, how are you doing? Hey, how are you doing? Hey, how are you doing? Hey, how are you doing? Hey, how are you doing?Hey, how are you doing?",
+      userId: "vishesh1",
+      sender: "vishesh1",
+      text: "How’s everything?",
       time: "10:10 AM",
     },
   ],
   vishesh2: [
     {
-      userId: "vishesh1",
-      sender: "them",
+      userId: "vishesh2",
+      sender: "vishesh2",
       text: "Don't forget our meeting",
       time: "9:00 AM",
     },
     {
       userId: "vishesh2",
-      sender: "me",
+      sender: "vishesh1",
       text: "I'll be there",
       time: "9:05 AM",
     },
   ],
   vishesh3: [
     {
-      userId: "vishesh1",
-      sender: "them",
+      userId: "vishesh3",
+      sender: "vishesh3",
       text: "Here are the documents",
       time: "2:00 PM",
     },
     {
-      userId: "vishesh2",
-      sender: "me",
+      userId: "vishesh3",
+      sender: "vishesh1",
       text: "Got them, thanks",
       time: "2:30 PM",
     },
     {
       userId: "vishesh3",
-      sender: "them",
+      sender: "vishesh3",
       text: "Can you review by tomorrow?",
       time: "2:31 PM",
     },
@@ -109,7 +109,6 @@ const ChatHistory = ({
     socket.emit("joinChat", { loggedInUsername, userId });
 
     const handleNewMessage = ({ newMessage }) => {
-      // Only add if not already in messages (prevent duplicates)
       setChatMessages((prev) => {
         const exists = prev.some(
           (msg) =>
@@ -120,7 +119,6 @@ const ChatHistory = ({
         return exists ? prev : [...prev, newMessage];
       });
     };
-  
 
     socket.on("messageReceived", handleNewMessage);
 
@@ -128,9 +126,8 @@ const ChatHistory = ({
       socket.off("messageReceived", handleNewMessage);
       socket.disconnect();
     };
-  }, [loggedInUser, userId]);
+  }, [loggedInUsername, userId]);
 
-  // Update local messages when prop changes
   useEffect(() => {
     setChatMessages(messages);
   }, [messages]);
@@ -159,15 +156,14 @@ const ChatHistory = ({
           </>
         )}
       </div>
-      <div className="flex h-[calc(100vh-12rem)] flex-col justify-between">
-        {/* Messages area */}
-        <div className="flex flex-1 flex-col justify-end overflow-y-auto bg-cardBg p-4">
-          {chatMessages?.map((msg) => {
-            const isSender = msg.sender === loggedInUsername;
 
+      <div className="flex h-[calc(100vh-12rem)] flex-col justify-between">
+        <div className="flex flex-1 flex-col justify-end overflow-y-auto bg-cardBg p-4">
+          {chatMessages?.map((msg, idx) => {
+            const isSender = msg.sender === loggedInUsername;
             return (
               <div
-                key={`${msg.userId}-${msg.time}`}
+                key={idx}
                 className={`mb-4 flex ${isSender ? "justify-end" : "justify-start"}`}
               >
                 <div
@@ -175,7 +171,7 @@ const ChatHistory = ({
                     isSender
                       ? "sender-bubble bg-primary text-text"
                       : "receiver-bubble bg-bgSecondary text-text"
-                  } `}
+                  }`}
                 >
                   <p>{msg.text}</p>
                   <p
@@ -198,7 +194,7 @@ const ChatHistory = ({
               className="flex-1 rounded-l-lg border border-border bg-cardBg px-4 py-2 text-text focus:outline-none focus:ring-1 focus:ring-primary"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
             />
             <button
               className="rounded-r-lg bg-primary px-4 py-2 text-text hover:bg-hover"
@@ -222,11 +218,11 @@ const Chat = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const loggedInUser = useSelector((store) => store.user);
   const loggedInUsername = loggedInUser?.username;
+ 
 
   useEffect(() => {
     if (userId) {
-      // In a real app, you would fetch messages for this user
-      setMessages(messages[userId] || []);
+      setMessages(mockMessages[userId] || []);
       setSelectedChat(chats.find((chat) => chat.userId === userId));
     }
   }, [userId]);
@@ -236,17 +232,18 @@ const Chat = () => {
 
     const newMessage = {
       userId,
-      sender: loggedInUser?.username,
+      sender: loggedInUsername,
       text: message,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
-    const socket = createSocketConnection();
 
+    const socket = createSocketConnection();
     socket.emit("sendMessage", { loggedInUsername, userId, newMessage });
 
+    setMessages((prev) => [...prev, newMessage]);
     setMessage("");
   };
 
@@ -257,7 +254,6 @@ const Chat = () => {
   return (
     <div className="min-h-[calc(100vh-10rem)] py-5">
       <div className="flex h-full rounded-lg border-2 border-border bg-bgSecondary">
-        {/* Left sidebar - Chat list */}
         <div
           className={`${userId ? "hidden md:block" : "block"} w-full rounded-l-lg rounded-r-lg border-r border-border bg-bgSecondary md:w-1/3 md:rounded-r-none lg:w-1/4`}
         >
@@ -308,7 +304,6 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* Right section - Chat interface or welcome message */}
         <div
           className={`${userId ? "block" : "hidden md:flex"} flex-1 flex-col`}
         >

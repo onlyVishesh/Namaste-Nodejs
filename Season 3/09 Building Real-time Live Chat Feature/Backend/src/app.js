@@ -20,6 +20,7 @@ const requestRouter = require("./routes/request");
 const userRouter = require("./routes/userConnection");
 const searchRouter = require("./routes/search");
 const paymentRoute = require("./routes/payment");
+const chatRoute = require("./routes/chat");
 const initializeSocket = require("./utils/socket");
 
 //* Using routers for handling different routes
@@ -29,6 +30,7 @@ app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", searchRouter);
 app.use("/", paymentRoute);
+app.use("/", chatRoute);
 
 const server = http.createServer(app);
 
