@@ -2,6 +2,7 @@ const socket = require("socket.io");
 const { getSecretRoomId } = require("./constants");
 const Chat = require("../models/chat");
 const User = require("../models/user");
+const { encrypt } = require("./encryption");
 
 const onlineUsers = new Set();
 
@@ -82,7 +83,7 @@ const initializeSocket = (server) => {
 
           const messageDoc = {
             sender: senderUser._id,
-            content: newMessage.text,
+            content: encrypt(newMessage.text),
             readBy: [senderUser._id],
             createdAt: new Date(),
           };

@@ -7,6 +7,7 @@ const User = require("../models/user");
 const Chat = require("../models/chat");
 const ConnectionRequest = require("../models/connectionRequest");
 const moment = require("moment");
+const { encrypt, decrypt } = require("../utils/encryption");
 
 const onlineUsers = new Set(); // This will be updated by socket logic
 
@@ -43,7 +44,9 @@ chatRoute.get("/chats", userAuth, async (req, res) => {
         avatar:
           otherParticipant.avatar ||
           `https://ui-avatars.com/api/?name=${otherParticipant.username}`,
-        lastMessage: chat.lastMessage?.content || "",
+        lastMessage: chat.lastMessage?.content
+          ? decrypt(chat.lastMessage.content)
+          : "",
         time: humanizeTime(
           chat.lastMessage ? chat.lastMessage.createdAt : chat.updatedAt
         ),
@@ -158,7 +161,7 @@ chatRoute.get("/chats/:userId/messages", userAuth, async (req, res) => {
     const formattedMessages = msgs.map((msg) => ({
       userId: msg.sender.username,
       sender: msg.sender.username,
-      text: msg.content,
+      text: decrypt(msg.content),
       time: humanizeTime(msg.createdAt),
       createdAt: msg.createdAt,
       _id: msg._id,
