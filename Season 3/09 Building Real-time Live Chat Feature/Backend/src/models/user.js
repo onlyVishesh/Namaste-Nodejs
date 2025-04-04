@@ -141,6 +141,7 @@ const userSchema = new Schema(
       enum: ["free", "Starter", "Professional", "Enterprise"],
       default: "free",
     },
+    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User" }], // users this user has blocked
   },
   { timestamps: true }
 );
