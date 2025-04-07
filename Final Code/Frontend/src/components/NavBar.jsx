@@ -4,6 +4,7 @@ import { House, LockKeyhole, Menu, UserRoundPen, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { IoIosChatboxes } from "react-icons/io";
 import { MdOutlineWorkspacePremium } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -28,9 +29,8 @@ const NavBar = () => {
     home: <House />,
     networks: <Users />,
     profile: <UserRoundPen />,
-    Premium: (
-      <MdOutlineWorkspacePremium className="h-5 w-5 sm:h-6 sm:w-7" />
-    ),
+    Premium: <MdOutlineWorkspacePremium className="h-5 w-5 sm:h-6 sm:w-7" />,
+    chat: <IoIosChatboxes className="h-5 w-5 sm:h-6 sm:w-7" />,
   };
 
   const HAMBURGER_SECTIONS = {
@@ -236,7 +236,7 @@ const NavBar = () => {
     }, 100);
   };
 
-  const newLocal = "z-50 fixed top-0 h-auto w-full bg-bgSecondary";
+  const newLocal = "z-50 fixed top-0 h-20 w-full bg-bgSecondary";
   return (
     <nav className={newLocal} ref={menuRef}>
       <div className="mx-0 flex h-full items-center justify-between px-4 sm:container sm:mx-auto">
@@ -302,9 +302,9 @@ const NavBar = () => {
         <div className="flex items-center justify-center gap-5">
           {user && (
             <div
-              className="relative block md:hidden"
+              className="relative h-10 w-10 cursor-pointer md:hidden lg:h-12 lg:w-12"
               ref={profileRef1}
-              onClick={() => setShowProfileMenu1(!showProfileMenu1)} // Toggle on click
+              onClick={() => setShowProfileMenu1(!showProfileMenu1)}
             >
               <img
                 draggable="false"
@@ -313,26 +313,24 @@ const NavBar = () => {
                     ? user.avatar
                     : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 }
-                alt=""
-                className="inset-0 z-[100] size-8 rounded-full border-2 border-border object-cover shadow-lg shadow-shadow lg:size-10"
+                alt="User Avatar"
+                className="h-full w-full rounded-full border-2 border-border object-cover shadow-lg shadow-shadow"
               />
+
               {showProfileMenu1 && (
                 <ul
-                  className="absolute -right-16 flex w-40 flex-col gap-2 rounded-b-md bg-bgSecondary px-4 py-2 pb-4 pt-6 text-center text-lg font-bold transition duration-100"
                   ref={profileMenuRef1}
+                  className="absolute right-0 top-full z-50 mt-2 w-40 rounded-md bg-bgSecondary py-2 text-center text-sm font-semibold shadow-lg"
                 >
-                  <NavLink
-                    to="/profile"
-                    className="hover:cursor-pointer hover:text-hover"
-                  >
-                    Profile
-                  </NavLink>
-                  <li>
+                  <li className="rounded-md px-4 py-2 transition hover:bg-hover">
+                    <NavLink to="/profile" className="block w-full text-text">
+                      Profile
+                    </NavLink>
+                  </li>
+                  <li className="rounded-md px-4 py-2 transition hover:bg-hover">
                     <button
-                      className="hover:cursor-pointer hover:text-hover"
-                      onClick={() => {
-                        handleLogout();
-                      }}
+                      onClick={handleLogout}
+                      className="block w-full text-left text-text"
                     >
                       Logout
                     </button>
@@ -346,6 +344,7 @@ const NavBar = () => {
             <Menu />
           </div>
         </div>
+
         <div
           className={`absolute right-0 top-10 h-[calc(100vh-4rem)] w-0 overflow-hidden rounded-sm transition-all duration-300 ease-in-out md:relative md:right-auto md:top-auto md:flex md:h-auto md:w-auto md:items-center md:overflow-visible ${
             showNavbar
@@ -353,7 +352,7 @@ const NavBar = () => {
               : ""
           }`}
         >
-          <ul className="flex flex-col items-center space-x-2 font-medium md:flex-row md:space-x-4 lg:space-x-6">
+          <ul className="flex flex-col items-center space-x-2 font-medium md:flex-row md:space-x-1 lg:space-x-6">
             {user ? (
               <>
                 {Object.keys(NAVBAR_LINKS).map((link) => {
