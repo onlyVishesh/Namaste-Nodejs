@@ -118,9 +118,9 @@ Dive into Node.js fundamentals! This season covers core concepts like modules, t
 
 Build a real-world MERN project! This season focuses on microservices, Express server setup, authentication, database modeling, API development, and frontend integration, culminating in the DevTinder app. Ideal for hands-on learning!
 
-1. **[Repository - Frontend]()** : Handles the user interface and client-side logic
+1. **[Repository - Frontend](https://github.com/onlyVishesh/DevRoot-Frontend)** : Handles the user interface and client-side logic
 
-2. **[Repository - Backend]()** : Manages server-side logic, APIs, and interactions with the database.
+2. **[Repository - Backend](https://github.com/onlyVishesh/DevRoot-Backend)** : Manages server-side logic, APIs, and interactions with the database.
 
 View [`commits`](https://github.com/onlyVishesh/Namaste-Nodejs/commits/main/) for every topic update
 
@@ -144,9 +144,37 @@ View [`commits`](https://github.com/onlyVishesh/Namaste-Nodejs/commits/main/) fo
 - [18 | DevTinder UI - Part 4](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%202/18%20DevTinder%20UI%20-%20Part%204)
 - [19 | DevTinder UI - Part 5](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%202/19%20DevTinder%20UI%20-%20Part%205)
 
-## **Season 3:**
+## [**Season 3**](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203)
 
-Will be added soon...
+### Deployment & Advanced Features
+
+Master production-grade Node.js deployment! Season 3 focuses on cloud deployment, configuration management, and advanced features like payment integration, email services, and real-time communications.
+
+1. **[Repository - Frontend](https://github.com/onlyVishesh/DevRoot-Frontend)** : Final production frontend with all features
+2. **[Repository - Backend](https://github.com/onlyVishesh/DevRoot-Backend)** : Final production backend with all advanced features
+
+View [`commits`](https://github.com/onlyVishesh/Namaste-Nodejs/commits/main/) for every topic update
+
+- [01 | Launching a AWS Instance and Deploying Frontend](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/01%20Launching%20a%20AWS%20Instance%20and%20Deploying%20Frontend)
+- [02 | Nginx & Backend Node App Deployment](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/02%20Nginx%20%26%20Backend%20Node%20App%20Deployment)
+- [03 | Adding a Custom Domain Name](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/03%20Adding%20a%20Custom%20Domain%20Name)
+- [04 | Sending Emails using Amazon SES](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/04%20Sending%20Emails%20using%20Amazon%20SES)
+- [05 | Keeping Our Credentials Safe Using dotenv Files](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/05%20Keeping%20Our%20Credentials%20Safe%20Using%20dotenv%20Files)
+- [06 | Scheduling Cron Jobs](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/06%20Scheduling%20Cron%20Jobs)
+- [07 | Payment Gateway Integration ft. Razorpay](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/07%20Payment%20Gateway%20Integration%20ft.%20Razorpay)
+- [08 | Web Sockets & Socket.io](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/08%20Web%20Sockets%20%26%20Socket.io)
+- [09 | Building Real-time Live Chat Feature](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Season%203/09%20Building%20Real-time%20Live%20Chat%20Feature)
+
+## [**Final Code**](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code)
+
+The complete, production-ready code for the DevRoot application with all features implemented:
+
+- **[Backend](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code/Backend)** : Complete server implementation with all features and optimizations
+  - [API List](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code/Backend/api_list.md) : Documentation of all available APIs
+  - [Thought Process](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code/Backend/thoughtProcess.md) : Development approach and decisions
+
+- **[Frontend](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code/Frontend)** : Fully functional React frontend with all UI components
+  - [Pages](https://github.com/onlyVishesh/Namaste-Nodejs/tree/main/Final%20Code/Frontend/pages.md) : Overview of all application pages and their features
 
 ---
 
@@ -177,6 +205,10 @@ Create a .env file in the server folder:
 
 ```env
 VITE_BackendURL = <Backend_URL>
+VITE_EMAILJS_SERVICE_ID = <EmailJS_ID>
+VITE_EMAILJS_TEMPLATE_ID = <EmailJS_Template_ID>
+VITE_EMAILJS_PUBLIC_KEY = <EmailJS_Public_ID>
+
 ```
 
 ##### Backend `.env` file
@@ -188,6 +220,17 @@ secretJWT = <Write_any_text>
 adminEmails = <comma_seperated_emails_for_admin_role>
 moderatorEmails = <comma_seperated_emails_for_moderators_role>
 FrontendURL = <Frontend_URL>
+
+ALLOWED_FIELDS = "firstName,lastName,username,avatar,about,skills,gender,status,banner,headline,isPremium"
+
+AWS_ACCESS_KEY = <AWS_Access_Key>
+AWS_SECRET = <AWS_Secret>
+LIVE_WEBSITE_LINK = <Line_Website_Url>
+
+RAZORPAY_KEY_ID = <Razorpay_Key_ID>
+RAZORPAY_KEY_SECRET = <Razorpay_Key_Secret>
+RAZORPAY_WEBHOOK_SECRET = <Razorpay_Webhook_secret>
+CHAT_ENCRYPTION_KEY=<32_bit_number>
 ```
 
 ### 4. Run the Application

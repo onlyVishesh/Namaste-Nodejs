@@ -60,6 +60,11 @@
 
 - [x] **GET** /search - To search for users, skills, or topics (with query parameters like name, skill, etc.).
 
+### APIs for messaging
+
+- [x] **GET** /chat - Get all chats of logged in user with last message and participant details
+- [x] **GET** /chats/:userId/messages - Get messages between logged in user and another user
+
 ## Extra APIs (future scope)
 
 ### APIs related to post
@@ -69,11 +74,6 @@
 - **DELETE** /feed/post/:postId - To delete a post from the feed.
 - **POST** /feed/post/:postId/like - To like a post.
 - **POST** /feed/post/:postId/comment - To add a comment to a post.
-
-### APIs for messaging
-
-- **POST** /message/send/:userId - To send a direct message to a user.
-- **GET** /message/conversation/:userId - To view the conversation with a user.
 
 ### APIs related to Projects
 
